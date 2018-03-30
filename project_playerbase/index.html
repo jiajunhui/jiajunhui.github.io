@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Player,Decode,Cover," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言PlayerBase是随着业务的不断延伸而诞生的。这一两年一直做视频相关的业务，从最开始的简单的使用MediaPlayer，到现在的支持多平台、多渠道、多种三方播放器的接入、SDK的无感知替换以及播放核心的自由切换。以及采用的覆盖层的概念，很好的做到了业务的快速迭代支持。">
+<meta name="keywords" content="Player,Decode,Cover">
+<meta property="og:type" content="article">
+<meta property="og:title" content="播放器基础框架PlayerBase">
+<meta property="og:url" content="http://yoursite.com/project_playerbase/index.html">
+<meta property="og:site_name" content="贾俊辉的博客">
+<meta property="og:description" content="前言PlayerBase是随着业务的不断延伸而诞生的。这一两年一直做视频相关的业务，从最开始的简单的使用MediaPlayer，到现在的支持多平台、多渠道、多种三方播放器的接入、SDK的无感知替换以及播放核心的自由切换。以及采用的覆盖层的概念，很好的做到了业务的快速迭代支持。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/pic/mediaplayer.gif">
+<meta property="og:image" content="http://yoursite.com/pic/xplayer_struct.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_play_controller_cover.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_loading_cover.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_error_cover.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_gesture_cover.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_struct_01.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_struct_02.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_struct_03.png">
+<meta property="og:image" content="http://yoursite.com/pic/player_base_struct_04.png">
+<meta property="og:updated_time" content="2017-09-07T10:04:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="播放器基础框架PlayerBase">
+<meta name="twitter:description" content="前言PlayerBase是随着业务的不断延伸而诞生的。这一两年一直做视频相关的业务，从最开始的简单的使用MediaPlayer，到现在的支持多平台、多渠道、多种三方播放器的接入、SDK的无感知替换以及播放核心的自由切换。以及采用的覆盖层的概念，很好的做到了业务的快速迭代支持。">
+<meta name="twitter:image" content="http://yoursite.com/pic/mediaplayer.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/project_playerbase/"/>
+
+
+
+
+
+  <title>播放器基础框架PlayerBase | 贾俊辉的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">贾俊辉的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/project_playerbase/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="贾俊辉的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">播放器基础框架PlayerBase</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-05T00:00:00+08:00">
+                2017-07-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/我的开源项目/" itemprop="url" rel="index">
+                    <span itemprop="name">我的开源项目</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/project_playerbase/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/project_playerbase/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>PlayerBase是随着业务的不断延伸而诞生的。这一两年一直做视频相关的业务，从最开始的简单的使用MediaPlayer，到现在的支持多平台、多渠道、多种三方播放器的接入、SDK的无感知替换以及播放核心的自由切换。以及采用的覆盖层的概念，很好的做到了业务的快速迭代支持。</p>
+<a id="more"></a>
+<h1 id="发展过程"><a href="#发展过程" class="headerlink" title="发展过程"></a>发展过程</h1><h2 id="最开始的MediaPlayer裸奔"><a href="#最开始的MediaPlayer裸奔" class="headerlink" title="最开始的MediaPlayer裸奔"></a>最开始的MediaPlayer裸奔</h2><p>刚接手Android播放器时，由于之前没玩过播放器。且当时国内并没有稳定合适的第三方播放器。所以直接拿起系统原生的MediaPlayer就开干。其实接触这么久MediaPlayer，感触就是MediaPlayer最大的坑就在抛各种状态码上且各大厂商给改的体无完肤，不同的ROM有不同的表现。适配上略蛋疼。而且MediaPlayer支持的格式并不广泛。</p>
+<p>MediaPlayer状态机<br><img src="/pic/mediaplayer.gif"></p>
+<p>最开始的项目中就是直接调用MediaPlayer的API进行基本的视频播放，如下代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">MediaPlayer mp = <span class="keyword">new</span> MediaPlayer();</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">     mp.setDataSource(<span class="string">"/sdcard/test.mp4"</span>);</span><br><span class="line">     mp.prepare();</span><br><span class="line">     mp.start();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IllegalArgumentException e) &#123;</span><br><span class="line"> e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IllegalStateException e) &#123;</span><br><span class="line"> e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line"> e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line">mp.setOnCompletionListener(<span class="keyword">new</span> OnCompletionListener()&#123;</span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompletion</span><span class="params">(MediaPlayer mp)</span> </span>&#123;</span><br><span class="line">     mp.release();</span><br><span class="line"> &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>此时的需求就是满足基本的播放，使用MediaPlayer还能撑住。</p>
+<h2 id="集成第三方播放器IJKPlayer"><a href="#集成第三方播放器IJKPlayer" class="headerlink" title="集成第三方播放器IJKPlayer"></a>集成第三方播放器IJKPlayer</h2><p>哔哩哔哩（B站）的迅速发展也加速了ijkplayer的开源及其稳定的维护。为了弥补MediaPlayer的不足。我开始在项目中集成ijkplayer，通过在公司内部所有的测试机上跑播放，最终编译出适合项目的解码库，因为一些x86平台的手机，一开始以为需要编译x86对应的解码库，但实际测试发现arm平台的解码库在x86手机上是没有问题的，最终才知道是英特尔针对x86的手机平台做了指令集转换，自动支持arm指令集。<br>最终项目顺利集成ijkplayer，从实际效果上表现确实比MediaPlayer要好，设备兼容性问题就少了很多。</p>
+<p>对于ijkplayer的代码部分，此处不做介绍，有兴趣的可以去github上clone一份代码研究：<br><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">https://github.com/bilibili/ijkplayer</a></p>
+<h2 id="集成第三方云播"><a href="#集成第三方云播" class="headerlink" title="集成第三方云播"></a>集成第三方云播</h2><p>一开始使用MediaPlayer或者ijkplayer时走的都是公司的服务器以及公司购买的CDN。为了节省流量的开支，公司决定使用乐视云，把一部分视频资源传到了乐视云上，使用乐视播放器SDK进行播放。<br>此时，问题就来了。一部分要用ijkplayer播放，一部分要用乐视云播放，在同一个项目内集成两个播放器，还要做到不同的资源要切换对应的播放器。而且用的是同一个控制页面，也就是说UI是一样的，只是解码核心要随着资源变化进行切换。那么现有的ijkplayer的控制台肯定都废了，因为控制是有状态的，所以两个播放器的状态要进行统一化。</p>
+<h2 id="XPlayer的诞生"><a href="#XPlayer的诞生" class="headerlink" title="XPlayer的诞生"></a>XPlayer的诞生</h2><p>基于上面的需求，就重构了播放器部分，抽取出一个XPlayer框架。XPlayer框架解决的问题是多种播放核心使用的是统一的UI，UI可以部分定制。不同的播放核心采用了统一的接口进行了包装，也就是说调用播放时跟真正的解码器无关，需要用哪个解码只需传入实现定义好的解码器类型参数即可。</p>
+<p>整体结构上就是我定义了一个基础库，里面包含了一套默认的UI风格，提供一定的定制功能。基类实现了统一的播放器接口，里面封装了播放器的所有配置项和操作。每加入一个新的第三方SDK时，SDK的工程只需要依赖这个基础库并实现其播放接口即可。</p>
+<p>如下图所示：<br><img src="/pic/xplayer_struct.png"></p>
+<p>比如ijkplayer实现了播放统一接口，如下代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by Taurus on 2016/11/14.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IJKSinglePlayer</span> <span class="keyword">extends</span> <span class="title">BaseSinglePlayer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String TAG = <span class="string">"IjkVideoPlayer"</span>;</span><br><span class="line">    <span class="keyword">protected</span> IjkVideoView mVideoView;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> hasLoadLibrary;</span><br><span class="line">    <span class="keyword">private</span> String[] dataSource;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">IJKSinglePlayer</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">IJKSinglePlayer</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">IJKSinglePlayer</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs, defStyleAttr);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> View <span class="title">getPlayerView</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        loadLibrary();</span><br><span class="line">        mVideoView = <span class="keyword">new</span> IjkVideoView(context);</span><br><span class="line">        mVideoView.setFocusable(<span class="keyword">false</span>);</span><br><span class="line">        mVideoView.setBackgroundColor(Color.BLACK);</span><br><span class="line">        initPlayerListener();</span><br><span class="line">        <span class="keyword">return</span> mVideoView;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loadLibrary</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            IjkMediaPlayer.loadLibrariesOnce(<span class="keyword">null</span>);</span><br><span class="line">            IjkMediaPlayer.native_profileBegin(<span class="string">"libijkplayer.so"</span>);</span><br><span class="line">            hasLoadLibrary = <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            Log.e(TAG, <span class="string">"loadLibraries error"</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initPlayerListener</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mVideoView.setOnCompletionListener(<span class="keyword">new</span> IMediaPlayer.OnCompletionListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompletion</span><span class="params">(IMediaPlayer mp)</span> </span>&#123;</span><br><span class="line">                Log.d(TAG,<span class="string">"EVENT_CODE_PLAY_COMPLETE"</span>);</span><br><span class="line">                onPlayerEvent(OnPlayerEventListener.EVENT_CODE_PLAY_COMPLETE);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        mVideoView.setOnInfoListener(<span class="keyword">new</span> IMediaPlayer.OnInfoListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onInfo</span><span class="params">(IMediaPlayer mp, <span class="keyword">int</span> what, <span class="keyword">int</span> extra)</span> </span>&#123;</span><br><span class="line"><span class="comment">//                Log.d(TAG,"onInfo : what = " + what);</span></span><br><span class="line">                <span class="keyword">switch</span> (what) &#123;</span><br><span class="line">                    <span class="keyword">case</span> IMediaPlayer.MEDIA_INFO_BUFFERING_START:</span><br><span class="line">                        Log.d(TAG,<span class="string">"EVENT_CODE_BUFFERING_START"</span>);</span><br><span class="line">                        onPlayerEvent(OnPlayerEventListener.EVENT_CODE_BUFFERING_START);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> IMediaPlayer.MEDIA_INFO_BUFFERING_END:</span><br><span class="line">                        Log.d(TAG,<span class="string">"EVENT_CODE_BUFFERING_END"</span>);</span><br><span class="line">                        onPlayerEvent(OnPlayerEventListener.EVENT_CODE_BUFFERING_END);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:</span><br><span class="line">                        Log.d(TAG,<span class="string">"EVENT_CODE_RENDER_START"</span>);</span><br><span class="line">                        onPlayerEvent(OnPlayerEventListener.EVENT_CODE_RENDER_START);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        mVideoView.setOnErrorListener(<span class="keyword">new</span> IMediaPlayer.OnErrorListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onError</span><span class="params">(IMediaPlayer mp, <span class="keyword">int</span> what, <span class="keyword">int</span> extra)</span> </span>&#123;</span><br><span class="line">                onErrorEvent(OnErrorListener.ERROR_CODE_COMMON);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        mVideoView.setOnPreparedListener(<span class="keyword">new</span> IMediaPlayer.OnPreparedListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPrepared</span><span class="params">(IMediaPlayer mp)</span> </span>&#123;</span><br><span class="line">                preparedMediaPlayer(mp);</span><br><span class="line">                Log.d(TAG,<span class="string">"EVENT_CODE_PREPARED"</span>);</span><br><span class="line">                onPlayerEvent(OnPlayerEventListener.EVENT_CODE_PREPARED);</span><br><span class="line">                <span class="comment">//IjkVideoView  ...int STATE_PLAYING = 3;</span></span><br><span class="line">                <span class="keyword">if</span>(mVideoView != <span class="keyword">null</span> &amp;&amp; mStatus!=STATUS_PAUSE &amp;&amp; mVideoView.getTargetState() == <span class="number">3</span>)&#123;</span><br><span class="line">                    mVideoView.start();</span><br><span class="line">                &#125;</span><br><span class="line">                onStartSeek();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">preparedMediaPlayer</span><span class="params">(IMediaPlayer mediaPlayer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mediaPlayer == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        mediaPlayer.setOnSeekCompleteListener(<span class="keyword">new</span> IMediaPlayer.OnSeekCompleteListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSeekComplete</span><span class="params">(IMediaPlayer mp)</span> </span>&#123;</span><br><span class="line">                Log.d(TAG,<span class="string">"EVENT_CODE_SEEK_COMPLETE"</span>);</span><br><span class="line">                onPlayerEvent(OnPlayerEventListener.EVENT_CODE_SEEK_COMPLETE);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDecodeMode</span><span class="params">(DecodeMode mDecodeMode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.setDecodeMode(mDecodeMode);</span><br><span class="line">        updateVideoViewDecodeMode();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setViewType</span><span class="params">(ViewType mViewType)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.setViewType(mViewType);</span><br><span class="line">        updateVideoViewViewType();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">updateVideoViewViewType</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(mVideoView!=<span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span>(getViewType() == ViewType.SURFACEVIEW)&#123;</span><br><span class="line">                mVideoView.setEnableSurfaceView();</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(getViewType() == ViewType.TEXTUREVIEW)&#123;</span><br><span class="line">                mVideoView.setEnableTextureView();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">updateVideoViewDecodeMode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(mVideoView!=<span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span>(getDecodeMode() == DecodeMode.MEDIA_PLAYER)&#123;</span><br><span class="line">                mVideoView.setUsingAndroidPlayer(<span class="keyword">true</span>);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(getDecodeMode() == DecodeMode.SOFT)&#123;</span><br><span class="line">                mVideoView.setUsingAndroidPlayer(<span class="keyword">false</span>);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(getDecodeMode() == DecodeMode.HARD)&#123;</span><br><span class="line">                mVideoView.setUsingAndroidPlayer(<span class="keyword">false</span>);</span><br><span class="line">                mVideoView.setUsingMediaCodec(<span class="keyword">true</span>);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(getDecodeMode() == DecodeMode.EXO_PLAYER)&#123;</span><br><span class="line">                mVideoView.setPlayerType(Settings.PV_PLAYER__IjkExoMediaPlayer);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">toggleAspectRatio</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            mVideoView.toggleAspectRatio();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">available</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mVideoView!=<span class="keyword">null</span> &amp;&amp; hasLoadLibrary;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> VideoRate <span class="title">getCurrentDefinition</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;VideoRate&gt; <span class="title">getVideoDefinitions</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">changeVideoDefinition</span><span class="params">(VideoRate videoRate)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setData</span><span class="params">(String... data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available() &amp;&amp; data!=<span class="keyword">null</span> &amp;&amp; data.length&gt;<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.dataSource = data;</span><br><span class="line">            mVideoView.setVideoPath(data[<span class="number">0</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">rePlay</span><span class="params">(<span class="keyword">int</span> msc)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            stop();</span><br><span class="line">            setData(dataSource);</span><br><span class="line">            start(msc);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            mVideoView.start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(<span class="keyword">int</span> msc)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            <span class="keyword">if</span>(msc &gt; <span class="number">0</span>)&#123;</span><br><span class="line">                startSeekPos = msc;</span><br><span class="line">            &#125;</span><br><span class="line">            start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">pause</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available() &amp;&amp; isPlaying())&#123;</span><br><span class="line">            mVideoView.pause();</span><br><span class="line">            mStatus = STATUS_PAUSE;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">resume</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available() &amp;&amp; mStatus == STATUS_PAUSE)&#123;</span><br><span class="line">            mVideoView.start();</span><br><span class="line">            mStatus = STATUS_PLAYING;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">seekTo</span><span class="params">(<span class="keyword">int</span> msc)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            mVideoView.seekTo(msc);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            mVideoView.stop();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isPlaying</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            <span class="keyword">return</span> mVideoView.isPlaying();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCurrentPosition</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            <span class="keyword">return</span> mVideoView.getCurrentPosition();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getDuration</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            <span class="keyword">return</span> mVideoView.getDuration();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getBufferPercentage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            <span class="keyword">return</span> mVideoView.getBufferPercentage();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAspectRatio</span><span class="params">(AspectRatio aspectRatio)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(available())&#123;</span><br><span class="line">            <span class="keyword">if</span>(aspectRatio == AspectRatio.AspectRatio_16_9)&#123;</span><br><span class="line">                mVideoView.setAspectRatio(IRenderView.AR_16_9_FIT_PARENT);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(aspectRatio == AspectRatio.AspectRatio_4_3)&#123;</span><br><span class="line">                mVideoView.setAspectRatio(IRenderView.AR_4_3_FIT_PARENT);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(aspectRatio == AspectRatio.AspectRatio_FILL_PARENT)&#123;</span><br><span class="line">                mVideoView.setAspectRatio(IRenderView.AR_ASPECT_FILL_PARENT);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(aspectRatio == AspectRatio.AspectRatio_ORIGIN)&#123;</span><br><span class="line">                mVideoView.setAspectRatio(IRenderView.AR_ASPECT_WRAP_CONTENT);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.destroy();</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(mVideoView!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                mVideoView.stopPlayback();</span><br><span class="line">                mVideoView.release(<span class="keyword">true</span>);</span><br><span class="line">                destroyDrawingCache();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当资源进行切换时，播放核心时如何切换的。由于实际播放的SDK与主项目进行了隔离，所以主题思想采用的是依靠反射进行实例化播放器。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> View <span class="title">getPlayerWidget</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">    destroyPlayer();</span><br><span class="line">    Log.d(TAG,<span class="string">"playerType : "</span> + DebugPrintHelper.getPlayerDebugStr(getPlayerType()));</span><br><span class="line">    mInternalPlayer = (BaseSinglePlayer) ConfigLoader.getPlayerInstance(mContext,getPlayerType());</span><br><span class="line">    <span class="keyword">if</span>(mInternalPlayer !=<span class="keyword">null</span>)&#123;</span><br><span class="line">        mInternalPlayer.setOnErrorListener(<span class="keyword">new</span> OnErrorListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(<span class="keyword">int</span> errorCode)</span> </span>&#123;</span><br><span class="line">                onErrorEvent(errorCode);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        mInternalPlayer.setOnPlayerEventListener(<span class="keyword">new</span> OnPlayerEventListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPlayerEvent</span><span class="params">(<span class="keyword">int</span> eventCode)</span> </span>&#123;</span><br><span class="line">                onEventPlayer(eventCode);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> FrameLayout(mContext);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> mInternalPlayer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实后面随着业务的发展，XPlayer也暴露出了比较严重的缺点。因为一开始UI被固定到了基础框架内，虽然提供了一定的定制性，但是对于业务模块的删减与增加，UI部分的设计显得还是比较鸡肋的，弄的每次UI变化都要去动基础框架，这样会带来很大风险，万一哪次手一抖无意修改了基础框架的核心代码就会造成潜在的bug。<br>所以对于基础框架中UI的设计部分需要进行进一步的重构设计。进而保证基础框架尽量做到仅仅是个框架跟实际业务无任何关系。</p>
+<h2 id="PlayerBase的诞生"><a href="#PlayerBase的诞生" class="headerlink" title="PlayerBase的诞生"></a>PlayerBase的诞生</h2><p>在XPlayer的基础上，PlayerBase加入了容器的概念，以及覆盖层的概念。<br>接入了广告的自动代理播放，且广告资源也支持播放核心切换。<br>对于应用内的UI，比如播放控制器（暂停，进度条，时间显示等），我们可以认为这个播放控制器属于播放器的一个覆盖层cover，对于层的划分，要视具体的业务，划分粒度越小也就意味着覆盖层越多，反之越少。PlayerBase的基础框架内提供了默认的覆盖层划分，包含渲染层（SurfaceView）、播放控制层、手势控制层、Loading提示层、错误页面层、广告层等。基本满足常见的播放器业务。<br>播放状态控制<br><img src="/pic/player_base_play_controller_cover.png"></p>
+<p>播放加载提示<br><img src="/pic/player_base_loading_cover.png"></p>
+<p>播放错误提示<br><img src="/pic/player_base_error_cover.png"></p>
+<p>播放手势操作<br><img src="/pic/player_base_gesture_cover.png"></p>
+<h1 id="PlayerBase解析"><a href="#PlayerBase解析" class="headerlink" title="PlayerBase解析"></a>PlayerBase解析</h1><h2 id="容器的概念"><a href="#容器的概念" class="headerlink" title="容器的概念"></a>容器的概念</h2><p>这里的容器其实是对于层来说的，就是用来存放覆盖层的，每一个覆盖层都会被add到容器内，框架有默认的add策略，为了方便覆盖层的管理，其实还加入了层的优先级，即每个人都是有优先级的，谁放到下面，谁放到上面，谁放到哪个容器内，都是可以通过优先级进行区分add。<br>同时框架内也有默认的根容器，默认的根容器内由分为3个覆盖层容器，即默认容器其实是将覆盖层分为3中优先级（低级、中级、高级），低级的覆盖层cover将会被add到低级容器内，中级的cover会被add到中级的容器内，同样高级的自然会被add到高级的容器内。这样进行覆盖层的有序管理。覆盖层的添加要注意遮挡问题。<br>默认的容器代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by Taurus.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DefaultLevelCoverContainer</span> <span class="keyword">extends</span> <span class="title">BaseLevelCoverContainer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * the low level covers container .</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> FrameLayout mLevelLowCoverContainer;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * the medium level covers container .</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> FrameLayout mLevelMediumCoverContainer;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * the high level covers container .</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> FrameLayout mLevelHighCoverContainer;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DefaultLevelCoverContainer</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initLevelContainers</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//add low cover container</span></span><br><span class="line">        mLevelLowCoverContainer = <span class="keyword">new</span> FrameLayout(context);</span><br><span class="line">        mLevelLowCoverContainer.setBackgroundColor(Color.TRANSPARENT);</span><br><span class="line">        addLevelContainerView(mLevelLowCoverContainer,<span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//add medium cover container</span></span><br><span class="line">        mLevelMediumCoverContainer = <span class="keyword">new</span> FrameLayout(context);</span><br><span class="line">        mLevelMediumCoverContainer.setBackgroundColor(Color.TRANSPARENT);</span><br><span class="line">        addLevelContainerView(mLevelMediumCoverContainer,<span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//add high cover container</span></span><br><span class="line">        mLevelHighCoverContainer = <span class="keyword">new</span> FrameLayout(context);</span><br><span class="line">        mLevelHighCoverContainer.setBackgroundColor(Color.TRANSPARENT);</span><br><span class="line">        addLevelContainerView(mLevelHighCoverContainer,<span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onAvailableCoverAdd</span><span class="params">(BaseCover cover)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onAvailableCoverAdd(cover);</span><br><span class="line">        <span class="keyword">switch</span> (cover.getCoverLevel())&#123;</span><br><span class="line">            <span class="keyword">case</span> ICover.COVER_LEVEL_LOW:</span><br><span class="line">                mLevelLowCoverContainer.addView(cover.getView(),getNewMatchLayoutParams());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> ICover.COVER_LEVEL_MEDIUM:</span><br><span class="line">                mLevelMediumCoverContainer.addView(cover.getView(),getNewMatchLayoutParams());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> ICover.COVER_LEVEL_HIGH:</span><br><span class="line">                mLevelHighCoverContainer.addView(cover.getView(),getNewMatchLayoutParams());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onAvailableCoverRemove</span><span class="params">(BaseCover cover)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onAvailableCoverRemove(cover);</span><br><span class="line">        mLevelLowCoverContainer.removeView(cover.getView());</span><br><span class="line">        mLevelMediumCoverContainer.removeView(cover.getView());</span><br><span class="line">        mLevelHighCoverContainer.removeView(cover.getView());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCoversRemoveAll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCoversRemoveAll();</span><br><span class="line">        mLevelLowCoverContainer.removeAllViews();</span><br><span class="line">        mLevelMediumCoverContainer.removeAllViews();</span><br><span class="line">        mLevelHighCoverContainer.removeAllViews();</span><br><span class="line">        removeAllLevelContainers();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ViewGroup.<span class="function">LayoutParams <span class="title">getNewMatchLayoutParams</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过代码，我们也可以看到，默认的容器实现类其实是集成了一个容器的基类，如果默认的容器实现不满足与需求，那就可以自定义容器的add策略，同样覆盖层cover的优先级也可以自定义，这样，就完全做到了，容器的自定义以及cover的add策略的自定义。</p>
+<p>这样看起来似乎没什么问题。但实际上，还有个重要的问题，既然UI被拆分成覆盖层进行独立管理了，那么UI的状态如何随着播放器的变化而变化呢？覆盖层已经被接口隔离了啊。其实接下来需要解决的就是播放器与覆盖层如何进行通信的问题。</p>
+<p>比如播放器请求播放时，Loading组件要显示，当播放开始时，Loading要隐藏，播放出错时，错误页面要跳出来给用户以提示。</p>
+<p>这就需要播放器实时的汇报状态到覆盖层，而覆盖层根据自己需要的状态刷新显示。比如Loading覆盖层只需要关心是不是在加载中，是就显示，不是就隐藏。</p>
+<p>其实这个问题，最终采用的方案是：通过定义一个Receiver接口实现播放器传入不同的事件状态码回调给所有的覆盖层，各个覆盖层根据自己的需要过滤特定的状态码刷新自己即可。</p>
+<p>看代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseBindEventReceiver</span> <span class="keyword">extends</span> <span class="title">BaseContainer</span> <span class="keyword">implements</span> <span class="title">IEventReceiver</span>, <span class="title">PlayerObserver</span>,<span class="title">GestureObserver</span>,<span class="title">OnCoverEventListener</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BaseReceiverCollections receiverCollections;</span><br><span class="line">    <span class="keyword">private</span> OnCoverEventListener mOnCoverEventListener;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaseBindEventReceiver</span><span class="params">(@NonNull Context context)</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaseBindEventReceiver</span><span class="params">(@NonNull Context context, @Nullable AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaseBindEventReceiver</span><span class="params">(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs, defStyleAttr);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">bindCoverCollections</span><span class="params">(BaseReceiverCollections coverCollections)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">this</span>.receiverCollections !=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        <span class="keyword">this</span>.receiverCollections = coverCollections;</span><br><span class="line">        initCovers(mAppContext);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">unbindCoverCollections</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections !=<span class="keyword">null</span>)&#123;</span><br><span class="line">            receiverCollections.clear();</span><br><span class="line">            receiverCollections = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        removeAllCovers();</span><br><span class="line">        removeAllContainers();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initCovers</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections ==<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        List&lt;BaseEventReceiver&gt; covers = receiverCollections.getReceivers();</span><br><span class="line">        <span class="keyword">for</span>(BaseEventReceiver cover : covers)&#123;</span><br><span class="line">            <span class="keyword">if</span>(cover <span class="keyword">instanceof</span> BaseCover)&#123;</span><br><span class="line">                addCover((BaseCover) cover);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        onCoversHasInit(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> BaseReceiverCollections <span class="title">getReceiverCollections</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> receiverCollections;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCoversHasInit</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOnCoverEventListener</span><span class="params">(OnCoverEventListener onCoverEventListener)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mOnCoverEventListener = onCoverEventListener;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCoverEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(mOnCoverEventListener!=<span class="keyword">null</span>)&#123;</span><br><span class="line">            mOnCoverEventListener.onCoverEvent(eventCode, bundle);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onCoverEvent(eventCode, bundle);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当cover集合中存在Dpad控制层时，将焦点控制权交给它。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dPadRequestFocus</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span> &amp;&amp; receiver <span class="keyword">instanceof</span> IDpadFocusCover)&#123;</span><br><span class="line">                    receiver.onNotifyPlayEvent(OnPlayerEventListener.EVENT_CODE_PLAYER_DPAD_REQUEST_FOCUS, <span class="keyword">null</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onBindPlayer</span><span class="params">(BasePlayer player, OnCoverEventListener onCoverEventListener)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onBindPlayer(player,onCoverEventListener);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyConfigurationChanged</span><span class="params">(Configuration newConfig)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyConfigurationChanged(newConfig);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyPlayEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyPlayEvent(eventCode, bundle);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyErrorEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyErrorEvent(eventCode, bundle);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyPlayTimerCounter</span><span class="params">(<span class="keyword">int</span> curr, <span class="keyword">int</span> duration, <span class="keyword">int</span> bufferPercentage)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyPlayTimerCounter(curr, duration, bufferPercentage);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyNetWorkConnected</span><span class="params">(<span class="keyword">int</span> networkType)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyNetWorkConnected(networkType);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyNetWorkError</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyNetWorkError();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyAdPrepared</span><span class="params">(List&lt;BaseAdVideo&gt; adVideos)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyAdPrepared(adVideos);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyAdStart</span><span class="params">(BaseAdVideo adVideo)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyAdStart(adVideo);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNotifyAdFinish</span><span class="params">(VideoData data, <span class="keyword">boolean</span> isAllFinish)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    receiver.onNotifyAdFinish(data, isAllFinish);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureSingleTab</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureSingleTab(event);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureDoubleTab</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureDoubleTab(event);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureScroll</span><span class="params">(MotionEvent e1, MotionEvent e2, <span class="keyword">float</span> distanceX, <span class="keyword">float</span> distanceY)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureScroll(e1, e2, distanceX, distanceY);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureHorizontalSlide</span><span class="params">(<span class="keyword">float</span> percent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureHorizontalSlide(percent);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureRightVerticalSlide</span><span class="params">(<span class="keyword">float</span> percent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureRightVerticalSlide(percent);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureLeftVerticalSlide</span><span class="params">(<span class="keyword">float</span> percent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureLeftVerticalSlide(percent);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureEnableChange</span><span class="params">(<span class="keyword">boolean</span> enable)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureEnableChange(enable);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGestureEnd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">                <span class="keyword">if</span>(receiver <span class="keyword">instanceof</span> GestureObserver)&#123;</span><br><span class="line">                    ((GestureObserver)receiver).onGestureEnd();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//gesture handle----------------</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSingleTapUp</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onSingleTapUp(event);</span><br><span class="line">        onGestureSingleTab(event);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDoubleTap</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDoubleTap(event);</span><br><span class="line">        onGestureDoubleTab(event);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScroll</span><span class="params">(MotionEvent e1, MotionEvent e2, <span class="keyword">float</span> distanceX, <span class="keyword">float</span> distanceY)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onScroll(e1, e2, distanceX, distanceY);</span><br><span class="line">        onGestureScroll(e1, e2, distanceX, distanceY);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onHorizontalSlide</span><span class="params">(<span class="keyword">float</span> percent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onHorizontalSlide(percent);</span><br><span class="line">        onGestureHorizontalSlide(percent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onRightVerticalSlide</span><span class="params">(<span class="keyword">float</span> percent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onRightVerticalSlide(percent);</span><br><span class="line">        onGestureRightVerticalSlide(percent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onLeftVerticalSlide</span><span class="params">(<span class="keyword">float</span> percent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onLeftVerticalSlide(percent);</span><br><span class="line">        onGestureLeftVerticalSlide(percent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onPlayerGestureEnableChange</span><span class="params">(<span class="keyword">boolean</span> enable)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onPlayerGestureEnableChange(enable);</span><br><span class="line">        onGestureEnableChange(enable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onEndGesture</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onEndGesture();</span><br><span class="line">        onGestureEnd();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个解决了。接下来，大家想象一下这个场景，默认的播放控制层是在无操作5秒后自动隐藏，当播放器内有一个播放列表，用户操作播放列表时控制层不能隐藏。简单来说就是操作A层时，B层不能隐藏。这其实就需要我们解决另外一个问题：覆盖层与覆盖层之间的通信问题。</p>
+<p>这个问题如何解决呢？其实我们可以这么想，每个覆盖层其实都有一个共同的宿主，播放器。那么解决方案自然就出炉了，通过宿主作为桥梁进行覆盖层事件的分发。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCoverEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(mOnCoverEventListener!=<span class="keyword">null</span>)&#123;</span><br><span class="line">        mOnCoverEventListener.onCoverEvent(eventCode, bundle);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(receiverCollections!=<span class="keyword">null</span> &amp;&amp; receiverCollections.getReceivers()!=<span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">for</span>(BaseEventReceiver receiver:receiverCollections.getReceivers())&#123;</span><br><span class="line">            <span class="keyword">if</span>(receiver!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                receiver.onCoverEvent(eventCode, bundle);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>播放器如何和我们定义的N多个cover进行关联呢？这就要讲到框架内播放器的构建了。由于前面提到cover是被add到播放器内的，那么其实构建就可以通过添加的形式进行。需要哪个覆盖层就添加那个。不需要了就注释掉添加的代码即可，做到覆盖层模块随时插拔。</p>
+<p>而对于覆盖层的引入，给我们带来了什么好处：<br>1.UI分块管理，条理清晰，利于维护。<br>2.业务的变更只需要修改某一个或某几个cover，无变更的无任何影响。<br>3.对于业务的删减只需要在构建播放器时去掉cover的添加代码即可，无其他多余操作。</p>
+<p>到这儿，基本就没什么问题了。框架也基本算稳定了下来。</p>
+<p>项目地址：<a href="https://github.com/jiajunhui/PlayerBase" target="_blank" rel="noopener">https://github.com/jiajunhui/PlayerBase</a></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>用几张图罗列框架的架构模型：<br><img src="/pic/player_base_struct_01.png"><br><img src="/pic/player_base_struct_02.png"><br><img src="/pic/player_base_struct_03.png"><br><img src="/pic/player_base_struct_04.png"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/player/" rel="tag"># Player</a>
+          
+            <a href="/tags/decode/" rel="tag"># Decode</a>
+          
+            <a href="/tags/cover/" rel="tag"># Cover</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/java_jvm/" rel="next" title="Java虚拟机（JVM）介绍及其内存模型">
+                <i class="fa fa-chevron-left"></i> Java虚拟机（JVM）介绍及其内存模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="贾俊辉" />
+            
+              <p class="site-author-name" itemprop="name">贾俊辉</p>
+              <p class="site-description motion-element" itemprop="description">多年Android搬砖经验</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#发展过程"><span class="nav-number">2.</span> <span class="nav-text">发展过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#最开始的MediaPlayer裸奔"><span class="nav-number">2.1.</span> <span class="nav-text">最开始的MediaPlayer裸奔</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集成第三方播放器IJKPlayer"><span class="nav-number">2.2.</span> <span class="nav-text">集成第三方播放器IJKPlayer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集成第三方云播"><span class="nav-number">2.3.</span> <span class="nav-text">集成第三方云播</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XPlayer的诞生"><span class="nav-number">2.4.</span> <span class="nav-text">XPlayer的诞生</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PlayerBase的诞生"><span class="nav-number">2.5.</span> <span class="nav-text">PlayerBase的诞生</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PlayerBase解析"><span class="nav-number">3.</span> <span class="nav-text">PlayerBase解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#容器的概念"><span class="nav-number">3.1.</span> <span class="nav-text">容器的概念</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'g75jTWdMjRe52hhlBlfMCkBG-gzGzoHsz',
+        appKey: 'lDckU7EdKRQPuR2twHYcyndH',
+        placeholder: '壮士别走，留下神评！',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

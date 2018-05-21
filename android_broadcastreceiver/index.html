@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="BroadcastReceiver," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="简述Android应用可以发送或接收来自Android系统和其他Android应用的广播消息，类似于 发布 - 订阅 设计模式。这些广播是在感兴趣的事件发生时发送的。例如，Android系统在发生各种系统事件时发送广播，例如系统启动或设备开始充电时。应用程序还可以发送自定义广播，例如，向其他应用程序通知他们可能感兴趣的内容（例如，某些新数据已被下载）。 应用可以注册以接收特定的广播。发送广播时，系">
+<meta name="keywords" content="BroadcastReceiver">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android组件之BroadcastReceiver">
+<meta property="og:url" content="http://yoursite.com/android_broadcastreceiver/index.html">
+<meta property="og:site_name" content="贾俊辉的博客">
+<meta property="og:description" content="简述Android应用可以发送或接收来自Android系统和其他Android应用的广播消息，类似于 发布 - 订阅 设计模式。这些广播是在感兴趣的事件发生时发送的。例如，Android系统在发生各种系统事件时发送广播，例如系统启动或设备开始充电时。应用程序还可以发送自定义广播，例如，向其他应用程序通知他们可能感兴趣的内容（例如，某些新数据已被下载）。 应用可以注册以接收特定的广播。发送广播时，系">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-21T13:33:28.178Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android组件之BroadcastReceiver">
+<meta name="twitter:description" content="简述Android应用可以发送或接收来自Android系统和其他Android应用的广播消息，类似于 发布 - 订阅 设计模式。这些广播是在感兴趣的事件发生时发送的。例如，Android系统在发生各种系统事件时发送广播，例如系统启动或设备开始充电时。应用程序还可以发送自定义广播，例如，向其他应用程序通知他们可能感兴趣的内容（例如，某些新数据已被下载）。 应用可以注册以接收特定的广播。发送广播时，系">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/android_broadcastreceiver/"/>
+
+
+
+
+
+  <title>Android组件之BroadcastReceiver | 贾俊辉的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">贾俊辉的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/android_broadcastreceiver/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="贾俊辉的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android组件之BroadcastReceiver</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-04T20:03:14+08:00">
+                2017-01-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/android_broadcastreceiver/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/android_broadcastreceiver/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><p>Android应用可以发送或接收来自Android系统和其他Android应用的广播消息，类似于 发布 - 订阅 设计模式。这些广播是在感兴趣的事件发生时发送的。例如，Android系统在发生各种系统事件时发送广播，例如系统启动或设备开始充电时。应用程序还可以发送自定义广播，例如，向其他应用程序通知他们可能感兴趣的内容（例如，某些新数据已被下载）。</p>
+<p>应用可以注册以接收特定的广播。发送广播时，系统会自动将广播路由到已预订接收该特定广播类型的应用。</p>
+<p>一般来说，广播可以用作应用程序之间和正常用户流程之外的消息传递系统。但是，您必须小心，不要滥用在后台响应广播和运行作业，这可能会导致系统性能降低。</p>
+<a id="more"></a>
+<h1 id="关于系统广播"><a href="#关于系统广播" class="headerlink" title="关于系统广播"></a>关于系统广播</h1><p>系统在发生各种系统事件时自动发送广播，例如系统切入和切出飞行模式。系统广播被发送到订阅接收事件的所有应用程序。</p>
+<p>广播消息本身包装在一个Intent 对象中，该对象的操作字符串标识发生的事件（例如 <strong>android.intent.action.AIRPLANE_MODE</strong>）。Intent还可能包括捆绑到其额外领域的附加信息。例如，飞机模式意图包含一个布尔额外值，表示飞行模式是否打开。</p>
+<p>有关系统广播操作的完整列表，请参阅<strong>BROADCAST_ACTIONS.TXT</strong> Android SDK中的 文件。每个广播动作都有一个与其相关的常量字段。例如，常数的值 <strong>ACTION_AIRPLANE_MODE_CHANGED</strong>是 <strong>android.intent.action.AIRPLANE_MODE</strong>。每个广播操作的文档可在其关联的常量字段中找到。</p>
+<h1 id="系统广播的变化（2018-05-21-修改）"><a href="#系统广播的变化（2018-05-21-修改）" class="headerlink" title="系统广播的变化（2018/05/21 修改）"></a>系统广播的变化（2018/05/21 修改）</h1><p>Android 7.0及更高版本不再发送以下系统广播。此优化会影响所有应用，而不仅仅是针对Android 7.0的应用。</p>
+<p><strong>ACTION_NEW_PICTURE</strong><br><strong>ACTION_NEW_VIDEO</strong><br>定位到Android 7.0（API级别24）及更高版本的应用必须通过以下方式注册以下广播registerReceiver(BroadcastReceiver, IntentFilter)。在清单中声明接收者不起作用。</p>
+<p><strong>CONNECTIVITY_ACTION</strong><br>从Android 8.0（API级别26）开始，系统对清单声明的接收方施加额外的限制。如果您的应用定位到API级别26或更高，则无法使用清单来声明大多数隐式广播的接收方（专门针对您的应用的广播）。当用户主动使用您的应用程序时，您仍然可以使用Context上下文注册的接收器。</p>
+<h1 id="广播的接收"><a href="#广播的接收" class="headerlink" title="广播的接收"></a>广播的接收</h1><p>应用程序可以通过两种方式接收广播：通过清单Manifest声明的接收器和上下文Context注册的接收器。</p>
+<h2 id="清单文件Manifest声明的接收者"><a href="#清单文件Manifest声明的接收者" class="headerlink" title="清单文件Manifest声明的接收者"></a>清单文件Manifest声明的接收者</h2><p>如果您在清单中声明广播接收器，系统会在广播发送时启动您的应用程序（如果应用程序尚未运行）。<br>注意：如果您的应用程序的目标API级别为26或更高，则不能使用清单来声明隐式广播的接收器（专门不针对您的应用程序的广播），但可以免除该限制的一些隐式广播除外。</p>
+<p>要在清单中声明广播接收器，请执行以下步骤：</p>
+<p>1.<receiver> 在应用程序的清单中指定元素。</receiver></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:name</span>=<span class="string">".MyBroadcastReceiver"</span>  <span class="attr">android:exported</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.BOOT_COMPLETED"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.INPUT_METHOD_CHANGED"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>意图过滤器指定您的接收器订阅的广播操作。</p>
+<p>2.子类BroadcastReceiver和实现onReceive(Context, Intent)。以下示例中的广播接收机会记录并显示广播的内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyBroadcastReceiver</span> <span class="keyword">extends</span> <span class="title">BroadcastReceiver</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TAG = <span class="string">"MyBroadcastReceiver"</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span><span class="params">(Context context, Intent intent)</span> </span>&#123;</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        sb.append(<span class="string">"Action: "</span> + intent.getAction() + <span class="string">"\n"</span>);</span><br><span class="line">        sb.append(<span class="string">"URI: "</span> + intent.toUri(Intent.URI_INTENT_SCHEME).toString() + <span class="string">"\n"</span>);</span><br><span class="line">        String log = sb.toString();</span><br><span class="line">        Log.d(TAG, log);</span><br><span class="line">        Toast.makeText(context, log, Toast.LENGTH_LONG).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>系统包管理器在安装应用程序时注册接收器。接收器然后成为您的应用程序的单独入口点，这意味着系统可以启动应用程序并在应用程序当前未运行时传送广播。</p>
+<p>系统创建一个新的BroadcastReceiver组件对象来处理它收到的每个广播。此对象仅在调用期间有效onReceive(Context, Intent)。一旦您的代码从此方法返回，系统会认为该组件不再处于活动状态。</p>
+<h2 id="上下文Context注册的接收器"><a href="#上下文Context注册的接收器" class="headerlink" title="上下文Context注册的接收器"></a>上下文Context注册的接收器</h2><p>要使用上下文注册接收器，请执行以下步骤：</p>
+<p>1.创建一个实例<strong>BroadcastReceiver</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BroadcastReceiver br = <span class="keyword">new</span> MyBroadcastReceiver();</span><br></pre></td></tr></table></figure>
+<p>2.通过以下方式创建<strong>IntentFilter</strong>并注册接收器<strong>registerReceiver(BroadcastReceiver, IntentFilter)</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IntentFilter filter = <span class="keyword">new</span> IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);</span><br><span class="line">filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);</span><br><span class="line"><span class="keyword">this</span>.registerReceiver(br, filter);</span><br></pre></td></tr></table></figure>
+<p>3.要停止接收广播，请调用<strong>unregisterReceiver(android.content.BroadcastReceiver)</strong>。当您不再需要接收器或上下文不再有效时，请务必注销接收器。</p>
+<p>注意你注册和注销接收者的位置，例如，如果你注册一个接收者来<strong>onCreate(Bundle)</strong>使用活动的上下文，你应该取消注册，<strong>onDestroy()</strong>以防止接收者从活动上下文中泄漏出去。如果你注册一个接收器onResume()，你应该取消注册，onPause()以防止多次注册（如果你不想在暂停时收到广播，这可以减少不必要的系统开销）。不要在onSaveInstanceState(Bundle)中取消注册，因为如果用户移回到历史堆栈中，则不会调用它。</p>
+<h1 id="对进程状态的影响"><a href="#对进程状态的影响" class="headerlink" title="对进程状态的影响"></a>对进程状态的影响</h1><p>您的BroadcastReceiver（无论是否在运行）会影响其包含进程的状态，从而影响其被系统杀死的可能性。例如，当一个进程执行一个接收者（也就是说，当前在其onReceive() 方法中运行该代码）时，它被认为是一个前台进程。除非存在极大的内存压力，否则系统会继续运行。</p>
+<p>但是，一旦代码返回onReceive()，BroadcastReceiver不再处于活动状态。接收者的宿主进程变得与其中运行的其他应用程序组件一样重要。如果该进程仅托管清单声明的接收方（用户从未或最近未与之交互过的应用程序的常见情况），则在返回时onReceive()，系统将其进程视为低优先级进程，并可能会将其终止为其他更重要的流程提供资源。</p>
+<p>出于这个原因，您不应该从广播接收器开始长时间运行后台线程。在onReceive()执行后，系统可以随时终止进程以回收内存，并且这样做会终止进程中运行的衍生线程。为避免这种情况，您应该调用<strong>goAsync()</strong>（如果您希望有更多时间在后台线程中处理广播），或者<strong>JobService</strong>使用接收者从接收者调度一个<strong>JobScheduler</strong>，因此系统知道该过程继续执行主动工作。有关更多信息，请参阅进程和应用程序生命周期。</p>
+<p>下面的代码片段展示BroadcastReceiver使用<strong>goAsync()</strong>来完成更多的任务在<strong>onReceive()</strong>中。如果你想在你的工作中完成的工作onReceive()足够长，导致UI线程错过一帧（&gt; 16ms），这种情况更适合后台线程，这是特别有用的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyBroadcastReceiver</span> <span class="keyword">extends</span> <span class="title">BroadcastReceiver</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TAG = <span class="string">"MyBroadcastReceiver"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span><span class="params">(<span class="keyword">final</span> Context context, <span class="keyword">final</span> Intent intent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> PendingResult pendingResult = goAsync();</span><br><span class="line">        AsyncTask&lt;String, Integer, String&gt; asyncTask = <span class="keyword">new</span> AsyncTask&lt;String, Integer, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">protected</span> String <span class="title">doInBackground</span><span class="params">(String... params)</span> </span>&#123;</span><br><span class="line">                StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">                sb.append(<span class="string">"Action: "</span> + intent.getAction() + <span class="string">"\n"</span>);</span><br><span class="line">                sb.append(<span class="string">"URI: "</span> + intent.toUri(Intent.URI_INTENT_SCHEME).toString() + <span class="string">"\n"</span>);</span><br><span class="line">                Log.d(TAG, log);</span><br><span class="line">                <span class="comment">// Must call finish() so the BroadcastReceiver can be recycled.</span></span><br><span class="line">                pendingResult.finish();</span><br><span class="line">                <span class="keyword">return</span> data;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        asyncTask.execute();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="发送广播"><a href="#发送广播" class="headerlink" title="发送广播"></a>发送广播</h1><p>Android为应用程序发送广播提供了三种方式：</p>
+<p><strong>sendOrderedBroadcast(Intent, String)</strong> 方法一次向一个接收器发送广播。当每个接收器依次执行时，它可以将结果传播到下一个接收器，或者它可以完全中止广播，使其不会传递给其他接收器。运行的接收器的执行顺序可以通过匹配意图过滤器的android：priority属性进行控制; 具有相同优先级的接收器将以任意顺序运行。</p>
+<p><strong>sendBroadcast(Intent)</strong>方法以未定义的顺序向所有接收机发送广播。这被称为普通广播。这样更有效率，但意味着接收器无法读取其他接收器的结果，传播从广播接收的数据或中止广播。</p>
+<p><strong>LocalBroadcastManager.sendBroadcast</strong>方法将广播发送到与发件人位于同一应用程序中的接收者。如果您不需要跨应用程序发送广播，请使用本地广播。实现效率更高（不需要进程间通信），您无需担心与其他应用程序能够接收或发送广播相关的任何安全问题。<br>以下代码片段演示了如何通过创建一个Intent并调用来发送广播sendBroadcast(Intent)。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent();</span><br><span class="line">intent.setAction(<span class="string">"com.example.broadcast.MY_NOTIFICATION"</span>);</span><br><span class="line">intent.putExtra(<span class="string">"data"</span>,<span class="string">"Notice me senpai!"</span>);</span><br><span class="line">sendBroadcast(intent);</span><br></pre></td></tr></table></figure>
+<p>广播消息被包裹在一个Intent对象中。意图的动作字符串必须提供应用程序的Java包名称语法并唯一标识广播事件。您可以将附加信息附加到意图putExtra(String, Bundle)。您也可以通过调用setPackage(String)意图将广播限制在同一组织中的一组应用程序。</p>
+<h1 id="带有权限限制的广播"><a href="#带有权限限制的广播" class="headerlink" title="带有权限限制的广播"></a>带有权限限制的广播</h1><p>权限允许您将广播限制为拥有特定权限的应用程序集。您可以对广播的发送者或接收者实施限制。</p>
+<h2 id="发送广播时附带权限"><a href="#发送广播时附带权限" class="headerlink" title="发送广播时附带权限"></a>发送广播时附带权限</h2><p>当你打调用<strong>sendBroadcast(Intent, String)</strong>或者 <strong>sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)</strong>，你可以指定一个权限参数。只有接收方已经请求了该许可在他们的清单中标记（并且随后在危险时被授予许可）可以接收广播。例如，下面的代码发送一个广播：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sendBroadcast(<span class="keyword">new</span> Intent(<span class="string">"com.example.NOTIFY"</span>),</span><br><span class="line">              Manifest.permission.SEND_SMS);</span><br></pre></td></tr></table></figure>
+<p>要接收广播，接收应用程序必须请求权限，如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.SEND_SMS"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>您可以指定现有的系统权限SEND_SMS或使用该<permission>元素定义自定义权限 。<br>注意：自定义权限是在安装应用程序时注册的。定义自定义权限的应用程序必须安装在使用它的应用程序之前。</permission></p>
+<h2 id="接收带有权限的广播"><a href="#接收带有权限的广播" class="headerlink" title="接收带有权限的广播"></a>接收带有权限的广播</h2><p>如果您在注册广播接收机时指定一个权限参数（无论是在清单registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)中的<receiver>标签还是在 标签中），那么只有<uses-permission>在其清单中通过标签请求权限的广播公司 （如果它是危险的，随后被授予权限）可以发送接收者的意图。</uses-permission></receiver></p>
+<p>例如，假设您的接收应用程序具有清单声明的接收方，如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:name</span>=<span class="string">".MyBroadcastReceiver"</span></span></span><br><span class="line"><span class="tag">          <span class="attr">android:permission</span>=<span class="string">"android.permission.SEND_SMS"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.AIRPLANE_MODE"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>或者您的接收应用程序有一个上下文注册的接收器，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">IntentFilter filter = <span class="keyword">new</span> IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);</span><br><span class="line">registerReceiver(receiver, filter, Manifest.permission.SEND_SMS, <span class="keyword">null</span> );</span><br></pre></td></tr></table></figure>
+<p>然后，为了能够向这些接收方发送广播，发送应用程序必须请求权限，如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.SEND_SMS"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="安全考虑和最佳实践"><a href="#安全考虑和最佳实践" class="headerlink" title="安全考虑和最佳实践"></a>安全考虑和最佳实践</h1><p>以下是发送和接收广播的一些安全考虑事项和最佳做法：</p>
+<p>如果您不需要将广播发送到您的应用以外的组件，则<strong>LocalBroadcastManager</strong>可以使用支持库中的可用 广播发送和接收本地广播。的<strong>LocalBroadcastManager</strong>效率要高得多（不需要进程间通信），并可以让你避免考虑与其他应用程序能够接收或发送你的广播任何安全问题。本地广播可以在您的应用程序中用作通用的发布/订阅事件总线，而无需系统广播的任何开销。</p>
+<p>如果许多应用程序已注册接收清单中的相同广播，则可能会导致系统启动大量应用程序，从而对设备性能和用户体验产生重大影响。为了避免这种情况，优先使用清单声明上的注册。有时，Android系统本身会强制使用上下文注册的接收器。例如，<strong>CONNECTIVITY_ACTION</strong>广播仅传送给上下文注册的接收器。</p>
+<p>不要使用隐含的意图广播敏感信息。任何注册的应用程序都可以读取信息以接收广播。有三种方法可以控制谁可以接收您的广播：</p>
+<p>您可以在发送广播时指定权限。<br>在Android 4.0及更高版本，可以指定一个 包与 <strong>setPackage(String)</strong>发送广播时。系统将广播限制为与包匹配的一组应用程序。<br>您可以发送本地广播<strong>LocalBroadcastManager</strong>。<br>当您注册接收器时，任何应用程序都可能将潜在的恶意广播发送到您应用的接收器。有三种方法可以限制您的应用收到的广播：</p>
+<p>您可以在注册广播接收机时指定权限。<br>对于清单声明的接收者，您可以在清单中将 <strong>android：exported</strong> 属性设置为“false”。接收器不接收来自应用程序外部的广播。<br>你可以限制自己只有本地广播<strong>LocalBroadcastManager</strong>。<br>广播操作的命名空间是全局的。确保动作名称和其他字符串被写入您拥有的名称空间中，否则您可能会无意中与其他应用程序发生冲突。</p>
+<p>因为接收者的<strong>onReceive(Context, Intent)</strong>方法在主线程上运行，所以它应该快速执行并返回。如果您需要执行长时间运行的工作，请孵化线程或启动后台服务，因为系统可能会在onReceive()返回后终止整个进程 。<br>建议：调用<strong>goAsync()</strong>接收者的onReceive()方法并传递<strong>BroadcastReceiver.PendingResult</strong>给后台线程。这使广播从返回后保持活动状态onReceive()。但是，即使采用这种方法，系统也希望您能够很快完成广播（不到10秒）。它确实允许您将工作移至另一个线程以避免妨碍主线程。<br>用<strong>JobScheduler</strong>来协调任务。</p>
+<p>不要从广播接收者中开一一个新的Activity，因为用户体验很糟糕; 特别是如果有多个接收器的话。相反，请考虑使用Notification来显示通知。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/broadcastreceiver/" rel="tag"># BroadcastReceiver</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/android_service/" rel="next" title="Android组件之Service">
+                <i class="fa fa-chevron-left"></i> Android组件之Service
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/project_file_base/" rel="prev" title="文件操作工具库FileBase">
+                文件操作工具库FileBase <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="贾俊辉" />
+            
+              <p class="site-author-name" itemprop="name">贾俊辉</p>
+              <p class="site-description motion-element" itemprop="description">多年Android搬砖经验</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简述"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关于系统广播"><span class="nav-number">2.</span> <span class="nav-text">关于系统广播</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#系统广播的变化（2018-05-21-修改）"><span class="nav-number">3.</span> <span class="nav-text">系统广播的变化（2018/05/21 修改）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#广播的接收"><span class="nav-number">4.</span> <span class="nav-text">广播的接收</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#清单文件Manifest声明的接收者"><span class="nav-number">4.1.</span> <span class="nav-text">清单文件Manifest声明的接收者</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上下文Context注册的接收器"><span class="nav-number">4.2.</span> <span class="nav-text">上下文Context注册的接收器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对进程状态的影响"><span class="nav-number">5.</span> <span class="nav-text">对进程状态的影响</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#发送广播"><span class="nav-number">6.</span> <span class="nav-text">发送广播</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#带有权限限制的广播"><span class="nav-number">7.</span> <span class="nav-text">带有权限限制的广播</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#发送广播时附带权限"><span class="nav-number">7.1.</span> <span class="nav-text">发送广播时附带权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接收带有权限的广播"><span class="nav-number">7.2.</span> <span class="nav-text">接收带有权限的广播</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安全考虑和最佳实践"><span class="nav-number">8.</span> <span class="nav-text">安全考虑和最佳实践</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'g75jTWdMjRe52hhlBlfMCkBG-gzGzoHsz',
+        appKey: 'lDckU7EdKRQPuR2twHYcyndH',
+        placeholder: '壮士别走，留下神评！',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="贾俊辉的博客">
 <meta property="og:description" content="简述Android应用可以发送或接收来自Android系统和其他Android应用的广播消息，类似于 发布 - 订阅 设计模式。这些广播是在感兴趣的事件发生时发送的。例如，Android系统在发生各种系统事件时发送广播，例如系统启动或设备开始充电时。应用程序还可以发送自定义广播，例如，向其他应用程序通知他们可能感兴趣的内容（例如，某些新数据已被下载）。 应用可以注册以接收特定的广播。发送广播时，系">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-21T13:33:28.178Z">
+<meta property="og:updated_time" content="2018-05-21T13:36:38.990Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android组件之BroadcastReceiver">
 <meta name="twitter:description" content="简述Android应用可以发送或接收来自Android系统和其他Android应用的广播消息，类似于 发布 - 订阅 设计模式。这些广播是在感兴趣的事件发生时发送的。例如，Android系统在发生各种系统事件时发送广播，例如系统启动或设备开始充电时。应用程序还可以发送自定义广播，例如，向其他应用程序通知他们可能感兴趣的内容（例如，某些新数据已被下载）。 应用可以注册以接收特定的广播。发送广播时，系">
@@ -411,7 +411,7 @@
 <p>一般来说，广播可以用作应用程序之间和正常用户流程之外的消息传递系统。但是，您必须小心，不要滥用在后台响应广播和运行作业，这可能会导致系统性能降低。</p>
 <a id="more"></a>
 <h1 id="关于系统广播"><a href="#关于系统广播" class="headerlink" title="关于系统广播"></a>关于系统广播</h1><p>系统在发生各种系统事件时自动发送广播，例如系统切入和切出飞行模式。系统广播被发送到订阅接收事件的所有应用程序。</p>
-<p>广播消息本身包装在一个Intent 对象中，该对象的操作字符串标识发生的事件（例如 <strong>android.intent.action.AIRPLANE_MODE</strong>）。Intent还可能包括捆绑到其额外领域的附加信息。例如，飞机模式意图包含一个布尔额外值，表示飞行模式是否打开。</p>
+<p>广播消息本身包装在一个Intent对象中,该对象的操作字符串标识发生的事件（例如 <strong>android.intent.action.AIRPLANE_MODE</strong>）。Intent还可能包括捆绑到其额外领域的附加信息。例如，飞机模式意图包含一个布尔额外值，表示飞行模式是否打开。</p>
 <p>有关系统广播操作的完整列表，请参阅<strong>BROADCAST_ACTIONS.TXT</strong> Android SDK中的 文件。每个广播动作都有一个与其相关的常量字段。例如，常数的值 <strong>ACTION_AIRPLANE_MODE_CHANGED</strong>是 <strong>android.intent.action.AIRPLANE_MODE</strong>。每个广播操作的文档可在其关联的常量字段中找到。</p>
 <h1 id="系统广播的变化（2018-05-21-修改）"><a href="#系统广播的变化（2018-05-21-修改）" class="headerlink" title="系统广播的变化（2018/05/21 修改）"></a>系统广播的变化（2018/05/21 修改）</h1><p>Android 7.0及更高版本不再发送以下系统广播。此优化会影响所有应用，而不仅仅是针对Android 7.0的应用。</p>
 <p><strong>ACTION_NEW_PICTURE</strong><br><strong>ACTION_NEW_VIDEO</strong><br>定位到Android 7.0（API级别24）及更高版本的应用必须通过以下方式注册以下广播registerReceiver(BroadcastReceiver, IntentFilter)。在清单中声明接收者不起作用。</p>
@@ -505,8 +505,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/project_file_base/" rel="prev" title="文件操作工具库FileBase">
-                文件操作工具库FileBase <i class="fa fa-chevron-right"></i>
+              <a href="/android_content_provider/" rel="prev" title="Android组件之内容提供者ContentProvider">
+                Android组件之内容提供者ContentProvider <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -591,7 +591,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -613,7 +613,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

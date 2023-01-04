@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="视频是包含了画面和声音的一个整体，是采用了一些复杂的算法将画面和声音数字信号进行编码存储，并通过解码算法再进行画面和声音的还原播放。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频基础知识整理">
+<meta property="og:url" content="http://example.com/2018/09/02/av_base_info/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="视频是包含了画面和声音的一个整体，是采用了一些复杂的算法将画面和声音数字信号进行编码存储，并通过解码算法再进行画面和声音的还原播放。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/video_packing_type.png">
+<meta property="og:image" content="http://example.com/images/space_more_zip.png">
+<meta property="og:image" content="http://example.com/images/time_more_zip1.png">
+<meta property="og:image" content="http://example.com/images/time_more_zip2.png">
+<meta property="og:image" content="http://example.com/images/encode_decode_info.png">
+<meta property="og:image" content="http://example.com/images/gop_desc1.png">
+<meta property="og:image" content="http://example.com/images/IBP_info.png">
+<meta property="og:image" content="http://example.com/images/gop_desc2.png">
+<meta property="og:image" content="http://example.com/images/encode_h264.png">
+<meta property="og:image" content="http://example.com/images/vcl_nal.png">
+<meta property="og:image" content="http://example.com/images/nal_desc.png">
+<meta property="og:image" content="http://example.com/images/nal_tyle_list.png">
+<meta property="og:image" content="http://example.com/images/pts_dts.png">
+<meta property="article:published_time" content="2018-09-02T13:22:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:35:30.815Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="播放器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/video_packing_type.png">
+
+
+<link rel="canonical" href="http://example.com/2018/09/02/av_base_info/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2018&#x2F;09&#x2F;02&#x2F;av_base_info&#x2F;&quot;,&quot;path&quot;:&quot;2018&#x2F;09&#x2F;02&#x2F;av_base_info&#x2F;&quot;,&quot;title&quot;:&quot;音视频基础知识整理&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>音视频基础知识整理 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">视频文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E5%B0%81%E8%A3%85%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">视频封装格式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E7%9A%84%E5%B0%81%E8%A3%85%E6%A0%BC"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">几种常见的封装格</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">视频编码格式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">常见的编码格式</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%BF%9B%E8%A1%8C%E7%BC%96%E7%A0%81%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">视频为什么要进行编码？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9C%8B%E4%B8%80%E7%BB%84%E6%95%B0%E6%8D%AE"><span class="nav-number">4.0.0.1.</span> <span class="nav-text">看一组数据</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%9A%84%E5%8E%8B%E7%BC%A9"><span class="nav-number">5.</span> <span class="nav-text">数据的压缩</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E7%9A%84%E5%8E%8B%E7%BC%A9"><span class="nav-number">6.</span> <span class="nav-text">视频的压缩</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%BB%E6%97%B6%E5%9F%9F%E5%8E%8B%E7%BC%A9"><span class="nav-number">6.0.0.1.</span> <span class="nav-text">去时域压缩</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%BB%E7%A9%BA%E5%9F%9F%E5%8E%8B%E7%BC%A9"><span class="nav-number">6.0.0.2.</span> <span class="nav-text">去空域压缩</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%86%E8%A7%89%E5%86%97%E4%BD%99"><span class="nav-number">6.0.0.3.</span> <span class="nav-text">视觉冗余</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E7%86%B5%E5%86%97%E4%BD%99-%E7%86%B5%E7%BC%96%E7%A0%81-%E5%93%88%E5%A4%AB%E6%9B%BC%E7%AE%97%E6%B3%95"><span class="nav-number">6.0.0.4.</span> <span class="nav-text">信息熵冗余 &#x3D;&#x3D; 熵编码-哈夫曼算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E5%86%97%E4%BD%99"><span class="nav-number">6.0.0.5.</span> <span class="nav-text">知识冗余</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%86%E9%9F%B3%E9%A2%91%E5%AE%8C%E6%95%B4%E7%9A%84%E5%BD%95%E5%88%B6%E7%BC%96%E7%A0%81%E6%B5%81%E7%A8%8B"><span class="nav-number">6.0.0.6.</span> <span class="nav-text">视音频完整的录制编码流程</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E7%BB%84%EF%BC%88GOP%EF%BC%89%E5%8E%8B%E7%BC%A9"><span class="nav-number">7.</span> <span class="nav-text">图像组（GOP）压缩</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#I%E5%B8%A7"><span class="nav-number">7.0.0.1.</span> <span class="nav-text">I帧</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#P%E5%B8%A7"><span class="nav-number">7.0.0.2.</span> <span class="nav-text">P帧</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#B%E5%B8%A7"><span class="nav-number">7.0.0.3.</span> <span class="nav-text">B帧</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#GOP%E7%9A%84%E5%80%BC"><span class="nav-number">7.0.0.4.</span> <span class="nav-text">GOP的值</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#I%E3%80%81B%E3%80%81P%E7%A4%BA%E6%84%8F%E5%9B%BE"><span class="nav-number">7.0.0.5.</span> <span class="nav-text">I、B、P示意图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#GOP%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">7.0.0.6.</span> <span class="nav-text">GOP的影响</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E5%B8%A6%E6%9D%A5%E7%9A%84%E4%BC%98%E7%82%B9%E5%92%8C%E9%97%AE%E9%A2%98"><span class="nav-number">7.0.0.7.</span> <span class="nav-text">编码带来的优点和问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%B8%B8%E7%94%A8%E7%9A%84%E7%BC%96%E7%A0%81%E6%A0%87%E5%87%86H-264"><span class="nav-number">7.0.0.8.</span> <span class="nav-text">最常用的编码标准H.264</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#H-264%E5%88%86%E5%B1%82%E7%BB%93%E6%9E%84%EF%BC%88VCL%E4%B8%8ENAL%EF%BC%89"><span class="nav-number">7.0.0.9.</span> <span class="nav-text">H.264分层结构（VCL与NAL）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NAL%EF%BC%88%E7%89%87%EF%BC%88%E5%AE%8F%E5%9D%97%EF%BC%89%EF%BC%89"><span class="nav-number">7.0.0.10.</span> <span class="nav-text">NAL（片（宏块））</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PTS%E4%B8%8EDTS"><span class="nav-number">7.0.0.11.</span> <span class="nav-text">PTS与DTS</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/09/02/av_base_info/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          音视频基础知识整理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-09-02 21:22:00" itemprop="dateCreated datePublished" datetime="2018-09-02T21:22:00+08:00">2018-09-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>视频是包含了画面和声音的一个整体，是采用了一些复杂的算法将画面和声音数字信号进行编码存储，并通过解码算法再进行画面和声音的还原播放。</p>
+<span id="more"></span>
+
+<h2 id="视频文件格式"><a href="#视频文件格式" class="headerlink" title="视频文件格式"></a>视频文件格式</h2><p>文件格式其实就是为了让系统中的应用程序识别并关联这些文件，让相应的文件由相应的应用程序打开。比如你双击一个.mp4文件，就会打开播放器并播放该文件。</p>
+<p>所以我们常见到的.avi .mp4 .rmvb .mkv等都是视频的文件格式。它由   系统中得播放器程序关联。你可以随意改扩展名，但是视频本身的内容不会变，只是关联启动的应用程序可能会变。并不是说将一个.avi的视频后缀改为.mp4他就变成MP4格式的了。</p>
+<h2 id="视频封装格式"><a href="#视频封装格式" class="headerlink" title="视频封装格式"></a>视频封装格式</h2><p>封装格式（也叫容器），就是将已经编码压缩好的视频轨和音频轨按照一定的格式放到一个文件中，也就是说仅仅是一个外壳，或者把它当成一个放视频轨和音频轨的文件夹也可以。</p>
+<p>同样，封装格式一样不影响视频画质。它只负责把内部的视频轨和音频轨集成在一起，只起到一个文件夹（或者压缩包）的作用，并没有对视频轨和音频轨造成影响。</p>
+<h5 id="几种常见的封装格"><a href="#几种常见的封装格" class="headerlink" title="几种常见的封装格"></a>几种常见的封装格</h5><p><img src="/images/video_packing_type.png" alt="image-20210607112412856"></p>
+<h2 id="视频编码格式"><a href="#视频编码格式" class="headerlink" title="视频编码格式"></a>视频编码格式</h2><p>所谓视频编码方式就是指能够对数字视频进行压缩或者解压缩（视频解码）的程序或者设备。也可以指通过过特定的压缩技术，将某个视频格式转换成另一种视频格式。</p>
+<h5 id="常见的编码格式"><a href="#常见的编码格式" class="headerlink" title="常见的编码格式"></a>常见的编码格式</h5><p>1，MPEG系列（由ISO[国际标准组织机构]下属的MPEG[运动图象专家组]开发 ）视频编码方面主要有：</p>
+<ol>
+<li><p>MPEG-1第二部分（MPEG-1第二部分主要使用在VCD上，有些在线视频也使用这种格式。该编解码器的质量大致上和原有的VHS录像带相当。）2) MPEG-2第二部分（MPEG-2第二部分等同于H.262，使用在DVD、SVCD和大多数数字视频广播系统和有线分布系统（cable distribution systems）中。）</p>
+</li>
+<li><p>MPEG-4第二部分（MPEG-4第二部分标准可以使用在网络传输、广播和媒体存储上。比起MPEG-2和第一版的H.263，它的压缩性能有所提高。）4) MPEG-4第十部分（MPEG-4第十部分技术上和ITU-T H.264是相同的标准，有时候也被叫做“AVC”）最后这两个编码组织合作，诞生了H.264/AVC标准。ITU-T给这个标准命名为H.264，而ISO/IEC称它为MPEG-4 高级视频编码（Advanced Video Coding，AVC）。</p>
+</li>
+</ol>
+<p>2，H.26X系列 （由ITU[国际电传视讯联盟]主导）包括H.261、H.262、H.263、H.264、H.265。</p>
+<ol>
+<li><p>H.261：主要在老的视频会议和视频电话产品中使用。</p>
+</li>
+<li><p>H.263：主要用在视频会议、视频电话和网络视频上。</p>
+</li>
+<li><p>H.264：H.264/MPEG-4第十部分，或称AVC（Advanced Video Coding，高级视频编码），是一种视频压缩标准，一种被广泛使用的高精度视频的录制、压缩和发布格式。</p>
+</li>
+<li><p>H.265：高效率视频编码（High Efficiency Video Coding，简称HEVC）是一种视频压缩标准，H.264/MPEG-4 AVC的继任者。HEVC被认为不仅提升图像质量，同时也能达到H.264/MPEG-4 AVC两倍之压缩率（等同于同样画面质量下比特率减少了50%），可支持4K分辨率甚至到超高画质电视，最高分辨率可达到8192×4320（8K分辨率），这是目前发展的趋势。</p>
+</li>
+</ol>
+<p>其他系列：AMV · AVS · Bink · CineForm · Cinepak · Dirac · DV · Indeo · Video · Pixlet · RealVideo · RTVideo · SheerVideo · Smacker · Sorenson Video · Theora · VC-1 · VP3 · VP6 · VP7 · VP8 · VP9 · WMV。因为以上编码方式不常用，不再介绍。</p>
+<h2 id="视频为什么要进行编码？"><a href="#视频为什么要进行编码？" class="headerlink" title="视频为什么要进行编码？"></a>视频为什么要进行编码？</h2><p>视频是连续的图像序列，由连续的帧构成，一帧即为一幅图像。<br>由于人眼的视觉暂留效应，当帧序列以一定的速率播放时，我们看到的就是动作连续的视频。<br>这么多连续的图像数据如果不经过编码的数据量太大了。</p>
+<h5 id="看一组数据"><a href="#看一组数据" class="headerlink" title="看一组数据"></a>看一组数据</h5><p>1）一部全高清1080P 2小时的大片，原始数据量大约为4171G</p>
+<p>2）假设图像分辨率为4CIF（704*576），帧频为25f/s.如果不进行压缩，大概需要多大的带宽呢？</p>
+<p>如果原始图像为4:2:0的YUV格式数据（这个格式已经为原始数据的最小），</p>
+<p>每幅画面的大小为：704<em>576</em>1.5*8 bit = 4.64M，也就是说每一帧为4.64M。</p>
+<p>如果想看流畅的视频画面，大概每秒需要传输25帧，也即需要4.64*25M = 116M的带宽。</p>
+<p>CIF（352*288）格式也需要116/4=29M 的带宽。也就是说如果不压缩，20M的接入带宽，</p>
+<p>连QQ聊天都做不了。</p>
+<p>以上的计算，只是想说明一个问题，原始视频的数据量相当大，不可能直接进行实时网络传输，甚至连存储的代价都相当大。</p>
+<p>这就需要做视频压缩，也就是说去除掉原始数据中的一些冗余，然后再进行传输或者存储，来减少对带宽和存储空间的需求。</p>
+<p>大家现在可以在2-4M的带宽上享受高清实时视频服务，可以在一张4G的蓝光DVD里面存储高清视频，这是因为这些传输或者存在的视频信号已经经过了压缩。</p>
+<h2 id="数据的压缩"><a href="#数据的压缩" class="headerlink" title="数据的压缩"></a>数据的压缩</h2><p>数据压缩是指在不丢失有用信息的前提下，缩减数据量以减少存储空间，提高其传输、存储和处理效率，或按照一定的算法对数据进行重新组织，减少数据的冗余和存储的空间的一种技术方法。</p>
+<p>数据压缩能够实现是因为多数现实世界的数据都有统计冗余。例如，字母“e”在英语中比字母“z”更加常用，字母“q”后面是“z”的可能性非常小。无损压缩算法通常利用了统计冗余，这样就能更加简练地、但仍然是完整地表示发送方的数据。</p>
+<p>一些机制是可逆的，这样就可以恢复原始的数据，这种机制称为<strong>无损数据压缩</strong>；另外一些机制为了实现更高的压缩率允许一定程度的数据损失，这种机制称为<strong>有损数据压缩</strong>。</p>
+<h2 id="视频的压缩"><a href="#视频的压缩" class="headerlink" title="视频的压缩"></a>视频的压缩</h2><p>视频图像数据有极强的相关性，也就是说有大量的冗余信息。其中冗余信息可分为<strong>空域冗余信息</strong>和<strong>时域冗余信息</strong>。</p>
+<p>压缩技术就是将数据中的冗余信息去掉（去除数据之间的相关性），压缩技术包含帧内图像数据压缩技术、帧间图像数据压缩技术和熵编码压缩技术。</p>
+<h5 id="去时域压缩"><a href="#去时域压缩" class="headerlink" title="去时域压缩"></a>去时域压缩</h5><p>使用帧间编码技术可去除时域冗余信息，它包括以下三部分：</p>
+<p>•－ 运动补偿</p>
+<p>​     运动补偿是通过先前的局部图像来预测、补偿当前的局部图像，它是减少帧序列冗余信息的有效方法。</p>
+<p>•－ 运动表示</p>
+<p>​     不同区域的图像需要使用不同的运动矢量来描述运动信息。运动矢量通过熵编码进行压缩。</p>
+<p>•－运动估计</p>
+<p>​     运动估计是从视频序列中抽取运动信息的一整套技术。</p>
+<p>•注：通用的压缩标准都使用基于块的运动估计和运动补偿。</p>
+<h5 id="去空域压缩"><a href="#去空域压缩" class="headerlink" title="去空域压缩"></a>去空域压缩</h5><p>主要使用帧内编码技术和熵编码技术：</p>
+<p>•－变换编码</p>
+<p>​     帧内图像和预测差分信号都有很高的空域冗余信息。变换编码将空域信号变换到另一正交矢量空间，使其相关性下降，数据冗余度减小。</p>
+<p>•－ 量化编码</p>
+<p>​     经过变换编码后，产生一批变换系数，对这些系数进行量化，使编码器的输出达到一定的位率。这一过程导致精度的降低。</p>
+<p>•－熵编码</p>
+<p>​     熵编码是无损编码。它对变换、量化后得到的系数和运动信息，进行进一步的压缩。</p>
+<p><img src="/images/space_more_zip.png" alt="image-20210607113147211"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">空域冗余</span><br><span class="line"></span><br><span class="line">单帧画面内有很多像素点是一样的，如果存储时一个点一个点的存储，这将带来很大的存储空间的浪费。</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/time_more_zip1.png" alt="image-20210607113251252"></p>
+<p><img src="/images/time_more_zip2.png" alt="image-20210607113314716"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">帧与帧之间的冗余成为时域冗余</span><br><span class="line"></span><br><span class="line">帧1与帧2有很大一部分是一样的，画面内只有部分物体发生了位移或动作变化。随属于不同的画面帧，但存储时如果能共用相同的画面元素，能节省很大一部分存储空间。</span><br></pre></td></tr></table></figure>
+
+<h5 id="视觉冗余"><a href="#视觉冗余" class="headerlink" title="视觉冗余"></a>视觉冗余</h5><p>视觉冗余:是指人眼不能感知或不敏感的那部分图像信息。</p>
+<h5 id="信息熵冗余-熵编码-哈夫曼算法"><a href="#信息熵冗余-熵编码-哈夫曼算法" class="headerlink" title="信息熵冗余 == 熵编码-哈夫曼算法"></a>信息熵冗余 <strong>==</strong> <strong>熵编码</strong>-<strong>哈夫曼算法</strong></h5><p>信息熵冗余:也称编码冗余，人们用于表达某一信息所需要的比特数总比理论上表示该信息所需要的最少比特<br>数要大，它们之间的差距就是信息熵冗余，或称编码冗余。</p>
+<h5 id="知识冗余"><a href="#知识冗余" class="headerlink" title="知识冗余"></a>知识冗余</h5><p>人类(头 身体 腿)，汽车，房子 不需要记录</p>
+<p>知识冗余:是指在有些图像中还包含与某些验证知识有关的信息。</p>
+<h5 id="视音频完整的录制编码流程"><a href="#视音频完整的录制编码流程" class="headerlink" title="视音频完整的录制编码流程"></a>视音频完整的录制编码流程</h5><p><img src="/images/encode_decode_info.png" alt="encode_decode_info"></p>
+<p>编码的目的，就是为了压缩。各种视频编码方式，都是为了让视频变得体积更小，有利于存储和传输。编码的<br>核心思想就是去除冗余信息。</p>
+<h2 id="图像组（GOP）压缩"><a href="#图像组（GOP）压缩" class="headerlink" title="图像组（GOP）压缩"></a>图像组（GOP）压缩</h2><p>•GOP（Group of Picture）</p>
+<p>   在视频编码序列中，GOP就称为一个图像组。</p>
+<p>•GOP中的编码帧</p>
+<p>   在视频中，每帧代表一幅静止的图像，而压缩是要采取各种压缩算法减少数据的容量。</p>
+<p>   在视频编码序列中，主要有三种编码帧：I帧、P帧、B帧</p>
+<p><strong>I****帧</strong>即Intra-coded picture（帧内编码图像帧），也<strong>称关键帧</strong>不参考其他图像帧，只利用本帧的信息进行编码，是一幅完整的画面。</p>
+<p><strong>P****帧</strong>即Predictive-coded Picture（预测编码图像帧），利用之前的I帧或P帧，采用运动预测的方式进行帧间预测编码，表示的是这一帧跟之前的一个关键帧（或P帧）的差别，解码时需要用之前缓存的画面叠加上本帧定义的差别，生成最终画面。（也就是<strong>差别帧</strong>，P帧没有完整画面数据，只有与前一帧的画面差别的数据）。</p>
+<p><strong>B****帧</strong>即Bidirectionally predicted picture（双向预测编码图像帧)，提供最高的压缩比，它既需要之前的图像帧(I帧或P帧)，也需要后来的图像帧(P帧)，采用运动预测的方式进行帧间双向预测编码，换言之，要解码B帧，不仅要取得之前的缓存画面，还要解码之后的画面，通过前后画面的与本帧数据的叠加取得最终的画面。B帧压缩率高</p>
+<h5 id="I帧"><a href="#I帧" class="headerlink" title="I帧"></a>I帧</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">I帧特点： （关键帧）</span><br><span class="line">1.它是一个全帧压缩编码帧。它将全帧图像信息进行JPEG压缩编码及传输;        </span><br><span class="line">2.解码时仅用I帧的数据就可重构完整图像;        </span><br><span class="line">3.I帧描述了图像背景和运动主体的详情;        </span><br><span class="line">4.I帧不需要参考其他画面而生成;        </span><br><span class="line">5.I帧是P帧和B帧的参考帧(其质量直接影响到同组中以后各帧的质量);        </span><br><span class="line">6.I帧是帧组GOP的基础帧(第一帧),在一组中只有一个I帧;        </span><br><span class="line">7.I帧不需要考虑运动矢量;       </span><br><span class="line">8.I帧所占数据的信息量比较大。    </span><br><span class="line"></span><br><span class="line">I帧编码流程：       </span><br><span class="line">1.进行帧内预测，决定所采用的帧内预测模式。        </span><br><span class="line">2.像素值减去预测值，得到残差。        </span><br><span class="line">3.对残差进行变换和量化。        </span><br><span class="line">4.变长编码和算术编码。       </span><br><span class="line">5.重构图像并滤波，得到的图像作为其它帧的参考帧。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="P帧"><a href="#P帧" class="headerlink" title="P帧"></a>P帧</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">P帧特点</span><br><span class="line"></span><br><span class="line">1.P帧是I帧后面相隔1-2帧的编码帧。         </span><br><span class="line">2.P帧采用运动补偿的方法传送它与前面的I或P帧的差值及运动矢量（预测误差）。         </span><br><span class="line">3.解码时必须将I帧中的预测值与预测误差求和后才能重构完整的P帧图像。         </span><br><span class="line">4.P帧属于前向预测的帧间编码。它只参考前面最靠近它的I帧或P帧。          </span><br><span class="line">5.P帧可以是其后面P帧的参考帧，也可以是其前后的B帧的参考帧。        </span><br><span class="line">6.由于P帧是参考帧，它可能造成解码错误的扩散。         </span><br><span class="line">7.由于是差值传送，P帧的压缩比较高。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="B帧"><a href="#B帧" class="headerlink" title="B帧"></a>B帧</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">B帧特点</span><br><span class="line"></span><br><span class="line">1.B帧是由前面的I或P帧和后面的P帧来进行预测的;        </span><br><span class="line">2.B帧传送的是它与前面的I或P帧和后面的P帧之间的预测误差及运动矢量;        </span><br><span class="line">3.B帧是双向预测编码帧;        </span><br><span class="line">4.B帧压缩比最高,因为它只反映2参考帧间运动主体的变化情况,预测比较准确;        </span><br><span class="line">5.B帧不是参考帧,不会造成解码错误的扩散。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="GOP的值"><a href="#GOP的值" class="headerlink" title="GOP的值"></a>GOP的值</h5><p>•GOP的值指的就是两个I帧之间的距离（两个I帧之间的图像帧数）。</p>
+<p>   在这个组内只有I帧是一幅完整的画面帧，而P帧和B帧都属于预测编码帧，一个I帧所占用的字节数大于一个P帧，一个P帧所占用的字节数大于一个B帧（如下图所示）。</p>
+<p><img src="/images/gop_desc1.png" alt="image-20210607114220152"></p>
+<p>•两个P帧之间的距离叫一个参考周期（Reference）。</p>
+<h5 id="I、B、P示意图"><a href="#I、B、P示意图" class="headerlink" title="I、B、P示意图"></a>I、B、P示意图</h5><p><img src="/images/IBP_info.png" alt="image-20210606220037253"></p>
+<p>•根据I、P、B帧的定义，I帧属于帧内编码，自己完成就行了。而P帧需要参考前面的帧，B帧前后帧都可以作为参考帧。</p>
+<p>•P 帧和 B 帧编码的基本流程为：    </p>
+<p>(1)进行运动估计，计算采用帧间编码模式的率失真函数(节)值。P 帧 只参考前面的帧，B 帧可参考后面的帧。    </p>
+<p>(2)进行帧内预测，选取率失真函数值最小的帧内模式与帧间模式比较，确定采用哪种编码模式。    </p>
+<p>(3)计算实际值和预测值的差值。    </p>
+<p>(4)对残差进行变换和量化。    </p>
+<p>(5)若编码，如果是帧间编码模式，编码运动矢量。</p>
+<p>注:I、B、P各帧是根据压缩算法的需要,是人为定义的,它们都是实实在在的物理帧,至于图像中的哪一帧是I帧,是随机的,一但确定了I帧,以后的各帧就严格按规定顺序排列。</p>
+<p><img src="/images/gop_desc2.png" alt="image-20210607114550043"></p>
+<h5 id="GOP的影响"><a href="#GOP的影响" class="headerlink" title="GOP的影响"></a>GOP的影响</h5><p>•在码率不变的前提下，GOP值越大，P、B帧的数量会越多，平均每个I、P、B帧所占用的字节数就越多，也就更容易获取较好的图像质量；Reference越大，B帧的数量越多，同理也更容易获得较好的图像质量。</p>
+<p>•需要说明的是，通过提高GOP值来提高图像质量是有限度的，在遇到场景切换的情况时，H.264编码器会自动强制插入一个I帧，此时实际的GOP值被缩短了。另一方面，在一个GOP中，P、B帧是由I帧预测得到的，当I帧的图像质量比较差时，会影响到一个GOP中后续P、B帧的图像质量，直到下一个GOP开始才有可能得以恢复，所以GOP值也不宜设置过大。</p>
+<p>•同时，由于P、B帧的复杂度大于I帧，所以过多的P、B帧会影响编码效率，使编码效率降低。另外，过长的GOP还会影响Seek操作的响应速度，由于P、B帧是由前面的I或P帧预测得到的，所以Seek操作需要直接定位，解码某一个P或B帧时，需要先解码得到本GOP内的I帧及之前的N个预测帧才可以，GOP值越长，需要解码的预测帧就越多，seek响应的时间也越长。</p>
+<h5 id="编码带来的优点和问题"><a href="#编码带来的优点和问题" class="headerlink" title="编码带来的优点和问题"></a>编码带来的优点和问题</h5><p>•优点</p>
+<p>​    1.视频码率大幅度下降。</p>
+<p>​    2.码率降低的同时清晰度依然很好。</p>
+<p>​    3.同等清晰度下视频的传输有效的节约带宽。</p>
+<p>​    3.码率的降低将直接带来广泛的应用，如实时高清视频直播。2K、4K超清视频。</p>
+<p>•</p>
+<p>•问题</p>
+<p>   1.编码带来的直接问题就是解码。而高压缩率下的编码带来的就是对硬件解码性能的挑战，可能引起硬件负载一直处于高位运行状态。手持设备最直接的感官就是发热。</p>
+<p>   2.播放器所面临的问题就是对众多不同编码格式的视频进行解码。</p>
+<h5 id="最常用的编码标准H-264"><a href="#最常用的编码标准H-264" class="headerlink" title="最常用的编码标准H.264"></a>最常用的编码标准H.264</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">H.264 == MPEG-4 - AVC</span><br><span class="line">HEVC == H.265 [H.264基础上 加入了更多的算法 == 压缩的更小]</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/encode_h264.png" alt="image-20210606220153237"></p>
+<h5 id="H-264分层结构（VCL与NAL）"><a href="#H-264分层结构（VCL与NAL）" class="headerlink" title="H.264分层结构（VCL与NAL）"></a>H.264分层结构（VCL与NAL）</h5><p>VCL</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VCL(Video Coding Layer，视频编码层):负责高效的视频内容表示， VCL数据即编码处理的输出，它表示被压缩编码后的视频数据序列。</span><br></pre></td></tr></table></figure>
+
+<p>NAL</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAL(Network Abstraction Layer，网络提取层):负责以网络所要求的恰当的方式对数据进行打包和 传送，</span><br><span class="line">是传输层。不管在本地播放还是网络播放，都要通过这一层来传输。</span><br></pre></td></tr></table></figure>
+
+<p>VCL就是被压缩编码后原始数据，在VCL数据封装到NAL单元中之后，才可以用于传输或存储。</p>
+<p><img src="/images/vcl_nal.png" alt="image-20210606220350442"></p>
+<h5 id="NAL（片（宏块））"><a href="#NAL（片（宏块））" class="headerlink" title="NAL（片（宏块））"></a>NAL（片（宏块））</h5><p>一帧图片经过 H.264 编码器之后，NAL单元就是装载着这些片(被编码为一个或多个片 slice), 每片包 含整数个宏块(至少一个宏块，最多包含整个图像宏块)。</p>
+<p><img src="/images/nal_desc.png" alt="image-20210606220447005"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">一般H.264编码器的默认输出为:起始码+NALU(Nal单元)。起始码为:0x00000001或者0x000001。 一个NALU(PPS, I帧，B帧，P帧)</span><br><span class="line">为什么需求起始码，0x00000001或者0x000001 ? 答:因为每一个NALU都需要分隔，要分隔帧操作，就相对于写文章断句一样</span><br><span class="line">为什么 0x00000001或者0x000001。 两种起始码 ?</span><br><span class="line">答:0x00000001 起始码代表:一个NALU里面有很多片。</span><br><span class="line">0x000001 起始码代表: 一个NALU里面一个片可以搞定。 反正你必须明白，遇到0x00000001或者0x000001，就是NALU的起始码来了</span><br><span class="line">每个NALU 包含(起始码 与 1个字节的Nal Header 与 若干整数字节的负荷数据EBSP构成)</span><br></pre></td></tr></table></figure>
+
+<p>NAL类型查找表</p>
+<p><img src="/images/nal_tyle_list.png" alt="image-20210606220547391"></p>
+<h5 id="PTS与DTS"><a href="#PTS与DTS" class="headerlink" title="PTS与DTS"></a>PTS与DTS</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DTS表示解码时间戳，在什么时候解码这一帧的数据 ; PTS表示显示时间戳 ，在什么时候显示这一帧。 在没有B帧的情况下，DTS和PTS的输出顺序是一样的。</span><br><span class="line">因为B帧打乱了解码和显示的顺序(要解码B帧需要先解码后面的P帧)，所以一旦存在B帧，PTS和DTS就会不 同。</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/pts_dts.png" alt="image-20210606220700402"></p>
+<p>I帧 p b p b p b b p I帧 == GOP</p>
+<p>I帧之前分为一组</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%92%AD%E6%94%BE%E5%99%A8/" rel="tag"># 播放器</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/07/14/android_dalvik_vm_class_loader/" rel="prev" title="Android Dalvik虚拟机与类加载机制">
+                  <i class="fa fa-chevron-left"></i> Android Dalvik虚拟机与类加载机制
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/09/21/android_recycler_view_performance/" rel="next" title="Android RecyclerView性能优化与对比">
+                  Android RecyclerView性能优化与对比 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

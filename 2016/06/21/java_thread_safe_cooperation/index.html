@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="Java的内存模型就决定了其会有线程安全的问题，我们都知道java的内存模型中有主内存和线程的工作内存之分，主内存上存放的是线程共享的变量（实例字段，静态字段和构成数组的元素），线程的工作内存是线程私有的空间，存放的是线程私有的变量（方法参数与局部变量）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java-线程安全与协作">
+<meta property="og:url" content="http://example.com/2016/06/21/java_thread_safe_cooperation/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="Java的内存模型就决定了其会有线程安全的问题，我们都知道java的内存模型中有主内存和线程的工作内存之分，主内存上存放的是线程共享的变量（实例字段，静态字段和构成数组的元素），线程的工作内存是线程私有的空间，存放的是线程私有的变量（方法参数与局部变量）。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_synchronized01.jpg">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_synchronized02.jpg">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_synchronized03.jpg">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_jmm01.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_jmm02.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal01.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal02.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal03.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal04.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal05.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal06.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal07.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_threadlocal08.png">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_cooperation_lock01.jpg">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_cooperation_lock02.jpg">
+<meta property="og:image" content="http://example.com/images/java_thread_safe_cooperation_lock03.gif">
+<meta property="article:published_time" content="2016-06-21T12:18:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:43:34.499Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="线程安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/java_thread_safe_synchronized01.jpg">
+
+
+<link rel="canonical" href="http://example.com/2016/06/21/java_thread_safe_cooperation/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2016&#x2F;06&#x2F;21&#x2F;java_thread_safe_cooperation&#x2F;&quot;,&quot;path&quot;:&quot;2016&#x2F;06&#x2F;21&#x2F;java_thread_safe_cooperation&#x2F;&quot;,&quot;title&quot;:&quot;Java-线程安全与协作&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Java-线程安全与协作 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E9%94%81sychronized"><span class="nav-number">1.</span> <span class="nav-text">同步锁sychronized</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">synchronized的实现原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#volatile%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">2.</span> <span class="nav-text">volatile关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">volatile的实现原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ThreadLocal"><span class="nav-number">3.</span> <span class="nav-text">ThreadLocal</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E8%A7%A3%E6%9E%90"><span class="nav-number">3.1.</span> <span class="nav-text">实现解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E5%8F%91%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E5%88%86%E6%9E%90"><span class="nav-number">3.2.</span> <span class="nav-text">引发内存泄露分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8Esynchronized%E6%AF%94%E8%BE%83"><span class="nav-number">3.3.</span> <span class="nav-text">与synchronized比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E5%8D%8F%E4%BD%9C"><span class="nav-number">4.</span> <span class="nav-text">线程间的协作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#wait-notify-notifyAll"><span class="nav-number">4.1.</span> <span class="nav-text">wait()&#x2F;notify()&#x2F;notifyAll()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3%E5%90%84%E7%A7%8D%E9%94%81"><span class="nav-number">5.</span> <span class="nav-text">了解各种锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">5.1.</span> <span class="nav-text">锁的状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E5%90%91%E9%94%81"><span class="nav-number">5.2.</span> <span class="nav-text">偏向锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81"><span class="nav-number">5.3.</span> <span class="nav-text">轻量级锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81"><span class="nav-number">5.4.</span> <span class="nav-text">自旋锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">5.4.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">5.4.2.</span> <span class="nav-text">自旋锁的优缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81%E6%97%B6%E9%97%B4%E9%98%88%E5%80%BC"><span class="nav-number">5.4.3.</span> <span class="nav-text">自旋锁时间阈值</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E9%94%81%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">5.5.</span> <span class="nav-text">不同锁的比较</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2016/06/21/java_thread_safe_cooperation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java-线程安全与协作
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-06-21 20:18:00" itemprop="dateCreated datePublished" datetime="2016-06-21T20:18:00+08:00">2016-06-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Java的内存模型就决定了其会有线程安全的问题，我们都知道java的内存模型中有主内存和线程的工作内存之分，主内存上存放的是线程共享的变量（实例字段，静态字段和构成数组的元素），线程的工作内存是线程私有的空间，存放的是线程私有的变量（方法参数与局部变量）。</p>
+<span id="more"></span>
+
+<p>线程在工作的时候如果要操作主内存上的共享变量，为了获得更好的执行性能并不是直接去修改主内存而是会在线程私有的工作内存中创建一份变量的拷贝（缓存），在工作内存上对变量的拷贝修改之后再把修改的值刷回到主内存的变量中去，JVM提供了8种原子操作来完成这一过程：<code>lock</code>, <code>unlock</code>, <code>read</code>, <code>load</code>, <code>use</code>, <code>assign</code>, <code>store</code>, <code>write</code>。</p>
+<p>如果只有一个线程当然不会有什么问题，但是如果有多个线程同时在操作主内存中的变量，因为8种操作的非连续性和线程抢占cpu执行的机制就会带来冲突的问题，也就是多线程的安全问题。线程安全的定义就是：如果线程执行过程中不会产生共享资源的冲突就是线程安全的。</p>
+<h2 id="同步锁sychronized"><a href="#同步锁sychronized" class="headerlink" title="同步锁sychronized"></a>同步锁sychronized</h2><p>sychronized是Java中的关键字，是一种同步锁。它修饰的对象有一下几种：</p>
+<ol>
+<li><p>修饰一个代码块，被修饰的代码块称为同步语句块，其作用的范围是大括号{}括起来的代码，作用的对象是调用这个代码块的对象；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>&#123;</span><br><span class="line">		sychronized(<span class="keyword">this</span>)&#123;</span><br><span class="line">      	<span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span></span>&#123;</span><br><span class="line">  	sychronized(obj)&#123;</span><br><span class="line">      	<span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当两个并发线程(thread1和thread2)访问同一个对象中的synchronized代码块时，在同一时刻只能有一个线程得到执行，另一个线程受阻塞，必须等待当前线程执行完这个代码块以后才能执行该代码块。thread1和thread2是互斥的，因为在执行synchronized代码块时会锁定当前的对象，只有执行完该代码块才能释放该对象锁，下一个线程才能执行并锁定该对象。</p>
+<p><strong>注：</strong>如果thread1和thread2一个访问method，另一个访问method2，则不会去争同一把锁，因为两个方法中的同步代码快锁的并不是同一个对象。</p>
+</li>
+<li><p>修饰一个方法，被修饰的方法称为同步方法，其作用的范围是整个方法，作用的对象是调用这个方法的对象；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> sychronized <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>&#123;</span><br><span class="line">  	<span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>synchronized修饰一个方法很简单，就是在方法的前面加synchronized，synchronized修饰方法和修饰一个代码块类似，只是作用范围不一样，修饰代码块是大括号括起来的范围，而修饰方法范围是整个函数。</p>
+<p>虽然可以使用synchronized来定义方法，但synchronized并不属于方法定义的一部分，因此，synchronized关键字不能被继承。如果在父类中的某个方法使用了synchronized关键字，而在子类中覆盖了这个方法，在子类中的这个方法默认情况下并不是同步的，而必须显式地在子类的这个方法中加上synchronized关键字才可以。当然，还可以在子类方法中调用父类中相应的方法，这样虽然子类中的方法不是同步的，但子类调用了父类的同步方法，因此，子类的方法也就相当于同步了。</p>
+<p>注：</p>
+<p>1）接口定义方法时不能使用sychronized关键字</p>
+<p>2）构造方法不能使用synchronized关键字修饰，但是可以使用同步代码块</p>
+</li>
+<li><p>修饰一个静态的方法，其作用的范围是整个静态方法；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> sychronized <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>&#123;</span><br><span class="line">  	<span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们知道静态方法是属于类的而不属于对象的。同样的，synchronized修饰的静态方法锁定的是这个类在JVM中仅有的一份字节码对象。所以静态方法上的synchronized并不会和非静态方法上的synchronized锁互斥。</p>
+</li>
+<li><p>修饰一个类，其作用的范围是synchronized后面括号括起来的部分。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span></span>&#123;</span><br><span class="line">  	<span class="keyword">synchronized</span>(Test.class)&#123;</span><br><span class="line">      	<span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其和修饰静态方法时类似，锁住的都是.class对象。</p>
+</li>
+</ol>
+<h3 id="synchronized的实现原理"><a href="#synchronized的实现原理" class="headerlink" title="synchronized的实现原理"></a>synchronized的实现原理</h3><p>Synchronized在JVM里的实现都是基于进入和退出Monitor对象来实现方法同步和代码块同步，虽然具体实现细节不一样，但是都可以通过成对的MonitorEnter和MonitorExit指令来实现。</p>
+<p>对同步块，MonitorEnter指令插入在同步代码块的开始位置，而monitorExit指令则插入在方法结束处和异常处，JVM保证每个MonitorEnter必须有对应的MonitorExit。总的来说，当代码执行到该指令时，将会尝试获取该对象Monitor的所有权，即尝试获得该对象的锁：</p>
+<p>1、如果monitor的进入数为0，则该线程进入monitor，然后将进入数设置为1，该线程即为monitor的所有者。</p>
+<p>2、如果线程已经占有该monitor，只是重新进入，则进入monitor的进入数加1.</p>
+<p>3.如果其他线程已经占用了monitor，则该线程进入阻塞状态，直到monitor的进入数为0，再重新尝试获取monitor的所有权。</p>
+<p>对同步方法，从同步方法反编译的结果来看，方法的同步并没有通过指令monitorenter和monitorexit来实现，相对于普通方法，其常量池中多了ACC_SYNCHRONIZED标示符。</p>
+<p>JVM就是根据该标示符来实现方法的同步的：当方法被调用时，调用指令将会检查方法的 ACC_SYNCHRONIZED 访问标志是否被设置，如果设置了，执行线程将先获取monitor，获取成功之后才能执行方法体，方法执行完后再释放monitor。在方法执行期间，其他任何线程都无法再获得同一个monitor对象。</p>
+<p>synchronized使用的锁是存放在Java对象头里面，Java对象的对象头由 mark word 和 klass pointer 两部分组成：</p>
+<p>1）mark word存储了同步状态、标识、hashcode、GC状态等等。</p>
+<p>2）klass pointer存储对象的类型指针，该指针指向它的类元数据</p>
+<p>另外对于数组而言还会有一份记录数组长度的数据。</p>
+<p><img src="/images/java_thread_safe_synchronized01.jpg" alt="img"></p>
+<p>锁信息则是存在于对象的mark word中，MarkWord里默认数据是存储对象的HashCode等信息，</p>
+<p><img src="/images/java_thread_safe_synchronized02.jpg" alt="img"></p>
+<p>但是会随着对象的运行改变而发生变化，不同的锁状态对应着不同的记录存储方式</p>
+<p><img src="/images/java_thread_safe_synchronized03.jpg" alt="img"></p>
+<h2 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h2><p>先说下数据同步中的两个特性：</p>
+<p><strong>可见性：</strong>一个线程对共享变量的修改，更够及时的被其他线程看到</p>
+<p>可见性是指当多个线程访问同一个变量时，一个线程修改了这个变量的值，其他线程能够立即看得到修改的值。</p>
+<p>由于线程对变量的所有操作都必须在工作内存中进行，而不能直接读写主内存中的变量，那么对于共享变量V，它们首先是在自己的工作内存，之后再同步到主内存。可是并不会及时的刷到主存中，而是会有一定时间差。很明显，这个时候线程 A 对变量 V 的操作对于线程 B 而言就不具备可见性了 。</p>
+<p>要解决共享对象可见性这个问题，我们可以使用volatile关键字或者是加锁。</p>
+<p><strong>原子性：</strong>即不可再分了，不能分为多步操作。</p>
+<p>原子性：即一个操作或者多个操作 要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。</p>
+<p>我们都知道CPU资源的分配都是以线程为单位的,并且是分时调用,操作系统允许某个进程执行一小段时间，例如 50 毫秒，过了 50 毫秒操作系统就会重新选择一个进程来执行（我们称为“任务切换”），这个 50 毫秒称为“时间片”。而任务的切换大多数是在时间片段结束以后,</p>
+<p>那么线程切换为什么会带来bug呢？因为操作系统做任务切换，可以发生在任何一条CPU 指令执行完！注意，是 CPU 指令，CPU 指令，CPU 指令，而不是高级语言里的一条语句。比如count++，在java里就是一句话，但高级语言里一条语句往往需要多条 CPU 指令完成。其实count++至少包含了三个CPU指令！</p>
+<p>比如赋值或者return。比如”a = 1;”和 “return a;”这样的操作都具有原子性。类似”a += b”这样的操作不具有原子性，在某些JVM中”a += b”可能要经过这样三个步骤：<br>①　取出a和b<br>②　计算a+b<br>③　将计算结果写入内存</p>
+<p>而volatile就是为了保证可见性而设计的，先来简单了解一下Java内存模型。</p>
+<p>（1）Java所有变量都存储在主内存中<br>（2）每个线程都有自己独立的工作内存，里面保存该线程的使用到的变量副本（该副本就是主内存中该变量的一份拷贝）</p>
+<p><img src="/images/java_thread_safe_jmm01.png" alt="image-20210626195546859"></p>
+<p>（1）线程对共享变量的所有操作都必须在自己的工作内存中进行，不能直接在主内存中读写<br>（2）不同线程之间无法直接访问其他线程工作内存中的变量，线程间变量值的传递需要通过主内存来完成。</p>
+<p>线程1对共享变量的修改，要想被线程2及时看到，必须经过如下2个过程：<br>（1）把工作内存1中更新过的共享变量刷新到主内存中<br>（2）将主内存中最新的共享变量的值更新到工作内存2中</p>
+<p><img src="/images/java_thread_safe_jmm02.png" alt="image-20210626195755522"></p>
+<p><strong>(1)Synchronized：保证可见性和原子性</strong><br>  Synchronized能够实现原子性和可见性；在Java内存模型中，synchronized规定，线程在加锁时，先清空工作内存→在主内存中拷贝最新变量的副本到工作内存→执行完代码→将更改后的共享变量的值刷新到主内存中→释放互斥锁。<br><strong>(2)Volatile：保证可见性，但不保证操作的原子性</strong><br>  Volatile实现内存可见性是通过store和load指令完成的；也就是对volatile变量执行写操作时，会在写操作后加入一条store指令，即强迫线程将最新的值刷新到主内存中；而在读操作时，会加入一条load指令，即强迫从主内存中读入变量的值。但volatile不保证volatile变量的原子性。</p>
+<p><strong>(3)Synchronized和Volatile的比较</strong><br>  1）Synchronized保证内存可见性和操作的原子性<br>  2）Volatile只能保证内存可见性<br>  3）Volatile不需要加锁，比Synchronized更轻量级，并不会阻塞线程（volatile不会造成线程的阻塞；synchronized可能会造成线程的阻塞。）<br>  4）volatile标记的变量不会被编译器优化,而synchronized标记的变量可以被编译器优化（如编译器重排序的优化）.<br>  5）volatile是变量修饰符，仅能用于变量，而synchronized是一个方法或块的修饰符。<br>   volatile本质是在告诉JVM当前变量在寄存器中的值是不确定的，使用前，需要先从主存中读取，因此可以实现可见性。而对n=n+1,n++等操作时，volatile关键字将失效，不能起到像synchronized一样的线程同步（原子性）的效果。</p>
+<p>volatile比较适合用在一处写多处读的场景。</p>
+<h3 id="volatile的实现原理"><a href="#volatile的实现原理" class="headerlink" title="volatile的实现原理"></a>volatile的实现原理</h3><p>volatile关键字修饰的变量会存在一个“lock:”的前缀。</p>
+<p>Lock前缀，Lock不是一种内存屏障，但是它能完成类似内存屏障的功能。Lock会对CPU总线和高速缓存加锁，可以理解为CPU指令级的一种锁。</p>
+<p>同时该指令会将当前处理器缓存行的数据直接写会到系统内存中，且这个写回内存的操作会使在其他CPU里缓存了该地址的数据无效。</p>
+<h2 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h2><p>多线程访问同一个共享变量的时候容易出现并发问题，特别是多个线程对一个变量进行写入的时候，为了保证线程安全，一般使用者在访问共享变量的时候需要进行额外的同步措施才能保证线程安全性。<code>ThreadLocal</code>是除了加锁这种同步方式之外的一种保证一种规避多线程访问出现线程不安全的方法，当我们在创建一个变量后，如果每个线程对其进行访问的时候访问的都是线程自己的变量这样就不会存在线程不安全问题。</p>
+<p>　　<code>ThreadLocal</code>是JDK包提供的，它提供线程本地变量，如果创建一个<code>ThreadLocal</code>变量，那么访问这个变量的每个线程都会有这个变量的一个副本，在实际多线程操作的时候，操作的是自己本地内存中的变量，从而规避了线程安全问题。</p>
+<p>ThreadLocal类接口很简单，只有4个方法，我们先来了解一下：</p>
+<p>• <code>void set(Object value) </code></p>
+<p>设置当前线程的线程局部变量的值。</p>
+<p>• <code>public Object get() </code></p>
+<p>该方法返回当前线程所对应的线程局部变量。</p>
+<p>• <code>public void remove() </code></p>
+<p>将当前线程局部变量的值删除，目的是为了减少内存的占用，该方法是JDK 5.0新增的方法。需要指出的是，当线程结束后，对应该线程的局部变量将自动被垃圾回收，所以显式调用该方法清除线程的局部变量并不是必须的操作，但它可以加快内存回收的速度。</p>
+<p>• <code>protected Object initialValue() </code></p>
+<p>返回该线程局部变量的初始值，该方法是一个protected的方法，显然是为了让子类覆盖而设计的。这个方法是一个延迟调用方法，在线程第1次调用get()或set(Object)时才执行，并且仅执行1次。ThreadLocal中的缺省实现直接返回一个null。</p>
+<p>public final static ThreadLocal<String> RESOURCE = new ThreadLocal<String>();RESOURCE代表一个能够存放String类型的ThreadLocal对象。此时不论什么一个线程能够并发访问这个变量，对它进行写入、读取操作，都是线程安全的。</p>
+<h3 id="实现解析"><a href="#实现解析" class="headerlink" title="实现解析"></a>实现解析</h3><p><img src="/images/java_thread_safe_threadlocal01.png" alt="image-20210626200239926"></p>
+<p><img src="/images/java_thread_safe_threadlocal02.png" alt="img02"></p>
+<p><img src="/images/java_thread_safe_threadlocal03.png" alt="img03"></p>
+<p><img src="/images/java_thread_safe_threadlocal04.png" alt="img04"></p>
+<p><img src="/images/java_thread_safe_threadlocal05.png" alt="img05"></p>
+<p>上面先取到当前线程，然后调用getMap方法获取对应的ThreadLocalMap，ThreadLocalMap是ThreadLocal的静态内部类，然后Thread类中有一个这样类型成员，所以getMap是直接返回Thread的成员。</p>
+<p>看下ThreadLocal的内部类ThreadLocalMap源码：</p>
+<p><img src="/images/java_thread_safe_threadlocal06.png" alt="img06"></p>
+<p>可以看到有个Entry内部静态类，它继承了WeakReference，总之它记录了两个信息，一个是ThreadLocal&lt;?&gt;类型，一个是Object类型的值。getEntry方法则是获取某个ThreadLocal对应的值，set方法就是更新或赋值相应的ThreadLocal对应的值。</p>
+<p><img src="/images/java_thread_safe_threadlocal07.png" alt="img07"></p>
+<p><img src="/images/java_thread_safe_threadlocal08.png" alt="img"></p>
+<p>回顾我们的get方法，其实就是拿到<strong>每个线程独有的ThreadLocalMap</strong></p>
+<p>然后再用ThreadLocal的当前实例，拿到Map中的相应的Entry，然后就可以拿到相应的值返回出去。当然，如果Map为空，还会先进行map的创建，初始化等工作。</p>
+<h3 id="引发内存泄露分析"><a href="#引发内存泄露分析" class="headerlink" title="引发内存泄露分析"></a>引发内存泄露分析</h3><p>在前面的介绍中，我们知道ThreadLocal只是一个工具类，它为用户提供get、set、remove接口操作实际存放本地变量的threadLocals（调用线程的成员变量），也知道threadLocals是一个ThreadLocalMap类型的变量，下面我们来看看ThreadLocalMap这个类。在此之前，我们回忆一下Java中的四种引用类型。</p>
+<p><strong>①强引用</strong>：Java中默认的引用类型，一个对象如果具有强引用那么只要这种引用还存在就不会被GC。</p>
+<p><strong>②软引用</strong>：简言之，如果一个对象具有弱引用，在JVM发生OOM之前（即内存充足够使用），是不会GC这个对象的；只有到JVM内存不足的时候才会GC掉这个对象。软引用和一个引用队列联合使用，如果软引用所引用的对象被回收之后，该引用就会加入到与之关联的引用队列中</p>
+<p><strong>③弱引用</strong>:（这里讨论ThreadLocalMap中的Entry类的重点）：如果一个对象只具有弱引用，那么这个对象就会被垃圾回收器GC掉(被弱引用所引用的对象只能生存到下一次GC之前，当发生GC时候，无论当前内存是否足够，弱引用所引用的对象都会被回收掉)。弱引用也是和一个引用队列联合使用，如果弱引用的对象被垃圾回收期回收掉，JVM会将这个引用加入到与之关联的引用队列中。若引用的对象可以通过弱引用的get方法得到，当引用的对象呗回收掉之后，再调用get方法就会返回null</p>
+<p><strong>④虚引用</strong>:  虚引用是所有引用中最弱的一种引用，其存在就是为了将关联虚引用的对象在被GC掉之后收到一个通知。（不能通过get方法获得其指向的对象）</p>
+<p>ThreadLocalMap内部实际上是一个Entry数组，我们先看看Entry的这个内部类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 是继承自WeakReference的一个类，该类中实际存放的key是</span></span><br><span class="line"><span class="comment"> * 指向ThreadLocal的弱引用和与之对应的value值(该value值</span></span><br><span class="line"><span class="comment"> * 就是通过ThreadLocal的set方法传递过来的值)</span></span><br><span class="line"><span class="comment"> * 由于是弱引用，当get方法返回null的时候意味着坑能引用</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span> <span class="keyword">extends</span> <span class="title">WeakReference</span>&lt;<span class="title">ThreadLocal</span>&lt;?&gt;&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/** value就是和ThreadLocal绑定的 */</span></span><br><span class="line">    Object value;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//k：ThreadLocal的引用，被传递给WeakReference的构造方法</span></span><br><span class="line">    Entry(ThreadLocal&lt;?&gt; k, Object v) &#123;</span><br><span class="line">        <span class="keyword">super</span>(k);</span><br><span class="line">        value = v;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//WeakReference构造方法(public class WeakReference&lt;T&gt; extends Reference&lt;T&gt; )</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">WeakReference</span><span class="params">(T referent)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(referent); <span class="comment">//referent：ThreadLocal的引用</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Reference构造方法</span></span><br><span class="line">Reference(T referent) &#123;</span><br><span class="line">    <span class="keyword">this</span>(referent, <span class="keyword">null</span>);<span class="comment">//referent：ThreadLocal的引用</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Reference(T referent, ReferenceQueue&lt;? <span class="keyword">super</span> T&gt; queue) &#123;</span><br><span class="line">    <span class="keyword">this</span>.referent = referent;</span><br><span class="line">    <span class="keyword">this</span>.queue = (queue == <span class="keyword">null</span>) ? ReferenceQueue.NULL : queue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中，我们可以看出，当前ThreadLocal的引用k被传递给WeakReference的构造函数，所以ThreadLocalMap中的key为ThreadLocal的弱引用。当一个线程调用ThreadLocal的set方法设置变量的时候，当前线程的ThreadLocalMap就会存放一个记录，这个记录的key值为ThreadLocal的弱引用，value就是通过set设置的值。如果当前线程一直存在且没有调用该ThreadLocal的remove方法，如果这个时候别的地方还有对ThreadLocal的引用，那么当前线程中的ThreadLocalMap中会存在对ThreadLocal变量的引用和value对象的引用，是不会释放的，就会造成内存泄漏。</p>
+<p>　　考虑这个ThreadLocal变量没有其他强依赖，如果当前线程还存在，由于线程的ThreadLocalMap里面的key是弱引用，所以当前线程的ThreadLocalMap里面的ThreadLocal变量的弱引用在gc的时候就被回收，但是对应的value还是存在的这就可能造成内存泄漏(因为这个时候ThreadLocalMap会存在key为null但是value不为null的entry项)。</p>
+<p>　　总结：ThreadLocalMap中的Entry的key使用的是ThreadLocal对象的弱引用，在没有其他地方对ThreadLoca依赖，ThreadLocalMap中的ThreadLocal对象就会被回收掉，但是对应的value不会被回收，这个时候Map中就可能存在key为null但是value不为null的项，<strong>这需要实际的时候使用完毕及时调用remove方法避免内存泄漏。</strong></p>
+<h3 id="与synchronized比较"><a href="#与synchronized比较" class="headerlink" title="与synchronized比较"></a>与synchronized比较</h3><p><code>ThreadLocal</code>和<code>Synchonized</code>都用于解决多线程并发訪问。可是<code>ThreadLocal</code>与<code>synchronized</code>有本质的差别。<code>synchronized</code>是利用锁的机制，使变量或代码块在某一时该仅仅能被一个线程訪问。而<code>ThreadLocal</code>为每个线程都提供了变量的副本，使得每个线程在某一时间訪问到的并非同一个对象，这样就隔离了多个线程对数据的数据共享。</p>
+<h2 id="线程间的协作"><a href="#线程间的协作" class="headerlink" title="线程间的协作"></a>线程间的协作</h2><p>在前面我们将了很多关于同步的问题，然而在现实中，需要线程之间的协作。比如说最经典的生产者-消费者模型：当队列满时，生产者需要等待队列有空间才能继续往里面放入商品，而在等待的期间内，生产者必须释放对临界资源（即队列）的占用权。因为生产者如果不释放对临界资源的占用权，那么消费者就无法消费队列中的商品，就不会让队列有空间，那么生产者就会一直无限等待下去。因此，一般情况下，当队列满时，会让生产者交出对临界资源的占用权，并进入挂起状态。然后等待消费者消费了商品，然后消费者通知生产者队列有空间了。同样地，当队列空时，消费者也必须等待，等待生产者通知它队列中有商品了。这种互相通信的过程就是线程间的协作。</p>
+<h3 id="wait-notify-notifyAll"><a href="#wait-notify-notifyAll" class="headerlink" title="wait()/notify()/notifyAll()"></a>wait()/notify()/notifyAll()</h3><p>这三个方法均为Object的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Wakes up a single thread that is waiting on this object&#x27;s</span></span><br><span class="line"><span class="comment"> * monitor. If any threads are waiting on this object, one of them</span></span><br><span class="line"><span class="comment"> * is chosen to be awakened. The choice is arbitrary and occurs at</span></span><br><span class="line"><span class="comment"> * the discretion of the implementation. A thread waits on an object&#x27;s</span></span><br><span class="line"><span class="comment"> * monitor by calling one of the wait methods</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">notify</span><span class="params">()</span></span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Wakes up all threads that are waiting on this object&#x27;s monitor. A</span></span><br><span class="line"><span class="comment"> * thread waits on an object&#x27;s monitor by calling one of the</span></span><br><span class="line"><span class="comment"> * wait methods.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">notifyAll</span><span class="params">()</span></span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Causes the current thread to wait until either another thread invokes the</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@link</span> java.lang.Object#notify()&#125; method or the</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@link</span> java.lang.Object#notifyAll()&#125; method for this object, or a</span></span><br><span class="line"><span class="comment"> * specified amount of time has elapsed.</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;</span></span><br><span class="line"><span class="comment"> * The current thread must own this object&#x27;s monitor.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">wait</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>从这三个方法的文字描述可以知道以下几点信息：</p>
+<p>　　1）<code>wait()</code>、<code>notify()</code>和<code>notifyAll()</code>方法是本地方法，并且为final方法，无法被重写。</p>
+<p>　　2）调用某个对象的<code>wait()</code>方法能让当前线程阻塞，并且当前线程必须拥有此对象的<code>monitor</code>（即锁）</p>
+<p>　　3）调用某个对象的<code>notify()</code>方法能够唤醒一个正在等待这个对象的<code>monitor</code>的线程，如果有多个线程都在等待这个对象的monitor，则只能唤醒其中一个线程；</p>
+<p>　　4）调用<code>notifyAll()</code>方法能够唤醒所有正在等待这个对象的<code>monitor</code>的线程；</p>
+<p>上面已经提到，如果调用某个对象的<code>wait()</code>方法，当前线程必须拥有这个对象的<code>monitor</code>（即锁），因此调用<code>wait()</code>方法必须在同步块或者同步方法中进行（synchronized块或者synchronized方法）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (mObj)&#123;</span><br><span class="line">        <span class="keyword">while</span> (!mReady)&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                mObj.wait();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException exception) &#123;</span><br><span class="line">                exception.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>　　调用某个对象的wait()方法，相当于让当前线程交出此对象的monitor（释放了锁），然后进入等待状态，等待后续再次获得此对象的锁（Thread类中的sleep方法使当前线程暂停执行一段时间，从而让其他线程有机会继续执行，但它并不释放对象锁）；</p>
+<p>　　notify()方法能够唤醒一个正在等待该对象的monitor的线程，当有多个线程都在等待该对象的monitor的话，则只能唤醒其中一个线程，具体唤醒哪个线程则不得而知。</p>
+<p>　　同样地，调用某个对象的notify()方法，当前线程也必须拥有这个对象的monitor，因此调用notify()方法必须在同步块或者同步方法中进行（synchronized块或者synchronized方法）。</p>
+<p>　　nofityAll()方法能够唤醒所有正在等待该对象的monitor的线程，这一点与notify()方法是不同的。</p>
+<p>　　这里要注意一点：notify()和notifyAll()方法只是唤醒等待该对象的monitor的线程，并不决定哪个线程能够获取到monitor。</p>
+<p>　　上面尤其要注意一点，一个线程被唤醒不代表立即获取了对象的monitor，只有等调用完notify()或者notifyAll()并退出synchronized块，释放对象锁后，其余线程才可获得锁执行。</p>
+<h2 id="了解各种锁"><a href="#了解各种锁" class="headerlink" title="了解各种锁"></a>了解各种锁</h2><h3 id="锁的状态"><a href="#锁的状态" class="headerlink" title="锁的状态"></a>锁的状态</h3><p>一共有四种状态，<strong>无锁状态，偏向锁状态，轻量级锁状态和重量级锁状态</strong>，它会随着竞争情况逐渐升级。锁可以升级但不能降级，目的是为了提高获得锁和释放锁的效率。</p>
+<h3 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h3><p>引入背景：大多数情况下锁不仅不存在多线程竞争，而且总是由同一线程多次获得，为了让线程获得锁的代价更低而引入了偏向锁，减少不必要的CAS操作。</p>
+<p>偏向锁，顾名思义，它会偏向于第一个访问锁的线程，如果在运行过程中，同步锁只有一个线程访问，不存在多线程争用的情况，则线程是不需要触发同步的，减少加锁／解锁的一些CAS操作（比如等待队列的一些CAS操作），这种情况下，就会给线程加一个偏向锁。 如果在运行过程中，遇到了其他线程抢占锁，则持有偏向锁的线程会被挂起，JVM会消除它身上的偏向锁，将锁恢复到标准的轻量级锁。它通过消除资源无竞争情况下的同步原语，进一步提高了程序的运行性能。</p>
+<p>偏向锁获取过程：</p>
+<p>步骤1、 访问Mark Word中偏向锁的标识是否设置成1，锁标志位是否为01，确认为可偏向状态。</p>
+<p>步骤2、 如果为可偏向状态，则测试线程ID是否指向当前线程，如果是，进入步骤5，否则进入步骤3。</p>
+<p>步骤3、 如果线程ID并未指向当前线程，则通过CAS操作竞争锁。如果竞争成功，则将Mark Word中线程ID设置为当前线程ID，然后执行5；如果竞争失败，执行4。</p>
+<p>步骤4、 如果CAS获取偏向锁失败，则表示有竞争。当到达全局安全点（safepoint）时获得偏向锁的线程被挂起，偏向锁升级为轻量级锁，然后被阻塞在安全点的线程继续往下执行同步代码。（撤销偏向锁的时候会导致stop the word）</p>
+<p>步骤5、 执行同步代码。</p>
+<p><img src="/images/java_thread_safe_cooperation_lock01.jpg" alt="img"></p>
+<p>偏向锁的释放：</p>
+<p>偏向锁的撤销在上述第四步骤中有提到。偏向锁只有遇到其他线程尝试竞争偏向锁时，持有偏向锁的线程才会释放偏向锁，线程不会主动去释放偏向锁。偏向锁的撤销，需要等待全局安全点（在这个时间点上没有字节码正在执行），它会首先暂停拥有偏向锁的线程，判断锁对象是否处于被锁定状态，撤销偏向锁后恢复到未锁定（标志位为“01”）或轻量级锁（标志位为“00”）的状态。</p>
+<p>偏向锁的适用场景</p>
+<p>始终只有一个线程在执行同步块，在它没有执行完释放锁之前，没有其它线程去执行同步块，在锁无竞争的情况下使用，一旦有了竞争就升级为轻量级锁，升级为轻量级锁的时候需要撤销偏向锁，撤销偏向锁的时候会导致stop the word操作； </p>
+<p>在有锁的竞争时，偏向锁会多做很多额外操作，尤其是撤销偏向所的时候会导致进入安全点，安全点会导致stw，导致性能下降，这种情况下应当禁用。</p>
+<p>jvm开启/关闭偏向锁</p>
+<p>开启偏向锁：-XX:+UseBiasedLocking -XX:BiasedLockingStartupDelay=0</p>
+<p>关闭偏向锁：-XX:-UseBiasedLocking</p>
+<h3 id="轻量级锁"><a href="#轻量级锁" class="headerlink" title="轻量级锁"></a>轻量级锁</h3><p>轻量级锁是由偏向锁升级来的，偏向锁运行在一个线程进入同步块的情况下，当第二个线程加入锁争用的时候，偏向锁就会升级为轻量级锁； </p>
+<p>轻量级锁的加锁过程：</p>
+<p>1、在代码进入同步块的时候，如果同步对象锁状态为无锁状态且不允许进行偏向（锁标志位为“01”状态，是否为偏向锁为“0”），虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的Mark Word的拷贝，官方称之为 Displaced Mark Word。</p>
+<p>2、拷贝对象头中的Mark Word复制到锁记录中。</p>
+<p>3、拷贝成功后，虚拟机将使用CAS操作尝试将对象的Mark Word更新为指向Lock Record的指针，并将Lock record里的owner指针指向object mark word。如果更新成功，则执行步骤4，否则执行步骤5。</p>
+<p>4、如果这个更新动作成功了，那么这个线程就拥有了该对象的锁，并且对象Mark Word的锁标志位设置为“00”，即表示此对象处于轻量级锁定状态</p>
+<p>5、如果这个更新操作失败了，虚拟机首先会检查对象的Mark Word是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行。否则说明多个线程竞争锁，那么它就会自旋等待锁，一定次数后仍未获得锁对象。重量级线程指针指向竞争线程，竞争线程也会阻塞，等待轻量级线程释放锁后唤醒他。锁标志的状态值变为“10”，Mark Word中存储的就是指向重量级锁（互斥量）的指针，后面等待锁的线程也要进入阻塞状态。</p>
+<h3 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h3><h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>自旋锁原理非常简单，如果持有锁的线程能在很短时间内释放锁资源，那么那些等待竞争锁的线程就不需要做内核态和用户态之间的切换进入阻塞挂起状态，它们只需要等一等（自旋），等持有锁的线程释放锁后即可立即获取锁，这样就避免用户线程和内核的切换的消耗。</p>
+<p>但是线程自旋是需要消耗CPU的，说白了就是让CPU在做无用功，线程不能一直占用CPU自旋做无用功，所以需要设定一个自旋等待的最大时间。</p>
+<p>如果持有锁的线程执行的时间超过自旋等待的最大时间扔没有释放锁，就会导致其它争用锁的线程在最大等待时间内还是获取不到锁，这时争用线程会停止自旋进入阻塞状态。</p>
+<h4 id="自旋锁的优缺点"><a href="#自旋锁的优缺点" class="headerlink" title="自旋锁的优缺点"></a>自旋锁的优缺点</h4><p>自旋锁尽可能的减少线程的阻塞，这对于锁的竞争不激烈，且占用锁时间非常短的代码块来说性能能大幅度的提升，因为自旋的消耗会小于线程阻塞挂起操作的消耗！</p>
+<p>但是如果锁的竞争激烈，或者持有锁的线程需要长时间占用锁执行同步块，这时候就不适合使用自旋锁了，因为自旋锁在获取锁前一直都是占用cpu做无用功，占着XX不XX，线程自旋的消耗大于线程阻塞挂起操作的消耗，其它需要cup的线程又不能获取到cpu，造成cpu的浪费。</p>
+<h4 id="自旋锁时间阈值"><a href="#自旋锁时间阈值" class="headerlink" title="自旋锁时间阈值"></a>自旋锁时间阈值</h4><p>自旋锁的目的是为了占着CPU的资源不释放，等到获取到锁立即进行处理。但是如何去选择自旋的执行时间呢？如果自旋执行时间太长，会有大量的线程处于自旋状态占用CPU资源，进而会影响整体系统的性能。因此自旋次数很重要</p>
+<p>JVM对于自旋次数的选择，jdk1.5默认为10次，在1.6引入了适应性自旋锁，适应性自旋锁意味着自旋的时间不在是固定的了，而是由前一次在同一个锁上的自旋时间以及锁的拥有者的状态来决定，基本认为一个线程上下文切换的时间是最佳的一个时间。</p>
+<p>JDK1.6中-XX:+UseSpinning开启自旋锁； JDK1.7后，去掉此参数，由jvm控制；</p>
+<p><img src="/images/java_thread_safe_cooperation_lock02.jpg" alt="img"></p>
+<h3 id="不同锁的比较"><a href="#不同锁的比较" class="headerlink" title="不同锁的比较"></a>不同锁的比较</h3><p><img src="/images/java_thread_safe_cooperation_lock03.gif" alt="这里写图片描述"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" rel="tag"># 线程安全</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/06/16/java_class_loader_parent_delegate_model/" rel="prev" title="Java 类加载-双亲委派机制">
+                  <i class="fa fa-chevron-left"></i> Java 类加载-双亲委派机制
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/06/24/java_cas/" rel="next" title="Java-CAS">
+                  Java-CAS <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

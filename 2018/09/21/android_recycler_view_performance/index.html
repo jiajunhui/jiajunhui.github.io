@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="RecyclerView的优化是面试中经常提及的知识点，细节有很多，但可以分为几大类。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android RecyclerView性能优化与对比">
+<meta property="og:url" content="http://example.com/2018/09/21/android_recycler_view_performance/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="RecyclerView的优化是面试中经常提及的知识点，细节有很多，但可以分为几大类。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance01.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance02.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance03.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance04.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance05.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance06.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance07.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance08.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance09.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance10.png">
+<meta property="og:image" content="http://example.com/images/android_recycler_view_performance11.png">
+<meta property="article:published_time" content="2018-09-21T14:36:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:34:38.533Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="RecyclerView">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_recycler_view_performance01.png">
+
+
+<link rel="canonical" href="http://example.com/2018/09/21/android_recycler_view_performance/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2018&#x2F;09&#x2F;21&#x2F;android_recycler_view_performance&#x2F;&quot;,&quot;path&quot;:&quot;2018&#x2F;09&#x2F;21&#x2F;android_recycler_view_performance&#x2F;&quot;,&quot;title&quot;:&quot;Android RecyclerView性能优化与对比&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android RecyclerView性能优化与对比 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RecyclerView%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">RecyclerView性能优化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%92%8C%E8%A7%86%E5%9B%BE%E5%8A%A0%E8%BD%BD%E5%88%86%E7%A6%BB"><span class="nav-number">1.1.</span> <span class="nav-text">数据处理和视图加载分离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BC%98%E5%8C%96"><span class="nav-number">1.2.</span> <span class="nav-text">数据优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%83%E5%B1%80%E4%BC%98%E5%8C%96"><span class="nav-number">1.3.</span> <span class="nav-text">布局优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E8%BF%87%E6%B8%A1%E7%BB%98%E5%88%B6"><span class="nav-number">1.3.1.</span> <span class="nav-text">减少过渡绘制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%8F%E5%B0%91-xml-%E6%96%87%E4%BB%B6-inflate-%E6%97%B6%E9%97%B4"><span class="nav-number">1.3.2.</span> <span class="nav-text">减少 xml 文件 inflate 时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%8F%E5%B0%91-View-%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">1.3.3.</span> <span class="nav-text">减少 View 对象的创建</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">1.4.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RecyclerView%E4%B8%8EListView-%E5%AF%B9%E6%AF%94%E6%B5%85%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">RecyclerView与ListView 对比浅析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6%E5%AF%B9%E6%AF%94"><span class="nav-number">2.1.</span> <span class="nav-text">缓存机制对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%82%E7%BA%A7%E4%B8%8D%E5%90%8C%EF%BC%9A"><span class="nav-number">2.1.1.</span> <span class="nav-text">层级不同：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E4%B8%8D%E5%90%8C"><span class="nav-number">2.1.2.</span> <span class="nav-text">缓存不同</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E5%88%B7%E6%96%B0"><span class="nav-number">2.2.</span> <span class="nav-text">局部刷新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/09/21/android_recycler_view_performance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android RecyclerView性能优化与对比
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-09-21 22:36:00" itemprop="dateCreated datePublished" datetime="2018-09-21T22:36:00+08:00">2018-09-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>RecyclerView的优化是面试中经常提及的知识点，细节有很多，但可以分为几大类。</p>
+<span id="more"></span>
+
+<h1 id="RecyclerView性能优化"><a href="#RecyclerView性能优化" class="headerlink" title="RecyclerView性能优化"></a>RecyclerView性能优化</h1><h2 id="数据处理和视图加载分离"><a href="#数据处理和视图加载分离" class="headerlink" title="数据处理和视图加载分离"></a>数据处理和视图加载分离</h2><p>我们知道，从远端拉取数据肯定是要放在异步的，在我们拉取下来数据之后可能就匆匆把数据丢给了 VH 处理，其实，数据的处理逻辑我们也应该放在异步处理，这样 Adapter 在 notify change 后，ViewHolder 就可以简单无压力地做数据与视图的绑定逻辑，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mTextView.setText(Html.fromHtml(data).toString());</span><br></pre></td></tr></table></figure>
+
+<p>这里的 Html.fromHtml(data) 方法可能就是比较耗时的，存在多个TextView 的话耗时会更为严重，这样便会引发掉帧、卡顿，而如果把这一步与网络异步线程放在一起，站在用户角度，最多就是网络刷新时间稍长一点。</p>
+<h2 id="数据优化"><a href="#数据优化" class="headerlink" title="数据优化"></a>数据优化</h2><p>分页拉取远端数据，对拉取下来的远端数据进行缓存，提升二次加载速度；对于新增或者删除数据通过 DiffUtil 进行局部刷新数据，而不是一味地全局刷新数据。</p>
+<h2 id="布局优化"><a href="#布局优化" class="headerlink" title="布局优化"></a>布局优化</h2><h3 id="减少过渡绘制"><a href="#减少过渡绘制" class="headerlink" title="减少过渡绘制"></a>减少过渡绘制</h3><p>减少布局层级，可以考虑使用自定义 View 来减少层级，或者更合理地设置布局来减少层级。总之，减少布局层级深度。</p>
+<h3 id="减少-xml-文件-inflate-时间"><a href="#减少-xml-文件-inflate-时间" class="headerlink" title="减少 xml 文件 inflate 时间"></a>减少 xml 文件 inflate 时间</h3><p>这里的 xml 文件不仅包括 layout 的 xml，还包括 drawable 的 xml，xml文件 inflate 出 ItemView 是通过耗时的 IO操作，尤其当 Item 的复用几率很低的情况下，随着 Type 的增多，这种 inflate 带来的损耗是相当大的，此时我可以用代码去生成布局，即 new View() 的方式，只要搞清楚 xml 中每个节点的属性对应的 API 即可。</p>
+<h3 id="减少-View-对象的创建"><a href="#减少-View-对象的创建" class="headerlink" title="减少 View 对象的创建"></a>减少 View 对象的创建</h3><p>一个稍微复杂的 Item 会包含大量的 View，而大量的 View 的创建也会消耗大量时间，所以要尽可能简化ItemView；设计 ItemType 时，对多ViewType 能够共用的部分尽量设计成自定义 View，减少 View 的构造和嵌套。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>其他并不代表不重要，而是我不能把他们进行分类哈，其中可能某些操作会对你的 RecyclerView 有很大的优化。</p>
+<p>升级 RecycleView 版本到 25.1.0 及以上使用 Prefetch 功能，可参考RecyclerView 数据预取。</p>
+<ul>
+<li><p>如果 Item 高度是固定的话，可以使用RecyclerView.setHasFixedSize(true); 来避免 requestLayout浪费资源；</p>
+</li>
+<li><p>设置 RecyclerView.addOnScrollListener(listener); 来对滑动过程中停止加载的操作。</p>
+</li>
+<li><p>如果不要求动画，可以通过 ((SimpleItemAnimator)rv.getItemAnimator()).setSupportsChangeAnimations(false);把默认动画关闭来提神效率。</p>
+</li>
+<li><p>对 TextView 使用 String.toUpperCase 来替代android:textAllCaps=”true”。</p>
+</li>
+<li><p>对 TextView 使用 StaticLayout 或者 DynamicLayout 的自定义View 来代替它。</p>
+</li>
+<li><p>通过重写 RecyclerView.onViewRecycled(holder) 来回收资源。</p>
+</li>
+<li><p>通过 RecycleView.setItemViewCacheSize(size); 来加大RecyclerView 的缓存，用空间换时间来提高滚动的流畅性。</p>
+</li>
+<li><p>如果多个 RecycledView 的 Adapter 是一样的，比如嵌套的RecyclerView 中存在一样的 Adapter，可以通过设置RecyclerView.setRecycledViewPool(pool); 来共用一个RecycledViewPool。</p>
+</li>
+<li><p>对 ItemView 设置监听器，不要对每个 Item 都调用addXxListener，应该大家公用一个 XxListener，根据 ID 来进行不同的操作，优化了对象的频繁创建带来的资源消耗。</p>
+</li>
+<li><p>通过 getExtraLayoutSpace 来增加 RecyclerView 预留的额外空间（显<br>示范围之外，应该额外缓存的空间），如下所示：</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> LinearLayoutManager(<span class="keyword">this</span>) &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">getExtraLayoutSpace</span><span class="params">(RecyclerView.State state)</span></span>&#123;</span><br><span class="line">    	<span class="keyword">return</span> size;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h1 id="RecyclerView与ListView-对比浅析"><a href="#RecyclerView与ListView-对比浅析" class="headerlink" title="RecyclerView与ListView 对比浅析"></a>RecyclerView与ListView 对比浅析</h1><p>ListView与RecyclerView缓存机制原理大致相似，如下图所示：</p>
+<p><img src="/images/android_recycler_view_performance01.png" alt="image-20221223152710518"></p>
+<p>滑动过程中，离屏的ItemView即被回收至缓存，入屏的ItemView则会优先从缓存中获取，只是ListView与RecyclerView的实现细节有差异.（这只是缓存使用的其中一个场景，还有如刷新等）</p>
+<h2 id="缓存机制对比"><a href="#缓存机制对比" class="headerlink" title="缓存机制对比"></a>缓存机制对比</h2><h3 id="层级不同："><a href="#层级不同：" class="headerlink" title="层级不同："></a>层级不同：</h3><p>RecyclerView比ListView多两级缓存，支持多个离ItemView缓存，支持开发者自定义缓存处理逻辑，支持所有RecyclerView共用同一个RecyclerViewPool(缓存池)。<br>具体来说：<br>ListView(两级缓存)：</p>
+<p><img src="/images/android_recycler_view_performance02.png" alt="image-20221223152935922"></p>
+<p>RecyclerView(四级缓存)：</p>
+<p><img src="/images/android_recycler_view_performance03.png" alt="image-20221223153010279"></p>
+<p>ListView和RecyclerView缓存机制基本一致：<br>1). mActiveViews和mAttachedScrap功能相似，意义在于快速重用屏幕上可见的列表项ItemView，而不需要重新createView和bindView；<br>2). mScrapView和mCachedViews + mReyclerViewPool功能相似，意义在于缓存离开屏幕的ItemView，目的是让即将进入屏幕的ItemView重用.<br>3). RecyclerView的优势在于<br>a.mCacheViews的使用，可以做到屏幕外的列表项ItemView进入屏幕内时也无须bindView快速重用；<br>b.mRecyclerPool可以供多个RecyclerView共同使用，在特定场景下，如viewpaper+多个列表页下有优势.客观来说，RecyclerView在特定场景下对ListView的缓存机制做了补强和完善。</p>
+<h3 id="缓存不同"><a href="#缓存不同" class="headerlink" title="缓存不同"></a>缓存不同</h3><p>1). RecyclerView缓存RecyclerView.ViewHolder，抽象可理解为：View + ViewHolder(避免每次createView时调用findViewById) + flag(标识状态)；<br>2). ListView缓存View。缓存不同，二者在缓存的使用上也略有差别，具体来说：<br>ListView获取缓存的流程：</p>
+<p><img src="/images/android_recycler_view_performance04.png" alt="image-20221223153337582"></p>
+<p>RecyclerView获取缓存的流程：</p>
+<p><img src="/images/android_recycler_view_performance05.png" alt="image-20221223153414820"></p>
+<p>1). RecyclerView中mCacheViews(屏幕外)获取缓存时，是通过匹配pos获取目标位置的缓存，这样做的好处是，当数据源数据不变的情况下，无须重新bindView：</p>
+<p><img src="/images/android_recycler_view_performance06.png" alt="image-20221223153515347"></p>
+<p>而同样是离屏缓存，ListView从mScrapViews根据pos获取相应的缓存，但是并没有直接使用，而是重新getView（即必定会重新bindView），相关代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//AbsListView源码：line2345</span></span><br><span class="line"><span class="comment">//通过匹配pos从mScrapView中获取缓存</span></span><br><span class="line"><span class="keyword">final</span> View scrapView = mRecycler.getScrapView(position);</span><br><span class="line"><span class="comment">//无论是否成功都直接调用getView,导致必定会调用createView</span></span><br><span class="line"><span class="keyword">final</span> View child = mAdapter.getView(position, scrapView,<span class="keyword">this</span>);</span><br><span class="line"><span class="keyword">if</span> (scrapView != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (child != scrapView) &#123;</span><br><span class="line">    	mRecycler.addScrapView(scrapView, position);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2). ListView中通过pos获取的是view，即pos–&gt;view；RecyclerView中通过pos获取的是viewholder，即pos –&gt; (view，viewHolder，flag)；<br>从流程图中可以看出，标志flag的作用是判断view是否需要重新bindView，这也是RecyclerView实现局部刷新的一个核心。</p>
+<h2 id="局部刷新"><a href="#局部刷新" class="headerlink" title="局部刷新"></a>局部刷新</h2><p>由上文可知，RecyclerView的缓存机制确实更加完善，但还不算质的变化，RecyclerView更大的亮点在于提供了局部刷新的接口，通过局部刷新，就能避免调用许多无用的bindView。</p>
+<p><img src="/images/android_recycler_view_performance07.png" alt="image-20221223153818589"></p>
+<p>(RecyclerView和ListView添加，移除Item效果对比)<br>结合RecyclerView的缓存机制，看看局部刷新是如何实现的：以RecyclerView中notifyItemRemoved(1)为例，最终会调用requestLayout()，使整个RecyclerView重新绘制，过程为：onMeasure()–&gt;onLayout()–&gt;onDraw()</p>
+<p>其中，onLayout()为重点，分为三步：<br>dispathLayoutStep1()：记录RecyclerView刷新前列表项ItemView的各种信息，如Top,Left,Bottom,Right，用于动画的相关计算；<br>dispathLayoutStep2()：真正测量布局大小，位置，核心函数为layoutChildren()；<br>dispathLayoutStep3()：计算布局前后各个ItemView的状态，如Remove，Add，Move，Update等，如有必要执行相应的动画.<br>其中，layoutChildren()流程图：</p>
+<p><img src="/images/android_recycler_view_performance08.png" alt="image-20221223153938716"></p>
+<p><img src="/images/android_recycler_view_performance09.png" alt="image-20221223154013675"></p>
+<p>当调用notifyItemRemoved时，会对屏幕内ItemView做预处理，修改ItemView相应的pos以及flag(流程图中红色部分)：</p>
+<p><img src="/images/android_recycler_view_performance10.png" alt="image-20221223154052503"></p>
+<p>当调用fill()中RecyclerView.getViewForPosition(pos)时，RecyclerView通过对pos和flag的预处理，使得bindview只调用一次.<br>需要指出，ListView和RecyclerView最大的区别在于数据源改变时的缓存的处理逻辑，ListView是”一锅端”，将所有的mActiveViews都移入了二级缓存mScrapViews，而RecyclerView则是更加灵活地对每个View修改标志位，区分是否重新bindView。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1、在一些场景下，如界面初始化，滑动等，ListView和RecyclerView都能很好地工作，两者并没有很大的差异：<br>于是便抛出了这样一个问题，微信Android客户端卡券模块，大部分UI都是以列表页的形式展示，实现方式为ListView，是否有必要将其替换成RecyclerView呢？</p>
+<p><img src="/images/android_recycler_view_performance11.png" alt="image-20221223154244016"></p>
+<p>答案是否定的，从性能上看，RecyclerView并没有带来显著的提升，不需要频繁更新，暂不支持用动画，意味着RecyclerView优势也不太明显，没有太大的吸引力，ListView已经能很好地满足业务需求。</p>
+<p>2、数据源频繁更新的场景，如弹幕等，RecyclerView的优势会非常明显；<br>进一步来讲，结论是：列表页展示界面，需要支持动画，或者频繁更新，局部刷新，建议使用RecyclerView，更加强大完善，易扩展；其它情况(如微信卡包列表页)两者都OK，但ListView在使用上会更加方便，快捷。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RecyclerView/" rel="tag"># RecyclerView</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/09/02/av_base_info/" rel="prev" title="音视频基础知识整理">
+                  <i class="fa fa-chevron-left"></i> 音视频基础知识整理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/10/04/android_bitmap_better_performace/" rel="next" title="Android性能优化-Bitmap内存优化">
+                  Android性能优化-Bitmap内存优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

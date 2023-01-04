@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="AMS提供的主要功能：  统一调度各个应用程序的Activity。  应用程序须要启动Activity–&gt;报告给AMS，决定是否能够启动–&gt;若是能够，通知应用程序运行指定Activity。数据结构 AMS必须知道各个应用程序运行的Activity。异步  内存管理。  Activity退出时不会当即被杀死，只有在内存紧张时才会自动被杀，这些操做由AMS管理。  进程管理。  AMS向外">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android AMS核心分析">
+<meta property="og:url" content="http://example.com/2019/08/11/android_ams/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="AMS提供的主要功能：  统一调度各个应用程序的Activity。  应用程序须要启动Activity–&gt;报告给AMS，决定是否能够启动–&gt;若是能够，通知应用程序运行指定Activity。数据结构 AMS必须知道各个应用程序运行的Activity。异步  内存管理。  Activity退出时不会当即被杀死，只有在内存紧张时才会自动被杀，这些操做由AMS管理。  进程管理。  AMS向外">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_ams_system_server_start.png">
+<meta property="og:image" content="http://example.com/images/android_ams_system_server_invoke.png">
+<meta property="og:image" content="http://example.com/images/android_ams_process_record.jpg">
+<meta property="og:image" content="http://example.com/images/android_ams_activity_record.jpg">
+<meta property="og:image" content="http://example.com/images/android_ams_task_record.jpg">
+<meta property="og:image" content="http://example.com/images/android_ams_activity_thread_class_relation.png">
+<meta property="og:image" content="http://example.com/images/android_ams_start_activity_01.jpg">
+<meta property="og:image" content="http://example.com/images/android_ams_start_activity_02.jpg">
+<meta property="og:image" content="http://example.com/images/android_ams_activity_time_schduce.png">
+<meta property="article:published_time" content="2019-08-11T12:11:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:33:35.222Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="系统机制">
+<meta property="article:tag" content="AMS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_ams_system_server_start.png">
+
+
+<link rel="canonical" href="http://example.com/2019/08/11/android_ams/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2019&#x2F;08&#x2F;11&#x2F;android_ams&#x2F;&quot;,&quot;path&quot;:&quot;2019&#x2F;08&#x2F;11&#x2F;android_ams&#x2F;&quot;,&quot;title&quot;:&quot;Android AMS核心分析&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android AMS核心分析 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AMS%E7%9A%84%E5%90%AF%E5%8A%A8"><span class="nav-number">1.</span> <span class="nav-text">AMS的启动</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SystemServer%E7%9A%84%E5%90%AF%E5%8A%A8"><span class="nav-number">1.1.</span> <span class="nav-text">SystemServer的启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SystemServer%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">SystemServer执行流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AMS%E9%87%8D%E8%A6%81%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">AMS重要数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E6%95%B0%E6%8D%AE%E7%B1%BBProcessRecord"><span class="nav-number">2.1.</span> <span class="nav-text">进程数据类ProcessRecord</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98Activity%E4%BF%A1%E6%81%AF%E6%95%B0%E6%8D%AE%E7%B1%BBActivityRecord"><span class="nav-number">2.2.</span> <span class="nav-text">保存Activity信息数据类ActivityRecord</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E6%A0%88%E4%BF%A1%E6%81%AF%E6%95%B0%E6%8D%AE%E7%B1%BBTaskRecord"><span class="nav-number">2.3.</span> <span class="nav-text">任务栈信息数据类TaskRecord</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Activity%E7%9A%84%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">Activity的调度机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ActivityThread%E7%B1%BB%E5%85%B3%E7%B3%BB"><span class="nav-number">3.1.</span> <span class="nav-text">ActivityThread类关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity%E7%9A%84launchMode"><span class="nav-number">3.2.</span> <span class="nav-text">Activity的launchMode</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AMS%E5%90%AF%E5%8A%A8Activity%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">AMS启动Activity流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">启动过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity%E5%90%AF%E5%8A%A8%E6%97%B6%E5%BA%8F%E5%9B%BE"><span class="nav-number">4.2.</span> <span class="nav-text">Activity启动时序图</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/08/11/android_ams/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android AMS核心分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-08-11 20:11:00" itemprop="dateCreated datePublished" datetime="2019-08-11T20:11:00+08:00">2019-08-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>AMS提供的主要功能：</p>
+<ul>
+<li>统一调度各个应用程序的Activity。</li>
+</ul>
+<p>应用程序须要启动Activity–&gt;报告给AMS，决定是否能够启动–&gt;若是能够，通知应用程序运行指定Activity。数据结构</p>
+<p>AMS必须知道各个应用程序运行的Activity。异步</p>
+<ul>
+<li>内存管理。</li>
+</ul>
+<p>Activity退出时不会当即被杀死，只有在内存紧张时才会自动被杀，这些操做由AMS管理。</p>
+<ul>
+<li>进程管理。</li>
+</ul>
+<p>AMS向外提供了查询系统正在运行的进程信息的API。</p>
+<span id="more"></span>
+
+<h1 id="AMS的启动"><a href="#AMS的启动" class="headerlink" title="AMS的启动"></a>AMS的启动</h1><p>AMS在SystemServer进程initAndLoop()函数中被启动而且初始化。首先看一下SystemServer的启动流程。</p>
+<h2 id="SystemServer的启动"><a href="#SystemServer的启动" class="headerlink" title="SystemServer的启动"></a>SystemServer的启动</h2><p><img src="/images/android_ams_system_server_start.png" alt="android_ams_system_server_start"></p>
+<h2 id="SystemServer执行流程"><a href="#SystemServer执行流程" class="headerlink" title="SystemServer执行流程"></a>SystemServer执行流程</h2><p><img src="/images/android_ams_system_server_invoke.png" alt="android_ams_system_server_invoke"></p>
+<ul>
+<li>AMS.main()函数，建立AMS实例，而且建立Android运行环境获得一个ActivityThread和一个Context。</li>
+<li>AMS.setSystemProcess()函数，注册AMS服务到ServiceManager中。而且为system_server进程建立ProcessRecord，将该进程归入管理中。</li>
+<li>AMS.installSystemProvider()函数，为system_server进程加载SettingsProvider。</li>
+<li>AMS.systemReady()函数，作系统启动完毕后的工做，呈现HomeActivity。</li>
+</ul>
+<h1 id="AMS重要数据结构"><a href="#AMS重要数据结构" class="headerlink" title="AMS重要数据结构"></a>AMS重要数据结构</h1><p>AMS定义了几个数据类用于Process、Activity、Task信息。</p>
+<h2 id="进程数据类ProcessRecord"><a href="#进程数据类ProcessRecord" class="headerlink" title="进程数据类ProcessRecord"></a>进程数据类ProcessRecord</h2><p>用于记录一个进程相关信息</p>
+<p><img src="/images/android_ams_process_record.jpg" alt="android_ams_process_record"></p>
+<h2 id="保存Activity信息数据类ActivityRecord"><a href="#保存Activity信息数据类ActivityRecord" class="headerlink" title="保存Activity信息数据类ActivityRecord"></a>保存Activity信息数据类ActivityRecord</h2><p>用于保存一个Activity的信息。</p>
+<p>在ActivityRecord内部提供Token类实现IApplicationToken.Stub能够实现IPC回调其方法。通常是在WMS内部对其IPC调用。</p>
+<p><img src="/images/android_ams_activity_record.jpg" alt="android_ams_activity_record"></p>
+<h2 id="任务栈信息数据类TaskRecord"><a href="#任务栈信息数据类TaskRecord" class="headerlink" title="任务栈信息数据类TaskRecord"></a>任务栈信息数据类TaskRecord</h2><p>记录Activity所属任务栈信息。</p>
+<p><img src="/images/android_ams_task_record.jpg" alt="android_ams_task_record"></p>
+<h1 id="Activity的调度机制"><a href="#Activity的调度机制" class="headerlink" title="Activity的调度机制"></a>Activity的调度机制</h1><p>Activity调度过程：</p>
+<p>应用进程启动或者中止Activity—&gt;报告给AMS，其内部维护全部应用进程启动或者中止Activity的记录—&gt;AMS更新内部记录，并通知客户端进程操做—&gt;客户端进程接收通知，执行操做</p>
+<p>启动Activity的各类方式：</p>
+<ul>
+<li>应用程序中调用startActivity()</li>
+<li>在Home程序中单击应用程序图标启动Activity</li>
+<li>按“back”中止当前Activity启动新Activity</li>
+<li>长按“home”显示当前任务列表选择一个启动</li>
+</ul>
+<h2 id="ActivityThread类关系"><a href="#ActivityThread类关系" class="headerlink" title="ActivityThread类关系"></a>ActivityThread类关系</h2><p><img src="/images/android_ams_activity_thread_class_relation.png" alt="android_ams_activity_thread_class_relation"></p>
+<p>AMS经过Binder跨进程通知ActivityThread启动、中止指定Activity。</p>
+<p>ActivityThread做为Binder服务端实现指定接口由AMS远程调用。</p>
+<p>ActivityThread能够看作是进程的Android运行环境。</p>
+<h2 id="Activity的launchMode"><a href="#Activity的launchMode" class="headerlink" title="Activity的launchMode"></a>Activity的launchMode</h2><ul>
+<li>standard：默认启动模式，无论有没有已存在的实例都生成新的实例。</li>
+<li>singleTop：若是栈顶存在对应的实例则重复利用不生产新的实例，不存在则新建实例。</li>
+<li>singleTask：若是栈内存在对于的实例则使此Activity实例之上的其余Activity实例都出栈，使此Activity实例成为栈顶对象显示。</li>
+<li>singleInstance：启用一个新栈放入新建Activity实例，而且该栈内只容许存在这一个Activity实例。</li>
+</ul>
+<p>Intent中涉及到的Activity启动方式常量：</p>
+<ul>
+<li>FLAG_ACTIVITY_NEW_TASK：将目标Activity放置到新的task中。</li>
+<li>FLAG_ACTIVITY_CLEAR_TASK：启动一个Activity时先清除和其有关联的task，并新建Activity实例将其放入新的task中。必须和上面变量一块儿使用</li>
+<li>FLAG_ACTIVITY_CLEAR_TOP：启动一个不处于栈顶的Activity时，清除排在它前面的Activity使其显示出来。</li>
+</ul>
+<h1 id="AMS启动Activity流程"><a href="#AMS启动Activity流程" class="headerlink" title="AMS启动Activity流程"></a>AMS启动Activity流程</h1><h2 id="启动过程"><a href="#启动过程" class="headerlink" title="启动过程"></a>启动过程</h2><p><img src="/images/android_ams_start_activity_01.jpg" alt="android_ams_start_activity_01"></p>
+<p>整个调用步骤过程以下：</p>
+<p>1.首先IPC调用AMS方法传入参数启动指定Activity</p>
+<p>2.在AMS中首先查询PKMS获取该ActivityInfo，新建ActivityRecord和根据lunchMod建立TaskRecord两个重要变量，而且将ActivityRecord添加到task栈顶做为准备启动的Activity。</p>
+<p>3.在正式启动Activity以前首先检查其进程是否启动，为启动时通知AMS启动对应进程。</p>
+<p>下图就是AMS建立Activity对应进程及启动Activity的过程：</p>
+<p><img src="/images/android_ams_start_activity_02.jpg" alt="android_ams_start_activity_02"></p>
+<p>整个调用步骤过程以下：</p>
+<p>1.首先就是zygote进程fork新进程，指定新进程执行须要启动的ActivityThread类。</p>
+<p>2.在ActivityThread的main()方法中：</p>
+<ul>
+<li>首先新建ActivityThread对象。</li>
+<li>接着回调AMS接口通知其应用进程已启动成功。</li>
+<li>最后开启主线程消息循环，处理消息。</li>
+</ul>
+<p>3.其中上步骤第二点在与AMS交互中IPC调用AMS的attachApplication()函数中：</p>
+<ul>
+<li>首先根据pid查找对应的ProcessRecord</li>
+<li>设置该应用退出时的回调接口</li>
+<li>修改ProcessRecord一些参数</li>
+<li>最后与应用进程交互，开始建立Application对象</li>
+</ul>
+<p>4.AMS与应用进程交互时会发出一个异步消息，该消息内部：</p>
+<ul>
+<li>配置运行时信息</li>
+<li>安装该Application对应的ContentProvider</li>
+<li>生成一个Application对象而且回调onCreate()函数</li>
+</ul>
+<p>5.AMS与应用进程交互完接着准备启动目标Activity，在ActivityStackSupervisor.attachApplicationLocked()函数中会首先获取须要启动的ActivityRecord并保存到对应的ProcessRecord，接着IPC调用应用进程启动Activity。</p>
+<p>6.在应用进程中也是异步消息处理</p>
+<ul>
+<li>首先反射实例化目标Activity对象，回调相应onStart()以前的生命周期函数</li>
+<li>接着回调onResume()函数而且添加一个Idler消息对象到队列中。该对象内部方法会调用到AMS中的相应方法处理所以次启动而被暂停的Activity的相关声明周期函数处理。</li>
+</ul>
+<p>7.同时在AMS中会将task添加到最近任务列表中，而且发送10s定时等待这个Activity处理结果。</p>
+<p>8.此时目标Activity已经被成功启动，接着会处理一些Pending组件，这些组件多是在系统启动未成功时发起的一些启动指令。</p>
+<p>最终一个Activity启动成功。</p>
+<h2 id="Activity启动时序图"><a href="#Activity启动时序图" class="headerlink" title="Activity启动时序图"></a>Activity启动时序图</h2><p><img src="/images/android_ams_activity_time_schduce.png" alt="android_ams_activity_time_schduce"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%B3%BB%E7%BB%9F%E6%9C%BA%E5%88%B6/" rel="tag"># 系统机制</a>
+              <a href="/tags/AMS/" rel="tag"># AMS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/07/08/android_package_performace/" rel="prev" title="Android性能优化-安装包优化">
+                  <i class="fa fa-chevron-left"></i> Android性能优化-安装包优化
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/08/26/android_layout_draw_performace/" rel="next" title="Android性能优化-布局与绘制优化">
+                  Android性能优化-布局与绘制优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

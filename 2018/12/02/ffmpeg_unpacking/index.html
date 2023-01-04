@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="FFmpeg的解封装大概可分为以下九个步骤：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FFmpeg之解封装">
+<meta property="og:url" content="http://example.com/2018/12/02/ffmpeg_unpacking/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="FFmpeg的解封装大概可分为以下九个步骤：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/ffmpeg_play_dev_project_api.jpg">
+<meta property="article:published_time" content="2018-12-02T11:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:51:56.458Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="播放器">
+<meta property="article:tag" content="NDK">
+<meta property="article:tag" content="FFmpeg">
+<meta property="article:tag" content="JNI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/ffmpeg_play_dev_project_api.jpg">
+
+
+<link rel="canonical" href="http://example.com/2018/12/02/ffmpeg_unpacking/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2018&#x2F;12&#x2F;02&#x2F;ffmpeg_unpacking&#x2F;&quot;,&quot;path&quot;:&quot;2018&#x2F;12&#x2F;02&#x2F;ffmpeg_unpacking&#x2F;&quot;,&quot;title&quot;:&quot;FFmpeg之解封装&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>FFmpeg之解封装 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E4%BB%A3%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">主要代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Java%E5%B1%82%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">Java层代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JNI%E9%83%A8%E5%88%86%E4%BB%A3%E7%A0%81"><span class="nav-number">1.2.</span> <span class="nav-text">JNI部分代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%8F%8A%E5%87%BD%E6%95%B0%E9%87%8A%E4%B9%89"><span class="nav-number">1.3.</span> <span class="nav-text">主要的结构体及函数释义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">1.3.1.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.2.</span> <span class="nav-text">函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FFmpeg-API%E8%B0%83%E7%94%A8%E9%83%A8%E5%88%86"><span class="nav-number">1.4.</span> <span class="nav-text">FFmpeg API调用部分</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/12/02/ffmpeg_unpacking/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FFmpeg之解封装
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-12-02 19:00:00" itemprop="dateCreated datePublished" datetime="2018-12-02T19:00:00+08:00">2018-12-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>FFmpeg的解封装大概可分为以下九个步骤：</p>
+<span id="more"></span>
+
+<ol>
+<li>打开媒体地址（文件路径、视频URL）</li>
+<li>查找媒体中的音视频流信息</li>
+<li>根据流信息流个数循环查找</li>
+<li>获取媒体流</li>
+<li>从流获取编解码参数</li>
+<li>根据参数获取编解码器</li>
+<li>创建编解码器上下文</li>
+<li>使用上面的参数初始化编解码器上下文</li>
+<li>打开解码器</li>
+<li>循环读取压缩数据AVPacket</li>
+</ol>
+<p>回忆下上篇文章的图</p>
+<p><img src="/images/ffmpeg_play_dev_project_api.jpg" alt="ffmpeg解封装解码流程API概况"></p>
+<h2 id="主要代码"><a href="#主要代码" class="headerlink" title="主要代码"></a>主要代码</h2><h3 id="Java层代码"><a href="#Java层代码" class="headerlink" title="Java层代码"></a>Java层代码</h3><p>Player的方法设计基本是按照MediaPlayer的API设计的</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JJHPlayer</span> <span class="title">implements</span> <span class="title">IJJHPlayer</span> &#123;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.<span class="built_in">loadLibrary</span>(<span class="string">&quot;native-lib&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">JJHPlayer</span><span class="params">(Context context)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mContext = context;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @<span class="function">Override</span></span><br><span class="line"><span class="function">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDataSource</span><span class="params">(String dataSource)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mDataSource = dataSource;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @<span class="function">Override</span></span><br><span class="line"><span class="function">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">prepare</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">nativePrepare</span>(mDataSource);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">onNativeCallErrorEvent</span><span class="params">(<span class="keyword">int</span> eventCode, <span class="keyword">int</span> extra, String message)</span></span>&#123;</span><br><span class="line">        mHandler.<span class="built_in">post</span>(<span class="keyword">new</span> <span class="built_in">Runnable</span>() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="built_in">run</span>() &#123;</span><br><span class="line">                <span class="keyword">if</span>(mOnErrorEventListener!=null)</span><br><span class="line">                    mOnErrorEventListener.<span class="built_in">onError</span>(eventCode, extra,  message);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">onNativeCallPrepared</span><span class="params">()</span></span>&#123;</span><br><span class="line">        mHandler.<span class="built_in">post</span>(<span class="keyword">new</span> <span class="built_in">Runnable</span>() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="built_in">run</span>() &#123;</span><br><span class="line">                <span class="keyword">if</span>(mOnPrepareListener!=null)</span><br><span class="line">                    mOnPrepareListener.<span class="built_in">onPrepared</span>(JJHPlayer.<span class="keyword">this</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">  	<span class="comment">//Native方法函数定义</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> native <span class="keyword">void</span> <span class="title">nativePrepare</span><span class="params">(String dataSource)</span></span>;</span><br><span class="line">  	<span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="JNI部分代码"><a href="#JNI部分代码" class="headerlink" title="JNI部分代码"></a>JNI部分代码</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span></span><br><span class="line"><span class="function">JNIEXPORT <span class="keyword">void</span> JNICALL</span></span><br><span class="line"><span class="function"><span class="title">Java_cn_jiajunhui_lib_jjhplayer_JJHPlayer_nativePrepare</span><span class="params">(JNIEnv* env, jobject thiz, jstring data_source)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *_data_source = env-&gt;<span class="built_in">GetStringUTFChars</span>(data_source, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">auto</span> *helper = <span class="keyword">new</span> <span class="built_in">JNICallbackHelper</span>(vm, env, thiz);</span><br><span class="line">    player = <span class="keyword">new</span> <span class="built_in">JJHPlayer</span>(_data_source, helper);</span><br><span class="line">    player-&gt;<span class="built_in">setRenderCallback</span>(renderCallback);</span><br><span class="line">    player-&gt;<span class="built_in">prepare</span>();</span><br><span class="line">    env-&gt;<span class="built_in">ReleaseStringUTFChars</span>(data_source, _data_source);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="主要的结构体及函数释义"><a href="#主要的结构体及函数释义" class="headerlink" title="主要的结构体及函数释义"></a>主要的结构体及函数释义</h3><h4 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h4><p>AVFormatContext</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">1&gt; AVIOContext *pb：文件IO的上下文，自定义格式时使用</span><br><span class="line"></span><br><span class="line">2&gt; char filename[1024]：保存打开的文件名，经常用到，例如断开重连</span><br><span class="line"></span><br><span class="line">3&gt; unsigned int nb_streams：流数量</span><br><span class="line"></span><br><span class="line">4&gt; AVStream **streams：具体流内容，通常只有视频、音频，偶尔也会有字幕之类的</span><br><span class="line"></span><br><span class="line">5&gt; int64_t duration：总长度，以AV_TIME_BASE(通常为1000000)为单位，相当于使用微秒(us)为单位，注意这个值不一定能够获取到，如果获取不到可以通过帧数计算</span><br><span class="line"></span><br><span class="line">6&gt; int64_t bit_rate：比特率 1s中有多少bit</span><br></pre></td></tr></table></figure>
+
+<p>AVStream</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1&gt; AVCodecContext *codec：解码器，该参数已经过时</span><br><span class="line"></span><br><span class="line">2&gt; AVRational time_base：时间基数，分数，通常分子=&gt;1，分母=&gt;9000</span><br><span class="line"></span><br><span class="line">3&gt; int64_t duration：时长，duration * (time_base.num / time_base.den) 需要考虑除零</span><br><span class="line"></span><br><span class="line">4&gt; AVRational avg_frame_rate：帧率，对于视频来说一帧数据就是一张图片，对于音频来说就是一定量的样本数，具体一帧数据存多少样本数由codecpar-&gt;frame_size决定</span><br><span class="line"></span><br><span class="line">5&gt; AVCodecParameters *codecpar：音视频参数，主要用于替代codec</span><br></pre></td></tr></table></figure>
+
+<p>AVCodecParameters</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">1&gt; enum AVMediaType codec_type：编码类型，音频/视频</span><br><span class="line"></span><br><span class="line">2&gt; enum AVCodecID codec_id：编码格式，H264格式等</span><br><span class="line"></span><br><span class="line">3&gt; uint32_t codec_tag：用四个字节表示编码器，通常用不到</span><br><span class="line"></span><br><span class="line">4&gt; int format：视频像素格式/音频采样格式</span><br><span class="line"></span><br><span class="line">5&gt; int width, int height：视频宽高，仅视频有；不一定有，如果没有可以使用解码后的frame中的宽高</span><br><span class="line"></span><br><span class="line">6&gt; uint64_t channel_layout，int channels，int sample_rate，int frame_size：声道，如三声道(数值与channels二进制十进制数相同)，声道数，样本率，样本大小(单通道样本数)，仅音频有</span><br></pre></td></tr></table></figure>
+
+<p>AVPacket</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">1&gt; AVBufferRef *buf：用于存储引用计数的一块空间，packet增加的时候引用计数+1，减少的时候引用计数-1</span><br><span class="line"></span><br><span class="line">2&gt; int64_t pts：显示时间</span><br><span class="line"></span><br><span class="line">3&gt; int64_t dts：解码时间</span><br><span class="line"></span><br><span class="line">4&gt; uint8_t *data, int size：由ffmpeg创建和删除(不同帧数据量不同)，保存帧数据</span><br><span class="line"></span><br><span class="line">注意：在没有B帧的情况下pts = dts</span><br><span class="line"></span><br><span class="line">AVPacket相关函数：av_packet_alloc(创建并初始化一个packet)、av_packet_clone(复制并增加一次引用计数)、av_packet_ref(手动加一次引用)、av_packet_unref(手动减一次引用)、av_packet_free(空间清理)、av_init_packet(为packet设置默认值)、av_packet_from_data(给定数据生成一个packet)、av_copy_packet(废弃的函数，注意不要再使用)</span><br></pre></td></tr></table></figure>
+<h4 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h4><p>1&gt; av_register_all：注册所有的解封装和加封装格式，新版本的ffmpeg已经废弃该函数，可以不需要再调用</p>
+<p>2&gt; avformat_network_init：支持网络rtsp/rtmp/http数据流</p>
+<p>3&gt; avformat_open_input：打开音视频文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@param AVFormatContext **ps：需要注意ps不能为空，*ps可以为空，当*ps为空，会在内部创建存储空间，如果不传空可在外部先创建好空间但清理需要在外部处理</span><br><span class="line"></span><br><span class="line">@param const char *url：支持网络rtsp、http、本地路径</span><br><span class="line"></span><br><span class="line">@AVInputFormat *fmt：输入文件的格式，通常不需要指定，不指定的情况下由ffmpeg自己检测输入文件格式</span><br><span class="line"></span><br><span class="line">@AVDictionary **options：输入参数字典，具体有哪些参数可以参考源码ffmpeg-4.3.1\libavcodec\options_table.h里面的定义;可以使用方法av_dict_set设置参数，比如设置rtsp超时时间</span><br><span class="line"></span><br><span class="line">@return：0表示正常，非0返回错误码</span><br></pre></td></tr></table></figure>
+
+<p>4&gt; avformat_find_stream_info：获取流信息</p>
+<p>5&gt; av_dump_format：打印流详细信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@param AVFormatContext **ps</span><br><span class="line"></span><br><span class="line">@param int index：用于打印(没啥用)</span><br><span class="line"></span><br><span class="line">@param const char *url：用于打印(没啥用)</span><br><span class="line"></span><br><span class="line">@param int is_output：context是输入(0)或输出(1)</span><br></pre></td></tr></table></figure>
+<p>6&gt; av_find_best_stream：获取音视频流信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@param AVFormatContext **ps</span><br><span class="line"></span><br><span class="line">@param enum AVMediaType type</span><br><span class="line"></span><br><span class="line">@param  int wanted_stream_nb：通常设为-1，自动选择</span><br><span class="line"></span><br><span class="line">@param  int ratedstream：相关流，通常用不到，设为-1</span><br><span class="line"></span><br><span class="line">@param   AVCodec **decoder_ret：解码时用到，通常也不设置</span><br><span class="line"></span><br><span class="line">@param   int flags：保留字段</span><br></pre></td></tr></table></figure>
+
+<p>7&gt; av_read_frame：读取一帧数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@param AVFormatContext **ps</span><br><span class="line"></span><br><span class="line">@param AVPacket *pkt：不能传null，需要预分配空间作为输出参数</span><br></pre></td></tr></table></figure>
+
+<p>8&gt; av_seek_frame：移动到索引的frame</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@param AVFormatContext **ps</span><br><span class="line"></span><br><span class="line">@param stream_index：索引，-1表示default，通常使用视频来做seek，使用音频seek有可能移到视频某个非关键帧的位置</span><br><span class="line"></span><br><span class="line">@int64_t timestamp：移动到位置的时间戳</span><br><span class="line"></span><br><span class="line">@int flags：标志位 AV_SEEKFLAG_BACKWARD[1]：往后找  AV_SEEKFLAG_FRAME[8]：只跳到关键帧</span><br></pre></td></tr></table></figure>
+
+<p>9&gt; avformat_close_input：关闭打开的音视频文件</p>
+<p>10&gt; av_strerror：失败时存放错误信息</p>
+<h3 id="FFmpeg-API调用部分"><a href="#FFmpeg-API调用部分" class="headerlink" title="FFmpeg API调用部分"></a>FFmpeg API调用部分</h3><p>根据 url ，获取它的信息头，用这些信息来初始化解封装器及输入流。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第一步：打开媒体地址</span></span><br><span class="line">formatContext = <span class="built_in">avformat_alloc_context</span>();</span><br><span class="line"></span><br><span class="line">AVDictionary *dictionary = <span class="literal">nullptr</span>;</span><br><span class="line"><span class="built_in">av_dict_set</span>(&amp;dictionary, <span class="string">&quot;timeout&quot;</span>, <span class="string">&quot;5000000&quot;</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 参数1，AVFormatContext *</span></span><br><span class="line"><span class="comment"> * 参数2，路径</span></span><br><span class="line"><span class="comment"> * 参数3，AVInputFormat *fmt  Mac、Windows 摄像头、麦克风， 目前安卓用不到</span></span><br><span class="line"><span class="comment"> * 参数4，各种设置：例如：Http 连接超时， 打开rtmp的超时  AVDictionary **options</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">int</span> res = <span class="built_in">avformat_open_input</span>(&amp;formatContext, data_source, <span class="literal">nullptr</span>, &amp;dictionary);</span><br><span class="line"></span><br><span class="line"><span class="built_in">av_dict_free</span>(&amp;dictionary);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(res)&#123;</span><br><span class="line">  <span class="built_in">callBackErrorEvent</span>(THREAD_CHILD, FFMPEG_CAN_NOT_OPEN_URL, <span class="number">0</span>, <span class="built_in">av_err2str</span>(res));</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;avformat_open_input...&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>读取一些媒体数据，通过读取的这些媒体数据，尝试分析流信息。尤其是对于没有信息头的媒体，例如MPEG等，这步就很重要了，是对第一步的补充。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第二步：查找媒体中的音视频流信息</span></span><br><span class="line">res = <span class="built_in">avformat_find_stream_info</span>(formatContext, <span class="literal">nullptr</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(res &lt; <span class="number">0</span>)&#123;</span><br><span class="line">  <span class="built_in">callBackErrorEvent</span>(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS, <span class="number">0</span>, <span class="built_in">av_err2str</span>(res));</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//转换为单位毫秒</span></span><br><span class="line"><span class="keyword">this</span>-&gt;duration = formatContext-&gt;duration / (AV_TIME_BASE/<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;avformat_find_stream_info : duration = %d &quot;</span>, duration);</span><br></pre></td></tr></table></figure>
+
+<p>一个媒体文件通常包含视频数据、音频数据、字幕信息等，有的地方将这些不同的数据类别称为轨道，在FFmpeg中称为流stream。根据解封装器中已经获取的流信息，打开合适的解码器。<br>有几个流，就要打开几个解码器。例如：有音频流，要找到对应的音频解码器；有视频流，要找到对应的视频解码器。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第三步： 根据流信息 流个数 用循环查找</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;formatContext-&gt;nb_streams;i++)&#123;</span><br><span class="line">    <span class="comment">//第四步： 获取媒体流</span></span><br><span class="line">    AVStream *stream = formatContext-&gt;streams[i];</span><br><span class="line">  </span><br><span class="line">    <span class="comment">//第五步: 从上面的流中 获取编解码参数 由于 后面的编码器 解码器都需要参数（宽高等等）</span></span><br><span class="line">    AVCodecParameters *parameters = stream-&gt;codecpar;</span><br><span class="line">    <span class="comment">//第六步: 根据上面的参数 获取编解码器</span></span><br><span class="line">    AVCodec *codec = <span class="built_in">avcodec_find_decoder</span>(parameters-&gt;codec_id);</span><br><span class="line">    <span class="keyword">if</span>(!codec)&#123;</span><br><span class="line">        <span class="built_in">callBackErrorEvent</span>(THREAD_CHILD, FFMPEG_FIND_DECODER_FAIL, <span class="number">0</span>, <span class="string">&quot;can&#x27;t find decoder!&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//第七步： 编解码器上下文</span></span><br><span class="line">    AVCodecContext *codecContext = <span class="built_in">avcodec_alloc_context3</span>(codec);</span><br><span class="line">    <span class="keyword">if</span>(!codecContext)&#123;</span><br><span class="line">        <span class="built_in">callBackErrorEvent</span>(THREAD_CHILD, FFMPEG_ALLOC_CODEC_CONTEXT_FAIL, <span class="number">0</span>, <span class="string">&quot;init AVCodecContext error!&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//第八步: 使用上面的参数初始化编解码器上下文</span></span><br><span class="line">    res = <span class="built_in">avcodec_parameters_to_context</span>(codecContext, parameters);</span><br><span class="line">    <span class="keyword">if</span>(res &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">callBackErrorEvent</span>(THREAD_CHILD, FFMPEG_CODEC_CONTEXT_PARAMETERS_FAIL, <span class="number">0</span>, <span class="built_in">av_err2str</span>(res));</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//第九步: 打开解码器</span></span><br><span class="line">    res = <span class="built_in">avcodec_open2</span>(codecContext, codec, <span class="literal">nullptr</span>);</span><br><span class="line">    <span class="keyword">if</span>(res)&#123;</span><br><span class="line">        <span class="built_in">callBackErrorEvent</span>(THREAD_CHILD, FFMPEG_OPEN_DECODER_FAIL, <span class="number">0</span>, <span class="built_in">av_err2str</span>(res));</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  	<span class="comment">//Audio部分</span></span><br><span class="line">    <span class="keyword">if</span>(parameters-&gt;codec_type == AVMediaType::AVMEDIA_TYPE_AUDIO)&#123;</span><br><span class="line">        audioChannel = <span class="keyword">new</span> <span class="built_in">AudioChannel</span>(i, codecContext, stream-&gt;time_base, jniCallbackHelper);</span><br><span class="line">    &#125;</span><br><span class="line">  	<span class="comment">//Video部分</span></span><br><span class="line">  	<span class="keyword">else</span> <span class="keyword">if</span>(parameters-&gt;codec_type == AVMediaType::AVMEDIA_TYPE_VIDEO)&#123;</span><br><span class="line">        <span class="comment">//虽然是视频类型，但是只是一帧封面</span></span><br><span class="line">        <span class="keyword">if</span>(stream-&gt;disposition &amp; AV_DISPOSITION_ATTACHED_PIC)&#123;</span><br><span class="line">          	<span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        AVRational fps_rational = stream-&gt;avg_frame_rate;</span><br><span class="line">        <span class="keyword">double</span> fps = <span class="built_in">av_q2d</span>(fps_rational);</span><br><span class="line">        videoChannel = <span class="keyword">new</span> <span class="built_in">VideoChannel</span>(i, codecContext, stream-&gt;time_base, fps, jniCallbackHelper);</span><br><span class="line">      	videoChannel-&gt;<span class="built_in">setRenderCallback</span>(renderCallback);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!audioChannel &amp;&amp; !videoChannel)&#123;</span><br><span class="line">    <span class="built_in">callBackErrorEvent</span>(THREAD_CHILD, FFMPEG_NO_MEDIA, <span class="number">0</span>, <span class="string">&quot;no audio or video!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;prepared finish...&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(jniCallbackHelper)&#123;</span><br><span class="line">  	jniCallbackHelper-&gt;<span class="built_in">onPrepared</span>(THREAD_CHILD);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>把 视频 音频 的压缩包(AVPacket *) 循环获取出来 加入到队列里面去</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> JJHPlayer::_start() &#123;</span><br><span class="line">    AVPacket *packet = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="keyword">while</span> (isPlaying)&#123;</span><br><span class="line">        packet = <span class="built_in">av_packet_alloc</span>();</span><br><span class="line">        <span class="keyword">int</span> res = <span class="built_in">av_read_frame</span>(formatContext, packet);</span><br><span class="line">        <span class="keyword">if</span>(!res)&#123;</span><br><span class="line">            <span class="keyword">if</span>(videoChannel &amp;&amp; videoChannel-&gt;stream_index == packet-&gt;stream_index)&#123;</span><br><span class="line">                videoChannel-&gt;packets.<span class="built_in">insert</span>(packet);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(audioChannel &amp;&amp; audioChannel-&gt;stream_index == packet-&gt;stream_index)&#123;</span><br><span class="line">                audioChannel-&gt;packets.<span class="built_in">insert</span>(packet);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(res == AVERROR_EOF)&#123; <span class="comment">//   end of file == 读到文件末尾了 == AVERROR_EOF</span></span><br><span class="line">            <span class="comment">// 表示读完了，要考虑释放播放完成，表示读完了 并不代表播放完毕</span></span><br><span class="line">            <span class="keyword">if</span> (videoChannel-&gt;packets.<span class="built_in">empty</span>() &amp;&amp; audioChannel-&gt;packets.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">                <span class="keyword">break</span>; <span class="comment">// 队列的数据被音频 视频 全部播放完毕了，我在退出</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">break</span>;<span class="comment">//出现错误，结束当前循环</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    BaseChannel::<span class="built_in">releaseAVPacket</span>(&amp;packet);</span><br><span class="line">    <span class="built_in">stop</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>源码地址：<a target="_blank" rel="noopener" href="https://github.com/jiajunhui/ffmpeg-jjhplayer">https://github.com/jiajunhui/ffmpeg-jjhplayer</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%92%AD%E6%94%BE%E5%99%A8/" rel="tag"># 播放器</a>
+              <a href="/tags/NDK/" rel="tag"># NDK</a>
+              <a href="/tags/FFmpeg/" rel="tag"># FFmpeg</a>
+              <a href="/tags/JNI/" rel="tag"># JNI</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/11/24/ffmpeg_play_dev/" rel="prev" title="FFmpeg之Android播放器开发概览">
+                  <i class="fa fa-chevron-left"></i> FFmpeg之Android播放器开发概览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/12/09/ffmpeg_video_play/" rel="next" title="FFmpeg之视频播放">
+                  FFmpeg之视频播放 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

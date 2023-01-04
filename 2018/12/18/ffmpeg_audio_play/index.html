@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="在之前篇中的解封装的最后，把音视频的压缩数据分别放入了视频和音频的队列中，上篇中展示了视频的播放流程，本篇展示音频的播放过程。 音频的播放主要是采用OpenSLES进行的。OpenSL ES 是无授权费、跨平台、针对嵌入式系统精心优化的硬件音频加速API。该库都允许使用C或C ++来实现高性能，低延迟的音频操作。 Android的OpenSL ES库同样位于NDK的platforms文件夹内。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FFmpeg之音频播放">
+<meta property="og:url" content="http://example.com/2018/12/18/ffmpeg_audio_play/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="在之前篇中的解封装的最后，把音视频的压缩数据分别放入了视频和音频的队列中，上篇中展示了视频的播放流程，本篇展示音频的播放过程。 音频的播放主要是采用OpenSLES进行的。OpenSL ES 是无授权费、跨平台、针对嵌入式系统精心优化的硬件音频加速API。该库都允许使用C或C ++来实现高性能，低延迟的音频操作。 Android的OpenSL ES库同样位于NDK的platforms文件夹内。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-12-18T13:09:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:51:29.788Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="播放器">
+<meta property="article:tag" content="NDK">
+<meta property="article:tag" content="FFmpeg">
+<meta property="article:tag" content="JNI">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2018/12/18/ffmpeg_audio_play/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2018&#x2F;12&#x2F;18&#x2F;ffmpeg_audio_play&#x2F;&quot;,&quot;path&quot;:&quot;2018&#x2F;12&#x2F;18&#x2F;ffmpeg_audio_play&#x2F;&quot;,&quot;title&quot;:&quot;FFmpeg之音频播放&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>FFmpeg之音频播放 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CMake%E4%B8%AD%E5%A2%9E%E5%8A%A0%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">1.1.</span> <span class="nav-text">CMake中增加的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E5%85%A5openSLES%E7%9A%84%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">引入openSLES的头文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">2.</span> <span class="nav-text">相关的结构体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E9%87%87%E6%A0%B7%E7%9B%B8%E5%85%B3%E7%9A%84%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">重采样相关的函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9F%B3%E9%A2%91%E7%9A%84%E8%A7%A3%E7%A0%81%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">音频的解码流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E4%B8%AA%E9%98%9F%E5%88%97"><span class="nav-number">4.1.</span> <span class="nav-text">两个队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E4%B8%AA%E7%BA%BF%E7%A8%8B"><span class="nav-number">4.2.</span> <span class="nav-text">两个线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E9%87%87%E6%A0%B7%E6%92%AD%E6%94%BE"><span class="nav-number">5.</span> <span class="nav-text">重采样播放</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E5%BC%95%E6%93%8E%E5%AF%B9%E8%B1%A1%E5%B9%B6%E8%8E%B7%E5%8F%96%E3%80%90%E5%BC%95%E6%93%8E%E6%8E%A5%E5%8F%A3%E3%80%91"><span class="nav-number">5.1.</span> <span class="nav-text">1.创建引擎对象并获取【引擎接口】</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%AE%BE%E7%BD%AE%E6%B7%B7%E9%9F%B3%E5%99%A8"><span class="nav-number">5.2.</span> <span class="nav-text">2.设置混音器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%88%9B%E5%BB%BA%E6%92%AD%E6%94%BE%E5%99%A8"><span class="nav-number">5.3.</span> <span class="nav-text">3.创建播放器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AE%BE%E7%BD%AE%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0"><span class="nav-number">5.4.</span> <span class="nav-text">4.设置回调函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%AE%BE%E7%BD%AE%E6%92%AD%E6%94%BE%E5%99%A8%E7%8A%B6%E6%80%81%E4%B8%BA%E6%92%AD%E6%94%BE%E7%8A%B6%E6%80%81"><span class="nav-number">5.5.</span> <span class="nav-text">5.设置播放器状态为播放状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%89%8B%E5%8A%A8%E6%BF%80%E6%B4%BB%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0"><span class="nav-number">5.6.</span> <span class="nav-text">6.手动激活回调函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E9%87%8D%E9%87%87%E6%A0%B7"><span class="nav-number">5.7.</span> <span class="nav-text">7.重采样</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/12/18/ffmpeg_audio_play/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FFmpeg之音频播放
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-12-18 21:09:00" itemprop="dateCreated datePublished" datetime="2018-12-18T21:09:00+08:00">2018-12-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在之前篇中的解封装的最后，把音视频的压缩数据分别放入了视频和音频的队列中，上篇中展示了视频的播放流程，本篇展示音频的播放过程。</p>
+<p>音频的播放主要是采用OpenSLES进行的。OpenSL ES 是无授权费、跨平台、针对嵌入式系统精心优化的硬件音频加速API。该库都允许使用C或C ++来实现高性能，低延迟的音频操作。 Android的OpenSL ES库同样位于NDK的platforms文件夹内。</p>
+<span id="more"></span>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="CMake中增加的配置"><a href="#CMake中增加的配置" class="headerlink" title="CMake中增加的配置"></a>CMake中增加的配置</h3><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">target_link_libraries</span>(</span><br><span class="line">		native-lib</span><br><span class="line">    ....</span><br><span class="line">    openSLES</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="引入openSLES的头文件"><a href="#引入openSLES的头文件" class="headerlink" title="引入openSLES的头文件"></a>引入openSLES的头文件</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;SLES/OpenSLES.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;SLES/OpenSLES_Android.h&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="相关的结构体"><a href="#相关的结构体" class="headerlink" title="相关的结构体"></a>相关的结构体</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//引擎</span></span><br><span class="line">SLObjectItf engineObject = <span class="number">0</span>;</span><br><span class="line"><span class="comment">//引擎接口</span></span><br><span class="line">SLEngineItf engineInterface = <span class="number">0</span>;</span><br><span class="line"><span class="comment">//混音器</span></span><br><span class="line">SLObjectItf outputMixObject = <span class="number">0</span>;</span><br><span class="line"><span class="comment">//播放器</span></span><br><span class="line">SLObjectItf bqPlayerObject = <span class="number">0</span>;</span><br><span class="line"><span class="comment">//播放器接口</span></span><br><span class="line">SLPlayItf bqPlayerPlay = <span class="number">0</span>;</span><br><span class="line"><span class="comment">//播放器队列接口</span></span><br><span class="line">SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="重采样相关的函数"><a href="#重采样相关的函数" class="headerlink" title="重采样相关的函数"></a>重采样相关的函数</h2><p>1&gt; swr_alloc：申请内存</p>
+<p>2&gt; swr_alloc_set_opts：设置参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">@param SwrContext *s：音频重采样上下文</span><br><span class="line"></span><br><span class="line">@param int64_t out_ch_layout：输出的声道样式</span><br><span class="line"></span><br><span class="line">@param AVSampleFormat out_sample_fmt：输出的采样格式</span><br><span class="line"></span><br><span class="line">@param int out_sample_rate：输出采样率</span><br><span class="line"></span><br><span class="line">@param int64_t in_ch_layout：输入的声道样式</span><br><span class="line"></span><br><span class="line">@param AVSampleFormat in_sample_fmt：输入的采样格式</span><br><span class="line"></span><br><span class="line">@param int in_sample_rate：输入的采样率</span><br><span class="line"></span><br><span class="line">@param int log_offset, void *log_ctx：日志参数</span><br></pre></td></tr></table></figure>
+
+<p>3&gt; swr_init：初始化</p>
+<p>4&gt; swr_convert：转换</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@param SwrContext *s：音频重采样上下文</span><br><span class="line"></span><br><span class="line">@param uint8_t **out, int out_count：输出的数据和单通道数据大小</span><br><span class="line"></span><br><span class="line">@param uint8_t **in, int in_count：输出的数据和单通道数据大小</span><br></pre></td></tr></table></figure>
+
+<p>5&gt; swr_free：释放</p>
+<h2 id="音频的解码流程"><a href="#音频的解码流程" class="headerlink" title="音频的解码流程"></a>音频的解码流程</h2><p>跟视频一样，同样是两个队列两个线程</p>
+<h3 id="两个队列"><a href="#两个队列" class="headerlink" title="两个队列"></a>两个队列</h3><ol>
+<li>存放压缩数据的队列 queue&lt;AVPacket *&gt;</li>
+<li>存放解码后原始数据的队列 queue&lt;AVFrame *&gt;</li>
+</ol>
+<h3 id="两个线程"><a href="#两个线程" class="headerlink" title="两个线程"></a>两个线程</h3><ol>
+<li>第一个线程是取出队列的压缩包 进行解码，解码后的原始包 丢到frame对别中去</li>
+<li>第二个线程是从frame队列中取出原始包进行播放</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AudioChannel::start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    isPlaying = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    packets.<span class="built_in">setWork</span>(<span class="number">1</span>);</span><br><span class="line">    frames.<span class="built_in">setWork</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//取出packets队列中的压缩包进行解码，解码后的原始包放到frames队列中（音频原始包 PCM）</span></span><br><span class="line">    <span class="built_in">pthread_create</span>(&amp;pid_audio_decode, <span class="literal">nullptr</span>, task_audio_decode, <span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//从frames队列中取出原始包 进行 重采样 播放 使用Open SLES</span></span><br><span class="line">    <span class="built_in">pthread_create</span>(&amp;pid_audio_play, <span class="literal">nullptr</span>, task_audio_play, <span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>音频：取出队列的压缩包 进行解码 解码后的原始包 再push队列中去 （音频：PCM数据）</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AudioChannel::audio_decode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    AVPacket *packet = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="keyword">while</span> (isPlaying)&#123;</span><br><span class="line">        <span class="keyword">int</span> res = packets.<span class="built_in">getQueueAndDel</span>(packet);</span><br><span class="line">        <span class="keyword">if</span>(!isPlaying)&#123;</span><br><span class="line">            <span class="built_in">releaseAVPacket</span>(&amp;packet);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(!res)&#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        res = <span class="built_in">avcodec_send_packet</span>(codecContext, packet);</span><br><span class="line">        <span class="keyword">if</span>(res)&#123;</span><br><span class="line">            <span class="built_in">LOGE</span>(<span class="string">&quot;audio channel decode AVPacket fail !!!&quot;</span>)</span><br><span class="line">            <span class="built_in">releaseAVPacket</span>(&amp;packet);</span><br><span class="line">            <span class="keyword">break</span>;<span class="comment">// avcodec_send_packet 出现了错误，结束循环</span></span><br><span class="line">        &#125;</span><br><span class="line">        AVFrame *frame = <span class="built_in">av_frame_alloc</span>();</span><br><span class="line">        res = <span class="built_in">avcodec_receive_frame</span>(codecContext, frame);</span><br><span class="line">        <span class="keyword">if</span>(res == <span class="built_in">AVERROR</span>(EAGAIN))&#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(res != <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="built_in">LOGE</span>(<span class="string">&quot;audio channel receive AVFrame fail !!!&quot;</span>)</span><br><span class="line">            <span class="built_in">releaseAVPacket</span>(&amp;packet);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(isPlaying)&#123;</span><br><span class="line">            <span class="comment">// 拿到了 原始包-- PCM数据</span></span><br><span class="line">            frames.<span class="built_in">insert</span>(frame);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="built_in">releaseAVFrame</span>(&amp;frame);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">releaseAVPacket</span>(&amp;packet);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">releaseAVPacket</span>(&amp;packet);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="重采样播放"><a href="#重采样播放" class="headerlink" title="重采样播放"></a>重采样播放</h2><h3 id="1-创建引擎对象并获取【引擎接口】"><a href="#1-创建引擎对象并获取【引擎接口】" class="headerlink" title="1.创建引擎对象并获取【引擎接口】"></a>1.创建引擎对象并获取【引擎接口】</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1.1 创建引擎对象：SLObjectItf engineObject</span></span><br><span class="line">result = <span class="built_in">slCreateEngine</span>(&amp;engineObject, <span class="number">0</span>, <span class="literal">nullptr</span>, <span class="number">0</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>);</span><br><span class="line"><span class="keyword">if</span>(SL_RESULT_SUCCESS != result)&#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;slCreateEngine error!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1.2 初始化引擎</span></span><br><span class="line">(*engineObject)-&gt;<span class="built_in">Realize</span>(engineObject, SL_BOOLEAN_FALSE);<span class="comment">// SL_BOOLEAN_FALSE:延时等待你创建成功</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1.3 获取引擎接口</span></span><br><span class="line">result = (*engineObject)-&gt;<span class="built_in">GetInterface</span>(engineObject, SL_IID_ENGINE, &amp;engineInterface);</span><br><span class="line"><span class="keyword">if</span> (SL_RESULT_SUCCESS != result) &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;engineObject Realize error&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 健壮判断</span></span><br><span class="line"><span class="keyword">if</span> (engineInterface) &#123;</span><br><span class="line">    <span class="built_in">LOGD</span>(<span class="string">&quot;engineInterface create success&quot;</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;engineInterface create error&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-设置混音器"><a href="#2-设置混音器" class="headerlink" title="2.设置混音器"></a>2.设置混音器</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 2.1 创建混音器</span></span><br><span class="line">result = (*engineInterface)-&gt;<span class="built_in">CreateOutputMix</span>(engineInterface, &amp;outputMixObject, <span class="number">0</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>); <span class="comment">// 环境特效，混响特效，.. 都不需要</span></span><br><span class="line"><span class="keyword">if</span> (SL_RESULT_SUCCESS != result) &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;CreateOutputMix failed&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2.2 初始化混音器</span></span><br><span class="line">result = (*outputMixObject)-&gt;<span class="built_in">Realize</span>(outputMixObject, SL_BOOLEAN_FALSE); <span class="comment">// SL_BOOLEAN_FALSE:延时等待你创建成功</span></span><br><span class="line"><span class="keyword">if</span> (SL_RESULT_SUCCESS != result) &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;(*outputMixObject)-&gt;Realize failed&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不启用混响可以不用获取混音器接口 【声音的效果】</span></span><br><span class="line"><span class="comment">// 获得混音器接口</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">result = (*outputMixObject)-&gt;GetInterface(outputMixObject, SL_IID_ENVIRONMENTALREVERB,</span></span><br><span class="line"><span class="comment">                                         &amp;outputMixEnvironmentalReverb);</span></span><br><span class="line"><span class="comment">if (SL_RESULT_SUCCESS == result) &#123;</span></span><br><span class="line"><span class="comment">// 设置混响 ： 默认。</span></span><br><span class="line"><span class="comment">SL_I3DL2_ENVIRONMENT_PRESET_ROOM: 室内</span></span><br><span class="line"><span class="comment">SL_I3DL2_ENVIRONMENT_PRESET_AUDITORIUM : 礼堂 等</span></span><br><span class="line"><span class="comment">const SLEnvironmentalReverbSettings settings = SL_I3DL2_ENVIRONMENT_PRESET_DEFAULT;</span></span><br><span class="line"><span class="comment">(*outputMixEnvironmentalReverb)-&gt;SetEnvironmentalReverbProperties(</span></span><br><span class="line"><span class="comment">       outputMixEnvironmentalReverb, &amp;settings);</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;outputMixObject Success&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-创建播放器"><a href="#3-创建播放器" class="headerlink" title="3.创建播放器"></a>3.创建播放器</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建buffer缓存类型的队列  2的队列大小</span></span><br><span class="line">SLDataLocator_AndroidSimpleBufferQueue loc_bufq = &#123;SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,</span><br><span class="line">                                                   <span class="number">10</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pcm数据格式 == PCM是不能直接播放，mp3可以直接播放(参数集)，人家不知道PCM的参数</span></span><br><span class="line"><span class="comment">//  SL_DATAFORMAT_PCM：数据格式为pcm格式</span></span><br><span class="line"><span class="comment">//  2：双声道</span></span><br><span class="line"><span class="comment">//  SL_SAMPLINGRATE_44_1：采样率为44100</span></span><br><span class="line"><span class="comment">//  SL_PCMSAMPLEFORMAT_FIXED_16：采样格式为16bit</span></span><br><span class="line"><span class="comment">// SL_PCMSAMPLEFORMAT_FIXED_16：数据大小为16bit</span></span><br><span class="line"><span class="comment">// SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT：左右声道（双声道）</span></span><br><span class="line"><span class="comment">// SL_BYTEORDER_LITTLEENDIAN：小端模式</span></span><br><span class="line">SLDataFormat_PCM format_pcm = &#123;SL_DATAFORMAT_PCM, <span class="comment">// PCM数据格式</span></span><br><span class="line">                               <span class="number">2</span>, <span class="comment">// 声道数</span></span><br><span class="line">                               SL_SAMPLINGRATE_44_1, <span class="comment">// 采样率（每秒44100个点）</span></span><br><span class="line">                               SL_PCMSAMPLEFORMAT_FIXED_16, <span class="comment">// 每秒采样样本 存放大小 16bit</span></span><br><span class="line">                               SL_PCMSAMPLEFORMAT_FIXED_16, <span class="comment">// 每个样本位数 16bit</span></span><br><span class="line">                               SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT, <span class="comment">// 前左声道  前右声道</span></span><br><span class="line">                               SL_BYTEORDER_LITTLEENDIAN&#125;; <span class="comment">// 字节序(小端) 例如：int类型四个字节（到底是 高位在前 还是 低位在前 的排序方式，一般我们都是小端）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 数据源 将上述配置信息放到这个数据源中</span></span><br><span class="line"><span class="comment">// audioSrc最终配置音频信息的成果，给后面代码使用</span></span><br><span class="line">SLDataSource audioSrc = &#123;&amp;loc_bufq, &amp;format_pcm&#125;;</span><br><span class="line"><span class="comment">// audioSrc 给后面代码用的</span></span><br><span class="line"><span class="comment">// 独立声卡：24bit  集成声卡16bit</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 3.2 配置音轨（输出）</span></span><br><span class="line"><span class="comment">// 设置混音器</span></span><br><span class="line">SLDataLocator_OutputMix loc_outmix = &#123;SL_DATALOCATOR_OUTPUTMIX, outputMixObject&#125;; <span class="comment">// SL_DATALOCATOR_OUTPUTMIX:输出混音器类型</span></span><br><span class="line">SLDataSink audioSnk = &#123;&amp;loc_outmix, <span class="literal">nullptr</span>&#125;; <span class="comment">// outmix最终混音器的成果，给后面代码使用</span></span><br><span class="line"><span class="comment">// 需要的接口 操作队列的接口</span></span><br><span class="line"><span class="keyword">const</span> SLInterfaceID ids[<span class="number">1</span>] = &#123;SL_IID_BUFFERQUEUE&#125;;</span><br><span class="line"><span class="keyword">const</span> SLboolean req[<span class="number">1</span>] = &#123;SL_BOOLEAN_TRUE&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3.3 创建播放器 SLObjectItf bqPlayerObject</span></span><br><span class="line">result = (*engineInterface)-&gt;<span class="built_in">CreateAudioPlayer</span>(engineInterface, <span class="comment">// 参数1：引擎接口</span></span><br><span class="line">                                               &amp;bqPlayerObject, <span class="comment">// 参数2：播放器</span></span><br><span class="line">                                               &amp;audioSrc, <span class="comment">// 参数3：音频配置信息</span></span><br><span class="line">                                               &amp;audioSnk, <span class="comment">// 参数4：混音器</span></span><br><span class="line"></span><br><span class="line">                                                <span class="comment">// 下面代码都是 打开队列的工作</span></span><br><span class="line">                                               <span class="number">1</span>, <span class="comment">// 参数5：开放的参数的个数</span></span><br><span class="line">                                               ids,  <span class="comment">// 参数6：代表我们需要 Buff</span></span><br><span class="line">                                               req <span class="comment">// 参数7：代表我们上面的Buff 需要开放出去</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (SL_RESULT_SUCCESS != result) &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;CreateAudioPlayer failed!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3.4 初始化播放器：SLObjectItf bqPlayerObject</span></span><br><span class="line">result = (*bqPlayerObject)-&gt;<span class="built_in">Realize</span>(bqPlayerObject, SL_BOOLEAN_FALSE);  <span class="comment">// SL_BOOLEAN_FALSE:延时等待你创建成功</span></span><br><span class="line"><span class="keyword">if</span> (SL_RESULT_SUCCESS != result) &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;init bqPlayerObject Realize failed!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;bqPlayerObject init success!&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3.5 获取播放器接口 【以后播放全部使用 播放器接口去干（核心）】</span></span><br><span class="line">result = (*bqPlayerObject)-&gt;<span class="built_in">GetInterface</span>(bqPlayerObject, SL_IID_PLAY, &amp;bqPlayerPlay); <span class="comment">// SL_IID_PLAY:播放接口 == iplayer</span></span><br><span class="line"><span class="keyword">if</span> (SL_RESULT_SUCCESS != result) &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;bqPlayerObject GetInterface SL_IID_PLAY failed!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;bqPlayerObject GetInterface Success&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-设置回调函数"><a href="#4-设置回调函数" class="headerlink" title="4.设置回调函数"></a>4.设置回调函数</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 4.1 获取播放器队列接口：SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue  // 播放需要的队列</span></span><br><span class="line">result = (*bqPlayerObject)-&gt;<span class="built_in">GetInterface</span>(bqPlayerObject, SL_IID_BUFFERQUEUE, &amp;bqPlayerBufferQueue);</span><br><span class="line"><span class="keyword">if</span> (result != SL_RESULT_SUCCESS) &#123;</span><br><span class="line">    <span class="built_in">LOGE</span>(<span class="string">&quot;bqPlayerBufferQueue GetInterface SL_IID_BUFFERQUEUE failed!&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4.2 设置回调 void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context)</span></span><br><span class="line">(*bqPlayerBufferQueue)-&gt;<span class="built_in">RegisterCallback</span>(bqPlayerBufferQueue,  <span class="comment">// 传入刚刚设置好的队列</span></span><br><span class="line">                                         bqPlayerCallback,  <span class="comment">// 回调函数</span></span><br><span class="line">                                         <span class="keyword">this</span>); <span class="comment">// 给回调函数的参数</span></span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;setting playCallback Success&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-设置播放器状态为播放状态"><a href="#5-设置播放器状态为播放状态" class="headerlink" title="5.设置播放器状态为播放状态"></a>5.设置播放器状态为播放状态</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(*bqPlayerPlay)-&gt;<span class="built_in">SetPlayState</span>(bqPlayerPlay, SL_PLAYSTATE_PLAYING);</span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;SetPlayState Success&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-手动激活回调函数"><a href="#6-手动激活回调函数" class="headerlink" title="6.手动激活回调函数"></a>6.手动激活回调函数</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">bqPlayerCallback</span>(bqPlayerBufferQueue, <span class="keyword">this</span>);</span><br><span class="line"><span class="built_in">LOGI</span>(<span class="string">&quot;active playCallback Success&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-重采样"><a href="#7-重采样" class="headerlink" title="7.重采样"></a>7.重采样</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 1.out_buffers给予数据</span></span><br><span class="line"><span class="comment"> * 2.out_buffers给予数据的大小计算工作</span></span><br><span class="line"><span class="comment"> * @return  大小还要计算，因为我们还要做重采样工作，重采样之后，大小不同了</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">AudioChannel::getPCM</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> pcm_data_size = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取PCM数据</span></span><br><span class="line">    <span class="comment">// PCM数据在哪里？答：队列 frames队列中  frame-&gt;data == PCM数据(待 重采样   32bit)</span></span><br><span class="line"></span><br><span class="line">    AVFrame *frame = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="keyword">while</span> (isPlaying) &#123;</span><br><span class="line">        <span class="keyword">int</span> ret = frames.<span class="built_in">getQueueAndDel</span>(frame);</span><br><span class="line">        <span class="keyword">if</span> (!isPlaying) &#123;</span><br><span class="line">            <span class="keyword">break</span>; <span class="comment">// 如果关闭了播放，跳出循环，releaseAVPacket(&amp;pkt);</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!ret) &#123; <span class="comment">// ret == 0</span></span><br><span class="line">            <span class="keyword">continue</span>; <span class="comment">// 哪怕是没有成功，也要继续（假设：你生产太慢(原始包加入队列)，我消费就等一下你）</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 开始重采样</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 来源：10个48000   ----&gt;  目标:44100  11个44100</span></span><br><span class="line">        <span class="comment">// 获取单通道的样本数 (计算目标样本数： ？ 10个48000 ---&gt;  48000/44100因为除不尽  11个44100)</span></span><br><span class="line">        <span class="keyword">int</span> dst_nb_samples = <span class="built_in">av_rescale_rnd</span>(<span class="built_in">swr_get_delay</span>(swr_ctx, frame-&gt;sample_rate) + frame-&gt;nb_samples, <span class="comment">// 获取下一个输入样本相对于下一个输出样本将经历的延迟</span></span><br><span class="line">                                            out_sample_rate, <span class="comment">// 输出采样率</span></span><br><span class="line">                                            frame-&gt;sample_rate, <span class="comment">// 输入采样率</span></span><br><span class="line">                                            AV_ROUND_UP); <span class="comment">// 先上取 取去11个才能容纳的上</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// pcm的处理逻辑</span></span><br><span class="line">        <span class="comment">// 音频播放器的数据格式是我们自己在下面定义的</span></span><br><span class="line">        <span class="comment">// 而原始数据（待播放的音频pcm数据）</span></span><br><span class="line">        <span class="comment">// 重采样工作</span></span><br><span class="line">        <span class="comment">// 返回的结果：每个通道输出的样本数(注意：是转换后的)    做一个简单的重采样实验(通道基本上都是:1024)</span></span><br><span class="line">        <span class="keyword">int</span> samples_per_channel = <span class="built_in">swr_convert</span>(swr_ctx,</span><br><span class="line">                <span class="comment">// 下面是输出区域</span></span><br><span class="line">                                              &amp;out_buffers,  <span class="comment">// 【成果的buff】  重采样后的</span></span><br><span class="line">                                              dst_nb_samples, <span class="comment">// 【成果的 单通道的样本数 无法与out_buffers对应，所以有下面的pcm_data_size计算】</span></span><br><span class="line"></span><br><span class="line">                <span class="comment">// 下面是输入区域</span></span><br><span class="line">                                              (<span class="keyword">const</span> <span class="keyword">uint8_t</span> **) frame-&gt;data, <span class="comment">// 队列的AVFrame * 那的  PCM数据 未重采样的</span></span><br><span class="line">                                              frame-&gt;nb_samples); <span class="comment">// 输入的样本数</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 由于out_buffers 和 dst_nb_samples 无法对应，所以需要重新计算</span></span><br><span class="line">        pcm_data_size = samples_per_channel * out_sample_size * out_channels; <span class="comment">// 941通道样本数  *  2样本格式字节数  *  2声道数  =3764</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 单通道样本数:1024  * 2声道  * 2(16bit)  =  4,096</span></span><br><span class="line"></span><br><span class="line">        audio_time = frame-&gt;best_effort_timestamp * <span class="built_in">av_q2d</span>(time_base);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">break</span>; <span class="comment">// 利用while循环 来写我们的逻辑</span></span><br><span class="line"></span><br><span class="line">    &#125; <span class="comment">// while end</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// FFmpeg录制 Mac 麦克风  输出 每一个音频包的size == 4096</span></span><br><span class="line">    <span class="comment">// 4096是单声道的样本数，  44100是每秒钟采样的数</span></span><br><span class="line">    <span class="comment">// 采样率 和 样本数的关系？</span></span><br><span class="line">    <span class="comment">// 答： 单通道样本数:1024  * 2声道  * 2(16bit)  =  4,096 ==  4096是单声道的样本数</span></span><br><span class="line">    <span class="comment">//     采样率 44100是每秒钟采样的次数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 样本数 = 采样率 * 声道数 * 位声</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 双声道的样本数？  答： （采样率 * 声道数 * 位声） * 2</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">releaseAVFrame</span>(&amp;frame);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> pcm_data_size;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>源码地址：<a target="_blank" rel="noopener" href="https://github.com/jiajunhui/ffmpeg-jjhplayer">https://github.com/jiajunhui/ffmpeg-jjhplayer</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%92%AD%E6%94%BE%E5%99%A8/" rel="tag"># 播放器</a>
+              <a href="/tags/NDK/" rel="tag"># NDK</a>
+              <a href="/tags/FFmpeg/" rel="tag"># FFmpeg</a>
+              <a href="/tags/JNI/" rel="tag"># JNI</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/12/09/ffmpeg_video_play/" rel="prev" title="FFmpeg之视频播放">
+                  <i class="fa fa-chevron-left"></i> FFmpeg之视频播放
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/12/27/algorithm_binary_tree_base/" rel="next" title="二叉树基础算法">
+                  二叉树基础算法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

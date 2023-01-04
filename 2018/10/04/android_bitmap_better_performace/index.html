@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="Android中的bitmap是比较占用内存的，bitmap的大小直接影响到了应用占用内存的大小。Bitmap内存优化属于性能优化中较为重要的点。如何更好的使用 bitmap,减少其对 App内存的使用，是我们开发中不可回避的问题。为了解决这个问题，就出现了Bitmap 的高效加载策略。其实核心思想很简单。假设通过InmageView 来显示图片，很多时候 ImageVIew并没有原始图片的尺寸那">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android性能优化-Bitmap内存优化">
+<meta property="og:url" content="http://example.com/2018/10/04/android_bitmap_better_performace/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="Android中的bitmap是比较占用内存的，bitmap的大小直接影响到了应用占用内存的大小。Bitmap内存优化属于性能优化中较为重要的点。如何更好的使用 bitmap,减少其对 App内存的使用，是我们开发中不可回避的问题。为了解决这个问题，就出现了Bitmap 的高效加载策略。其实核心思想很简单。假设通过InmageView 来显示图片，很多时候 ImageVIew并没有原始图片的尺寸那">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_bitmap_better_performance01.png">
+<meta property="og:image" content="http://example.com/images/android_bitmap_better_performance02.png">
+<meta property="og:image" content="http://example.com/images/android_bitmap_better_performance03.png">
+<meta property="og:image" content="http://example.com/images/android_bitmap_better_performance04.png">
+<meta property="og:image" content="http://example.com/images/android_bitmap_better_performance05.png">
+<meta property="og:image" content="http://example.com/images/android_bitmap_better_performance06.png">
+<meta property="og:image" content="http://example.com/images/android_bitmap_better_performance07.png">
+<meta property="article:published_time" content="2018-10-04T14:17:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:32:15.916Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="性能优化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_bitmap_better_performance01.png">
+
+
+<link rel="canonical" href="http://example.com/2018/10/04/android_bitmap_better_performace/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2018&#x2F;10&#x2F;04&#x2F;android_bitmap_better_performace&#x2F;&quot;,&quot;path&quot;:&quot;2018&#x2F;10&#x2F;04&#x2F;android_bitmap_better_performace&#x2F;&quot;,&quot;title&quot;:&quot;Android性能优化-Bitmap内存优化&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android性能优化-Bitmap内存优化 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E4%BA%86%E8%A7%A3"><span class="nav-number">1.</span> <span class="nav-text">基础了解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bitmap%E7%9A%84%E5%8A%A0%E8%BD%BD"><span class="nav-number">1.1.</span> <span class="nav-text">Bitmap的加载</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%94%B9%E5%8F%98Bitmap%E5%A4%A7%E5%B0%8F"><span class="nav-number">2.</span> <span class="nav-text">改变Bitmap大小</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87martix%E8%BF%9B%E8%A1%8C%E5%8E%8B%E7%BC%A9-%E6%94%B9%E5%8F%98Bitmap%E5%A4%A7%E5%B0%8F"><span class="nav-number">2.1.</span> <span class="nav-text">通过martix进行压缩(改变Bitmap大小)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%94%B9Bitmap-Config%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">更改Bitmap.Config格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87Bitmap-compress%E6%96%B9%E6%B3%95%E5%8E%8B%E7%BC%A9%EF%BC%8C%E8%B4%A8%E9%87%8F%E5%8E%8B%E7%BC%A9"><span class="nav-number">2.3.</span> <span class="nav-text">通过Bitmap#compress方法压缩，质量压缩</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/10/04/android_bitmap_better_performace/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android性能优化-Bitmap内存优化
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-10-04 22:17:00" itemprop="dateCreated datePublished" datetime="2018-10-04T22:17:00+08:00">2018-10-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Android中的bitmap是比较占用内存的，bitmap的大小直接影响到了应用占用内存的大小。Bitmap内存优化属于性能优化中较为重要的点。如何更好的使用 bitmap,减少其对 App内存的使用，是我们开发中不可回避的问题。<br>为了解决这个问题，就出现了Bitmap 的高效加载策略。其实核心思想很简单。假设通过InmageView 来显示图片，很多时候 ImageVIew并没有原始图片的尺寸那么大，这个时候把整个图片加载进来再设置ImageView,显示是没有必要的，因为ImageView根本没办法显示原始图片。这时候就可以按一定的采样率来将图片缩小后在加载进来，这样图片既能在ImageView显示出来，又能降低内存占用从而在一定程度上避免OOM，提高了Bitmap加载时的性能。</p>
+<span id="more"></span>
+
+<h1 id="基础了解"><a href="#基础了解" class="headerlink" title="基础了解"></a>基础了解</h1><p>我们先了解一下，Bitmap到底占用多大的内存。</p>
+<p>Bitmap作为位图，需要读入一张图片每一个像素点的数据，其主要占用内存的地方也正是这些像素数据。对于像素数据总大小，我们可以猜想为：像素总数量 x 每个像素的字节大小，而像素总数量在矩形屏幕的表现下，应该是：横向像素数量 x 纵向像素数量，结合得到：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bitmap内存大小 = bitmap宽度(px) * bitmap长度(px) * 一个像素点占用的字节数</span><br></pre></td></tr></table></figure>
+
+<p>单个像素的字节大小由Bitmap 的一个可配置参数 Config 来决定。</p>
+<p>Bitmap 中，存在一个 枚举类 Config,定义了Android 中支持的 Bitmap配置。</p>
+<p><img src="/images/android_bitmap_better_performance01.png" alt="image"></p>
+<p>而Bitmap默认是使用24位真彩色加载的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Image are loaded with the &#123;<span class="doctag">@link</span> Bitmap.Config#ARGB_8888&#125; config by default.</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="keyword">public</span> Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Bitmap的加载"><a href="#Bitmap的加载" class="headerlink" title="Bitmap的加载"></a>Bitmap的加载</h2><p><strong>加载Bitamp的方式</strong><br>bitmap在Android中指的是一张图片。通过BitmapFactory类提供的4类方法：</p>
+<p>decodeFile,decodeResouce,decodeStream和 decodeByteArray,分别从文件系统，资源，输入流和字节数组中加载出一个 Bitmap 对象，其中decodeFiled,decodeResource又间接调用了 decodeStream 方法，这4类 方法最终是在Android的底层实现的，对应着BitmapFactory类的几个native方法。</p>
+<p><strong>BitmapFactory.Options的参数</strong><br><em><strong>inSampleSize参数(采样率)</strong></em><br>上述4类方法都支持BitmapFactory.Options参数，而Bitmap的按一定采样率进行缩放就是通过 BitmapFactory.Options参数实现的，主要用到了 inSampleSize参数，即采样率。通过对 inSampleSize 的设置，对图片的像素的高和款进行缩放。</p>
+<p>当 inSampleSize=1 ,即采样后的图片大小为图片的原始大小，小于1，也按照1来计算。当 inSampleSize&gt;1,即采样后的拖欠将会缩小，缩放比例为1/(inSampleSize的二次方)。</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">例如：一张 1024—1024像素的图片，采用ARG8888 格式存储，那么内存大小1024x1024x4=4m.如果 inSampleSize=2,即采样后图片内存大小为 512x512X4=1m</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：官方文档中指出，inSampleSize的取值应该总是2的指数，如1，2，4，8等。如果外界传入的 inSampleSize的值不为2的指数，那么系统会向下取整并选择成立一个最接近2的指数来代替。比如3，系统会选择2来代替。不过并非在所有的Android版本都成立</strong></p>
+<p><strong>关于 inSampleSize 取值的注意事项：</strong>通常是根据图片宽高实际的大小/需要的宽高大小，分别计算出宽和高的缩放比。单应该取其中最小的缩放比，避免缩放图片大小，到达指定控件中不能铺满，需要拉伸从而导致模糊。</p>
+<p>例如：ImageView的大小是 100x100 像素，而图片的原始大小是 200x300，那么宽的缩放比是 2，高的缩放比是 3，如果最终 inSampleSize=2,那么缩放后的图片大小 100x150，仍然合适 ImageView。如果inSamleSize=3,那么缩放后的图片大小小于 ImageView所期望的大小。这样图片就会被拉伸而导致模糊。</p>
+<p><em><strong>inJustDecodeBounds 参数</strong></em><br>我们需要获取加载的图片的宽高信息，然后交给inSampleSize 参数选择缩放比缩放，那么如何能不先加载图片却能获取得图片的宽高信息，通过 inJustDecodeBunds=true,然后加载图片就可以实现只解析图片的宽高信息，并不会真正的加载图片，所以这个操作是轻量级的。当获取了宽高信息，计算出缩放比后，然后在将 inJustDecodeBounds=false,再重新加载图片，就可以加载缩放后的图片。</p>
+<p><strong>注意：BitmapFactory 获取得图片宽高信息和图片的位置以及程序运行的设备有关，比如同一张图片放在不同的drawable目录下或者程序运行在不同屏幕密度的设备上，都可能导致BitmapFactory 获取到不同的结果，和 Android 的资源加载机制有关。</strong></p>
+<p><strong>高效加载Bitmap的流程</strong></p>
+<ol>
+<li>将BitmapFactory.Options的 inJustDecodeBounds 参数设置为true并加载图片。</li>
+<li>从BitmapFactory.Options中取出图片的原始宽高信息，他们对应于uouytWidth 和 outHeight参数。</li>
+<li>根据采样率的规则并结合目标View 的所需大小计算出采样率 inSampleSize.</li>
+<li>将BitmapFactory.Options 的inJustDecodeBounds 参数设为 false,然后重新加载图片。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Bitmap <span class="title">showBit</span><span class="params">(Resources resources, <span class="keyword">int</span> id, <span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> </span>&#123;</span><br><span class="line">    BitmapFactory.Options options = <span class="keyword">new</span> BitmapFactory.Options();</span><br><span class="line">    options.inJustDecodeBounds = <span class="keyword">true</span>;</span><br><span class="line">    Bitmap bitmap;</span><br><span class="line">    <span class="comment">//加载图片</span></span><br><span class="line">    BitmapFactory.decodeResource(resources, id, options);</span><br><span class="line">    Log.e(<span class="string">&quot;demo&quot;</span>,<span class="string">&quot;w&quot;</span>+options.outWidth+<span class="string">&quot;----h&quot;</span>+options.outHeight);</span><br><span class="line">    <span class="comment">//计算缩放比</span></span><br><span class="line">    options.inSampleSize = calculateInsamplSize(options, width, height);</span><br><span class="line">    <span class="comment">//重新加载图片</span></span><br><span class="line">    options.inJustDecodeBounds = <span class="keyword">false</span>;</span><br><span class="line">    bitmap = BitmapFactory.decodeResource(resources, id, options);</span><br><span class="line">    Log.e(<span class="string">&quot;demo&quot;</span>,bitmap.getWidth()</span><br><span class="line">            +<span class="string">&quot;------height&quot;</span>+bitmap.getHeight()+<span class="string">&quot;------size&quot;</span></span><br><span class="line">            +options.inSampleSize+<span class="string">&quot;-----byte&quot;</span>+bitmap.getRowBytes());</span><br><span class="line">    <span class="keyword">return</span> bitmap;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">calculateInsamplSize</span><span class="params">(BitmapFactory.Options options, <span class="keyword">int</span> reqWidth, <span class="keyword">int</span> reqHeight)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> height = options.outHeight;</span><br><span class="line">    <span class="keyword">int</span> width = options.outWidth;</span><br><span class="line">    <span class="keyword">int</span> sizeSimple = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> (height &gt; reqHeight &amp;&amp; width &gt; reqWidth) &#123;</span><br><span class="line">        <span class="keyword">int</span> sizew=width/reqWidth;</span><br><span class="line">        <span class="keyword">int</span> sizeh=height/reqHeight;</span><br><span class="line">        <span class="comment">//选其中最小的边为标准</span></span><br><span class="line">        <span class="keyword">int</span> sizemode=sizew&gt;sizeh?sizeh:sizew;</span><br><span class="line">        <span class="keyword">if</span> (sizemode&gt;sizeSimple)&#123;</span><br><span class="line">            <span class="keyword">return</span> sizeSimple*sizemode;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sizeSimple;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>观察打印数据：<br><img src="/images/android_bitmap_better_performance02.png" alt="Bitmap内存优化"><br>经过我们压缩之后，其图片大小占用1260字节，分辨率也是随之下降，不过都在我们所设定的范围之内，下面我们看看，如果不压缩，结果是怎么样。<br>更改inSampleSize=1，也就是默认原图显示。效果如下：<br><img src="/images/android_bitmap_better_performance03.png" alt="Bitmap内存优化"></p>
+<h1 id="改变Bitmap大小"><a href="#改变Bitmap大小" class="headerlink" title="改变Bitmap大小"></a>改变Bitmap大小</h1><p>根据上面的原理，我们可以从两个方面减少Bitmap的内存占用，一个是改变Bitmap的宽高，另一个是改变Bitmap.Config的值，将Bitmap.Config.ARGB_8888改为占用字节更少的Bitmap.Config.ARGB_4444或者Bitmap.Config.RGB_565。<br>除了上文中的更改采样率的方式进行压缩外，还有没有别的？显然是有的。</p>
+<p>1、通过martix进行压缩(改变Bitmap大小)。Bitmap.createBitmap或者Bitmap.createScaledBitmap方法。<br>2、更改Bitmap.Config格式。<br>3、通过Bitmap#compress方法压缩。</p>
+<p>原图信息如下：</p>
+<p><img src="/images/android_bitmap_better_performance04.png" alt="原图"></p>
+<h2 id="通过martix进行压缩-改变Bitmap大小"><a href="#通过martix进行压缩-改变Bitmap大小" class="headerlink" title="通过martix进行压缩(改变Bitmap大小)"></a>通过martix进行压缩(改变Bitmap大小)</h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> matrix = Matrix()</span><br><span class="line">matrix.setScale(<span class="number">0.1f</span>, <span class="number">0.1f</span>)</span><br><span class="line"><span class="keyword">val</span> bmpMatrixJpg = Bitmap.createBitmap(</span><br><span class="line">    bmpOriginJpg, <span class="number">0</span>, <span class="number">0</span>, bmpOriginJpg.getWidth(),</span><br><span class="line">    bmpOriginJpg.getHeight(), matrix, <span class="literal">true</span></span><br><span class="line">)</span><br><span class="line"><span class="comment">// Bitmap.createScaledBitmap内部也会使用Matrix进行缩放</span></span><br><span class="line"><span class="comment">//            val bmpMatrixJpg = Bitmap.createScaledBitmap(</span></span><br><span class="line"><span class="comment">//                bmpOriginJpg,</span></span><br><span class="line"><span class="comment">//                ScreenUtils.dip2px(this, 60f),</span></span><br><span class="line"><span class="comment">//                ScreenUtils.dip2px(this, 45f),</span></span><br><span class="line"><span class="comment">//                true</span></span><br><span class="line"><span class="comment">//            )</span></span><br><span class="line"><span class="keyword">val</span> descBmpConfigJpg =</span><br><span class="line">	<span class="string">&quot;height:<span class="subst">$&#123;bmpMatrixJpg?.height&#125;</span>,\nwidth:<span class="subst">$&#123;bmpMatrixJpg?.width&#125;</span>,\nallocationByteCount:<span class="subst">$&#123;bmpMatrixJpg?.allocationByteCount&#125;</span>byte,\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;byteCount:<span class="subst">$&#123;bmpMatrixJpg?.byteCount&#125;</span>byte,\nrowBytes:<span class="subst">$&#123;bmpMatrixJpg?.rowBytes&#125;</span>byte,\ndensity:<span class="subst">$&#123;bmpMatrixJpg?.density&#125;</span>&quot;</span></span><br><span class="line">tvMatrixJpgInfo.text = <span class="string">&quot;Jpg通过Matrix压缩后的信息：<span class="variable">$descBmpConfigJpg</span>&quot;</span></span><br><span class="line">ivMatrixJpg.setImageBitmap(bmpMatrixJpg)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/android_bitmap_better_performance05.png" alt="Matrix缩放Bitmap"></p>
+<p>由于我们设置的缩放比是0.1f，也就是宽高均是之前的1/10，所以压缩后的bitmap占用的内存大小变为原来的1/100。</p>
+<p>这种情况适用原图大小和目标bitmap大小均已知的情况。</p>
+<h2 id="更改Bitmap-Config格式"><a href="#更改Bitmap-Config格式" class="headerlink" title="更改Bitmap.Config格式"></a>更改Bitmap.Config格式</h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> option = BitmapFactory.Options()</span><br><span class="line">option.inPreferredConfig = Bitmap.Config.ARGB_4444</span><br><span class="line"><span class="comment">//  option.inPreferredConfig = Bitmap.Config.RGB_565 // 对透明度没要求的话可以试一下rgb_565</span></span><br><span class="line"><span class="keyword">val</span> bmpBmpConfigJpg = BitmapFactory.decodeStream(assets.<span class="keyword">open</span>(<span class="string">&quot;maomi.jpg&quot;</span>), <span class="literal">null</span>, option)</span><br><span class="line"><span class="keyword">val</span> descBmpConfigJpg =</span><br><span class="line">    <span class="string">&quot;height:<span class="subst">$&#123;bmpBmpConfigJpg?.height&#125;</span>,\nwidth:<span class="subst">$&#123;bmpBmpConfigJpg?.width&#125;</span>,\nallocationByteCount:<span class="subst">$&#123;bmpBmpConfigJpg?.allocationByteCount&#125;</span>byte,\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;byteCount:<span class="subst">$&#123;bmpBmpConfigJpg?.byteCount&#125;</span>byte,\nrowBytes:<span class="subst">$&#123;bmpBmpConfigJpg?.rowBytes&#125;</span>byte,\ndensity:<span class="subst">$&#123;bmpBmpConfigJpg?.density&#125;</span>&quot;</span></span><br><span class="line">tvBmpConfigJpgInfo.text = <span class="string">&quot;Jpg通过Bitmap.Config压缩后的信息：<span class="variable">$descBmpConfigJpg</span>&quot;</span></span><br><span class="line">ivBmpConfigJpg.setImageBitmap(bmpBmpConfigJpg)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/android_bitmap_better_performance06.png" alt="Bitmap.Config减少内存占用"></p>
+<p>我们将Bitmap.Config的值改为了根据输出的byteCount的值改为了Bitmap.Config.ARGB_4444，根据byteCount输出的值可以明显的看到，bitmap的内存大小减少了一半。</p>
+<p>如果对透明度没要求的话可以试一下Bitmap.Config.RGB_565。</p>
+<p>这种情况适用于对图片分辨率要求不高的情况。</p>
+<h2 id="通过Bitmap-compress方法压缩，质量压缩"><a href="#通过Bitmap-compress方法压缩，质量压缩" class="headerlink" title="通过Bitmap#compress方法压缩，质量压缩"></a>通过Bitmap#compress方法压缩，质量压缩</h2><p>还有一种很重要的压缩方式，通过Bitmap#compress方法，修改quality的值，来改变Bitmap生成的字节流的大小。这种方法不会改变Bitmap占用的内存大小。</p>
+<p>质量压缩不会减少图片的像素，它是在保持像素的前提下改变图片的位深及透明度等，来达到压缩图片的目的。图片的长，宽，像素都不变，那么bitmap所占内存大小是不会变的。这里改变的是bitmap对应的字节数组的大小，适合去传递二进制的图片数据，比如微信分享。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> bytearray = getBytesFromCompressBitmap(bmpOriginJpg, <span class="number">32</span> * <span class="number">1024</span>)</span><br><span class="line"><span class="keyword">val</span> bmpQualityJpg = BitmapFactory.decodeByteArray(bytearray, <span class="number">0</span>, bytearray.size)</span><br><span class="line"><span class="keyword">val</span> descQualityJpg =</span><br><span class="line">    <span class="string">&quot;height:<span class="subst">$&#123;bmpQualityJpg.height&#125;</span>,\nwidth:<span class="subst">$&#123;bmpQualityJpg.width&#125;</span>,\nallocationByteCount:<span class="subst">$&#123;bmpQualityJpg.allocationByteCount&#125;</span>byte,\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;byteCount:<span class="subst">$&#123;bmpQualityJpg.byteCount&#125;</span>byte,\nrowBytes:<span class="subst">$&#123;bmpQualityJpg.rowBytes&#125;</span>byte,\ndensity:<span class="subst">$&#123;bmpQualityJpg.density&#125;</span>,\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;bytearray:<span class="subst">$&#123;bytearray.size&#125;</span>&quot;</span></span><br><span class="line">tvQualityJpgInfo.text = <span class="string">&quot;Jpg进行Quality压缩后的信息：<span class="variable">$descQualityJpg</span>&quot;</span></span><br><span class="line">ivQualityJpg.setImageBitmap(bmpQualityJpg)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 将Bitmap的字节流压缩为目标大小</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@targetSize</span>  单位为Byte</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">getBytesFromCompressBitmap</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    bitmap: <span class="type">Bitmap</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    targetSize: <span class="type">Int</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: ByteArray &#123;</span><br><span class="line">    <span class="keyword">val</span> baos = ByteArrayOutputStream()</span><br><span class="line">    <span class="keyword">var</span> quality = <span class="number">100</span></span><br><span class="line">    bitmap.compress(Bitmap.CompressFormat.PNG, quality, baos)</span><br><span class="line">    <span class="keyword">var</span> bytes = baos.toByteArray()</span><br><span class="line">    <span class="keyword">while</span> (bytes.size &gt; targetSize &amp;&amp; quality &gt;= <span class="number">5</span>) &#123;</span><br><span class="line">        quality -= <span class="number">5</span></span><br><span class="line">        <span class="keyword">if</span> (quality &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            quality = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 重置，不然会累加</span></span><br><span class="line">        baos.reset()</span><br><span class="line">        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos)</span><br><span class="line">        bytes = baos.toByteArray()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        baos.close()</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        e.printStackTrace()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> bytes</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/android_bitmap_better_performance07.png" alt="质量压缩"></p>
+<p>可以看到，质量压缩不会改变原有bitmap的大小，它改变的是通过Bitmap#compress方法的字节流。</p>
+<p>具体开发过程中，可以根据需要自行选择合适的方式。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" rel="tag"># 性能优化</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/09/21/android_recycler_view_performance/" rel="prev" title="Android RecyclerView性能优化与对比">
+                  <i class="fa fa-chevron-left"></i> Android RecyclerView性能优化与对比
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/10/18/android_app_arch_design/" rel="next" title="Android应用架构设计">
+                  Android应用架构设计 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

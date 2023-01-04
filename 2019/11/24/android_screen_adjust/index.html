@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="由于 Android设备存在有不同的屏幕尺寸，屏幕分辨率，像素密度，Android应用在开发的过程必须要考虑到屏幕尺寸适配的问题，以保证在不同尺寸的Android设备上都能够正常运行。我们需要利用适配这一个过程把同一张原型图设计的样式尽可能以同样地视觉效果呈现在不同地屏幕上。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 屏幕适配">
+<meta property="og:url" content="http://example.com/2019/11/24/android_screen_adjust/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="由于 Android设备存在有不同的屏幕尺寸，屏幕分辨率，像素密度，Android应用在开发的过程必须要考虑到屏幕尺寸适配的问题，以保证在不同尺寸的Android设备上都能够正常运行。我们需要利用适配这一个过程把同一张原型图设计的样式尽可能以同样地视觉效果呈现在不同地屏幕上。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust01.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust02.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust03.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust04.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust05.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust06.png">
+<meta property="og:image" content="https://math.jianshu.com/math?formula=%5Ccolor%7Bred%7D%7Bpx%20=%20dp%20*%20density%7D">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust07.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust08.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust09.png">
+<meta property="og:image" content="http://example.com/images/android_screen_adjust10.png">
+<meta property="article:published_time" content="2019-11-24T13:16:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:29:12.005Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="总结">
+<meta property="article:tag" content="适配">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_screen_adjust01.png">
+
+
+<link rel="canonical" href="http://example.com/2019/11/24/android_screen_adjust/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2019&#x2F;11&#x2F;24&#x2F;android_screen_adjust&#x2F;&quot;,&quot;path&quot;:&quot;2019&#x2F;11&#x2F;24&#x2F;android_screen_adjust&#x2F;&quot;,&quot;title&quot;:&quot;Android 屏幕适配&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android 屏幕适配 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">适配基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E5%B0%BA%E5%AF%B8"><span class="nav-number">1.1.</span> <span class="nav-text">屏幕尺寸</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E5%88%86%E8%BE%A8%E7%8E%87"><span class="nav-number">1.2.</span> <span class="nav-text">屏幕分辨率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E5%83%8F%E7%B4%A0%E5%AF%86%E5%BA%A6"><span class="nav-number">1.3.</span> <span class="nav-text">屏幕像素密度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E5%B0%BA%E5%AF%B8%E3%80%81%E5%88%86%E8%BE%A8%E7%8E%87%E3%80%81%E5%83%8F%E7%B4%A0%E5%AF%86%E5%BA%A6%E4%B8%89%E8%80%85%E5%85%B3%E7%B3%BB"><span class="nav-number">1.4.</span> <span class="nav-text">屏幕尺寸、分辨率、像素密度三者关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%86%E5%BA%A6%E6%97%A0%E5%85%B3%E5%83%8F%E7%B4%A0"><span class="nav-number">1.5.</span> <span class="nav-text">密度无关像素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E6%AF%94%E4%BE%8B%E5%83%8F%E7%B4%A0"><span class="nav-number">1.6.</span> <span class="nav-text">独立比例像素</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E6%96%B9%E6%A1%88%E6%AF%94%E8%BE%83"><span class="nav-number">2.</span> <span class="nav-text">适配方案比较</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#dp%E5%8E%9F%E7%94%9F%E6%96%B9%E6%A1%88"><span class="nav-number">2.1.</span> <span class="nav-text">dp原生方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dimens%E5%9F%BA%E4%BA%8Epx%E7%9A%84%E9%80%82%E9%85%8D%EF%BC%88%E5%AE%BD%E9%AB%98%E9%99%90%E5%AE%9A%E7%AC%A6%E9%80%82%E9%85%8D%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">dimens基于px的适配（宽高限定符适配）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dimens%E5%9F%BA%E4%BA%8Edp%E7%9A%84%E9%80%82%E9%85%8D%EF%BC%88smallWidth%E9%80%82%E9%85%8D%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">dimens基于dp的适配（smallWidth适配）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8A%E6%97%A5%E5%A4%B4%E6%9D%A1%E9%80%82%E9%85%8D%EF%BC%88%E4%BF%AE%E6%94%B9%E6%89%8B%E6%9C%BA%E7%9A%84%E8%AE%BE%E5%A4%87%E5%AF%86%E5%BA%A6density%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">今日头条适配（修改手机的设备密度density）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A2%B3%E7%90%86%E9%9C%80%E6%B1%82%EF%BC%9A"><span class="nav-number">2.4.1.</span> <span class="nav-text">梳理需求：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%BE%E6%96%B9%E6%A1%88%E5%85%BC%E5%AE%B9%E7%AA%81%E7%A0%B4%E5%8F%A3"><span class="nav-number">2.4.2.</span> <span class="nav-text">找方案兼容突破口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E4%B8%8D%E6%98%AFAndroid%E4%B8%AD%E6%89%80%E6%9C%89%E7%9A%84dp%E5%92%8Cpx%E7%9A%84%E6%8D%A2%E7%AE%97%E9%83%BD%E6%98%AF%E9%80%9A%E8%BF%87-DisplayMetrics-%E4%B8%AD%E7%9B%B8%E5%85%B3%E7%9A%84%E5%80%BC%E6%9D%A5%E8%AE%A1%E7%AE%97%E7%9A%84%E5%91%A2%EF%BC%9F"><span class="nav-number">2.4.3.</span> <span class="nav-text">是不是Android中所有的dp和px的换算都是通过 DisplayMetrics 中相关的值来计算的呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E6%96%B9%E6%A1%88"><span class="nav-number">2.4.4.</span> <span class="nav-text">最终方案</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E7%9A%84%E9%97%AE%E9%A2%98%E6%8E%A2%E8%AE%A8"><span class="nav-number">3.</span> <span class="nav-text">相关的问题探讨</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#drawable-xhdpi%E4%B8%AD%E7%9A%84%E5%9B%BE%E7%89%87%E6%94%BE%E5%88%B0xxhdpi%E7%9A%84%E6%89%8B%E6%9C%BA%E4%B8%8A%EF%BC%8C%E5%86%85%E5%AD%98%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%98%E5%8C%96%E7%9A%84"><span class="nav-number">3.1.</span> <span class="nav-text">drawable-xhdpi中的图片放到xxhdpi的手机上，内存是如何变化的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E6%89%80%E5%8D%A0%E5%86%85%E5%AD%98%E6%98%AF%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E7%9A%84%EF%BC%9F"><span class="nav-number">3.1.1.</span> <span class="nav-text">图片所占内存是如何计算的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C%E9%AA%8C%E8%AF%81"><span class="nav-number">3.1.2.</span> <span class="nav-text">结果验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">3.1.3.</span> <span class="nav-text">结论</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E8%A7%84%E5%88%99%E3%80%82%E6%AF%94%E5%A6%82%E8%AF%B4%E5%9B%BE%E7%89%87%E5%AD%98%E6%94%BE%E5%9C%A8drawable-hdpi%E5%92%8Cdrawable-xxhdpi%E4%B8%8B%EF%BC%8Cxhdpi%E7%9A%84%E6%89%8B%E6%9C%BA%E4%BC%9A%E5%8A%A0%E8%BD%BD%E5%93%AA%E5%BC%A0%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">资源文件加载规则。比如说图片存放在drawable-hdpi和drawable-xxhdpi下，xhdpi的手机会加载哪张？</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/11/24/android_screen_adjust/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android 屏幕适配
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-11-24 21:16:00" itemprop="dateCreated datePublished" datetime="2019-11-24T21:16:00+08:00">2019-11-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>由于 Android设备存在有不同的屏幕尺寸，屏幕分辨率，像素密度，Android应用在开发的过程必须要考虑到屏幕尺寸适配的问题，以保证在不同尺寸的Android设备上都能够正常运行。<br>我们需要利用适配这一个过程把同一张原型图设计的样式尽可能以同样地视觉效果呈现在不同地屏幕上。</p>
+<span id="more"></span>
+
+<h1 id="适配基础知识"><a href="#适配基础知识" class="headerlink" title="适配基础知识"></a>适配基础知识</h1><p><strong>由于Android系统的开放性，任何用户、开发者、OEM厂商、运营商都可以对Android进行定制，于是导致：</strong></p>
+<ul>
+<li>Android系统碎片化：小米定制的MIUI、魅族定制的flyme、华为定制的EMUI等等,当然其都是基于Google原生系统定制的</li>
+<li>Android机型屏幕尺寸碎片化：5寸、5.5寸、6寸等等</li>
+<li>Android屏幕分辨率碎片化：320x480、480x800、720x1280、1080x1920</li>
+</ul>
+<blockquote>
+<p>据友盟指数显示，统计至2015年12月，支持Android的设备共有27796种</p>
+</blockquote>
+<p>当Android系统、屏幕尺寸、屏幕密度出现碎片化的时候，就很容易出现同一元素在不同手机上显示不同的问题。</p>
+<blockquote>
+<p>试想一下这么一个场景：<br> 为4.3寸屏幕准备的UI设计图，运行在5.0寸的屏幕上，很可能在右侧和下侧存在大量的空白；而5.0寸的UI设计图运行到4.3寸的设备上，很可能显示不下。</p>
+</blockquote>
+<p><strong>首先介绍一下Android屏幕中用到的一些相关重要概念：</strong></p>
+<h2 id="屏幕尺寸"><a href="#屏幕尺寸" class="headerlink" title="屏幕尺寸"></a>屏幕尺寸</h2><p>含义：手机对角线的物理尺寸</p>
+<p>单位：英寸（inch），1英寸=2.54cm</p>
+<p>Android手机常见的尺寸有5寸、5.5寸、6寸等等</p>
+<h2 id="屏幕分辨率"><a href="#屏幕分辨率" class="headerlink" title="屏幕分辨率"></a>屏幕分辨率</h2><p> 含义：手机在横向、纵向上的像素点数总和</p>
+<ol>
+<li>一般描述成屏幕的”宽x高”=AxB</li>
+<li>含义：屏幕在横向方向（宽度）上有A个像素点，在纵向方向（高）有B个像素点</li>
+</ol>
+<p>例子：1080x1920，即宽度方向上有1080个像素点，在高度方向上有1920个像素点</p>
+<ul>
+<li>单位：px（pixel），1px=1个像素点</li>
+</ul>
+<blockquote>
+<p>UI设计师的设计图会以px作为统一的计量单位</p>
+</blockquote>
+<ul>
+<li>Android手机常见的分辨率：320x480、480x800、720x1280、1080x1920、 1080x2340</li>
+</ul>
+<h2 id="屏幕像素密度"><a href="#屏幕像素密度" class="headerlink" title="屏幕像素密度"></a>屏幕像素密度</h2><ul>
+<li>含义：每英寸的像素点数</li>
+<li>单位：dpi(dots per ich)</li>
+</ul>
+<blockquote>
+<p>假设设备内每英寸有160个像素，那么该设备的屏幕像素密度=160dpi</p>
+</blockquote>
+<ul>
+<li>安卓手机对于每类手机屏幕大小都有一个相应的屏幕像素密度：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>密度类型</th>
+<th>代表的分辨率（px）</th>
+<th>屏幕密度（dpi）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>低密度（ldpi）</td>
+<td>240x320</td>
+<td>120</td>
+</tr>
+<tr>
+<td>中密度（mdpi）</td>
+<td>320x480</td>
+<td>160</td>
+</tr>
+<tr>
+<td>高密度（hdpi）</td>
+<td>480x800</td>
+<td>240</td>
+</tr>
+<tr>
+<td>超高密度（xhdpi）</td>
+<td>720x1280</td>
+<td>320</td>
+</tr>
+<tr>
+<td>超超高密度（xxhdpi）</td>
+<td>1080x1920</td>
+<td>480</td>
+</tr>
+</tbody></table>
+<h2 id="屏幕尺寸、分辨率、像素密度三者关系"><a href="#屏幕尺寸、分辨率、像素密度三者关系" class="headerlink" title="屏幕尺寸、分辨率、像素密度三者关系"></a>屏幕尺寸、分辨率、像素密度三者关系</h2><p>一部手机的分辨率是宽*高，屏幕大小是以寸为单位，那么三者的关系是：</p>
+<p><img src="/images/android_screen_adjust01.png" alt="img"><br><strong>不懂没关系，在这里举个例子</strong><br> 假设一部手机的分辨率是1080x1920（px)，屏幕大小是5寸，问密度是多少？<br><strong>解</strong>：请直接套公式</p>
+<p><img src="/images/android_screen_adjust02.png" alt="img"></p>
+<h2 id="密度无关像素"><a href="#密度无关像素" class="headerlink" title="密度无关像素"></a>密度无关像素</h2><ul>
+<li>含义：density-independent pixel，叫dp或dip，与终端上的实际物理像素点无关。</li>
+<li>单位：dp，可以保证在不同屏幕像素密度的设备上显示相同的效果</li>
+</ul>
+<blockquote>
+<ol>
+<li>Android开发时用dp而不是px单位设置图片大小，是Android特有的单位</li>
+<li>场景：假如同样都是画一条长度是屏幕一半的线，如果使用px作为计量单位，那么在480x800分辨率手机上设置应为240px；在320x480的手机上应设置为160px，二者设置就不同了；如果使用dp为单位，在这两种分辨率下，160dp都显示为屏幕一半的长度。</li>
+</ol>
+</blockquote>
+<ul>
+<li>dp与px的转换<br> 因为ui设计师给你的设计图是以px为单位的，Android开发则是使用dp作为单位的，那么我们需要进行转换：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>密度类型</th>
+<th>代表的分辨率（px）</th>
+<th>屏幕密度（dpi）</th>
+<th>换算（px/dp）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>低密度（ldpi）</td>
+<td>240x320</td>
+<td>120</td>
+<td>1dp=0.75px</td>
+</tr>
+<tr>
+<td>中密度（mdpi）</td>
+<td>320x480</td>
+<td>160</td>
+<td>1dp=1px</td>
+</tr>
+<tr>
+<td>高密度（hdpi）</td>
+<td>480x800</td>
+<td>240</td>
+<td>1dp=1.5px</td>
+</tr>
+<tr>
+<td>超高密度（xhdpi）</td>
+<td>720x1280</td>
+<td>320</td>
+<td>1dp=2px</td>
+</tr>
+<tr>
+<td>超超高密度（xxhdpi）</td>
+<td>1080x1920</td>
+<td>480</td>
+<td>1dp=3px</td>
+</tr>
+</tbody></table>
+<p>在Android中，规定以160dpi（即屏幕分辨率为320x480）为基准：1dp=1px</p>
+<h2 id="独立比例像素"><a href="#独立比例像素" class="headerlink" title="独立比例像素"></a>独立比例像素</h2><ul>
+<li>含义：scale-independent pixel，叫sp或sip</li>
+<li>单位：sp</li>
+</ul>
+<blockquote>
+<p>Android开发时用此单位设置文字大小，可根据字体大小首选项进行缩放<br> 推荐使用12sp、14sp、18sp、22sp作为字体设置的大小，不推荐使用奇数和小数，容易造成精度的丢失问题；小于12sp的字体会太小导致用户看不清</p>
+</blockquote>
+<p>请把上面的概念记住，因为下面讲解都会用到！</p>
+<h1 id="适配方案比较"><a href="#适配方案比较" class="headerlink" title="适配方案比较"></a>适配方案比较</h1><h2 id="dp原生方案"><a href="#dp原生方案" class="headerlink" title="dp原生方案"></a>dp原生方案</h2><p>这是最原始的android适配方案，Android屏幕适配由来已久，关键在于屏幕尺寸与屏幕分辨率的变化巨大，而很多UI工程师为了兼容iOS和Android的适配，这样导致设计出来的UI稿是以px单位标注的。在成千上百种机型面前，px单位已难以适应。</p>
+<blockquote>
+<p>1.同样尺寸，不同分辨率：<br> 1080px的宽度上显示100px 比例是100/1080<br> 720px的宽度上显示100px 比例是100/720<br> 2.同分辨率，不同尺寸：<br> 1080px在4.7寸上显示100px<br> 1080px在6.1寸上显示100px<br> 如果使用多套px文件方案来适配，<strong>市面上少说上百种寸，需要的文件太多了</strong>。</p>
+</blockquote>
+<p><strong>不同分辨率的屏幕该如何适配</strong></p>
+<p>这时候就需要用到dp方案来解决了,所以<strong>dp究竟解决了什么问题?</strong></p>
+<p>以下公式表示了，同样尺寸上不同分辨率（不同density）的设备，每1dp所代表的像素数量是不一样的。</p>
+<blockquote>
+<p>480 dpi上 1dp = 1 * 3 =     3px<br> 320 dpi上 1dp = 1 * 2 =     2px<br> 240 dpi上 1dp = 1 * 1.5 =   1.5px<br> 160 dpi上 1dp = 1 * 1 =     1px<br> 120 dpi上 1dp = 1 * 0.75 =  0.75px</p>
+</blockquote>
+<p>但是所表示的物理长度（160dp=1in）是一样的。</p>
+<blockquote>
+<p>160 dp在density=3上表示480px，物理长度为1 in<br> 160 dp在density=2上表示320px，物理长度为1 in<br> 160 dp在density=1.5上表示240px，物理长度为1 in<br> 160 dp在density=1上表示160px，物理长度为1 in<br> 160 dp在density=0.75上表示120px，物理长度为1 in</p>
+</blockquote>
+<p>由上可知，dp单位的使用就意味着你在这些同样尺寸但是不同分辨率的设备上看到的大小一样，此时各设备上显示的比例也就一致了。</p>
+<p><strong>dp方案没有解决什么问题</strong></p>
+<p>举个例子：</p>
+<blockquote>
+<p>屏幕分辨率为：1920*1080，屏幕尺寸为5吋的话，那么dpi为440。假设我们UI设计图是按屏幕宽度为360dp来设计的，那这样会存在什么问题呢？</p>
+<p>在上述设备上，屏幕宽度其实为1080/(440/160)=392.7dp，也就是屏幕是比设计图要宽的。这种情况下， 即使使用dp也是无法在不同设备上显示为同样效果的。 同时还存在部分设备屏幕宽度不足360dp，这时就会导致按360dp宽度来开发实际显示不全的情况。</p>
+</blockquote>
+<p>而且上述屏幕尺寸、分辨率和像素密度的关系，很多设备并没有按此规则来实现， 因此dpi的值非常乱，没有规律可循，从而导致使用dp适配效果差强人意。</p>
+<h2 id="dimens基于px的适配（宽高限定符适配）"><a href="#dimens基于px的适配（宽高限定符适配）" class="headerlink" title="dimens基于px的适配（宽高限定符适配）"></a>dimens基于px的适配（宽高限定符适配）</h2><p><strong>原理：</strong></p>
+<blockquote>
+<p>根据市面上手机分辨率的占比分析，我们选定一个占比例值大的（比如1280<em>720）设定为一个基准，然后其他分辨率根据这个基准做适配。<br> 基准的意思（比如320</em>480的分辨率为基准）是：<br> 宽为320，将任何分辨率的宽度分为320份，取值为x1到x320<br> 长为480，将任何分辨率的高度分为480份，取值为y1到y480</p>
+</blockquote>
+<p>例如对于800 * 480的分辨率设备来讲，需要在项目中values-800x480目录下的dimens.xml文件中的如下设置（当然了，可以通过工具自动生成）：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dimen</span> <span class="attr">name</span>=<span class="string">&quot;x1&quot;</span>&gt;</span>1.5px<span class="tag">&lt;/<span class="name">dimen</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dimen</span> <span class="attr">name</span>=<span class="string">&quot;x2&quot;</span>&gt;</span>3.0px<span class="tag">&lt;/<span class="name">dimen</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dimen</span> <span class="attr">name</span>=<span class="string">&quot;x3&quot;</span>&gt;</span>4.5px<span class="tag">&lt;/<span class="name">dimen</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dimen</span> <span class="attr">name</span>=<span class="string">&quot;x4&quot;</span>&gt;</span>6.0px<span class="tag">&lt;/<span class="name">dimen</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dimen</span> <span class="attr">name</span>=<span class="string">&quot;x5&quot;</span>&gt;</span>7.5px<span class="tag">&lt;/<span class="name">dimen</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到x1 = 480 / 基准 = 480 / 320 = 1.5 ;它的意思就是同样的1px，在320/480分辨率的手机上是1px，在480/800的分辨率的手机上就是1*1.5px，px会根据我们指定的不同values文件夹自动适配为合适的大小。</p>
+<p><img src="/images/android_screen_adjust03.png" alt="img"></p>
+<p><img src="/images/android_screen_adjust04.png" alt="img"></p>
+<p><strong>验证方案：</strong><br> 简单通过计算验证下这种方案是否能达到适配的效果，例如设计图上有一个宽187dp的View。</p>
+<p><strong>分辨率为480 * 800</strong></p>
+<blockquote>
+<ul>
+<li>设计图占宽比: 187dp / 375dp = 0.498</li>
+<li>实际在480 800占宽比 = 187 1.28px / 480 = 0.498</li>
+</ul>
+</blockquote>
+<p><strong>分辨率为1080 * 1920</strong></p>
+<blockquote>
+<ul>
+<li>设计图占宽比: 187dp / 375dp = 0.498</li>
+<li>实际在1080 1920占宽比 = 187 2.88px / 1080 = 0.498</li>
+<li>计算高同理</li>
+</ul>
+</blockquote>
+<p><strong>缺点:</strong></p>
+<blockquote>
+<ul>
+<li><p>侵入性强</p>
+</li>
+<li><p>需要精准命中资源文件才能适配，比如1920x1080的手机就一定要找到1920x1080的限定符，否则就只能用统一的默认的dimens文件了。而使用默认的尺寸的话，UI就很可能变形，简单说，就是容错机制很差。</p>
+</li>
+<li><p>Android不同分辨率的手机实在太多了，可能你说主流就可以，的确小公司主流就可以，淘宝这种App肯定不能只适配主流手机。控件在设计图上显示的大小以及控件之间的间隙在小分辨率和大分辨率手机上天壤之别，你会发现大屏幕手机上控件超级大。可能你会觉得正常，毕竟分辨率不同。但实际效果大的有些夸张。</p>
+</li>
+<li><p>占据资源大：好几百KB，甚至多达1M或跟多。</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="dimens基于dp的适配（smallWidth适配）"><a href="#dimens基于dp的适配（smallWidth适配）" class="headerlink" title="dimens基于dp的适配（smallWidth适配）"></a>dimens基于dp的适配（smallWidth适配）</h2><p><strong>原理:</strong></p>
+<blockquote>
+<p>这种适配依据的是最小宽度限定符。指的是Android会识别屏幕可用高度和宽度的最小尺寸的dp值（其实就是手机的宽度值），然后根据识别到的结果去资源文件中寻找对应限定符的文件夹下的资源文件。这种机制和上文提到的宽高限定符适配原理上是一样的，都是系统通过特定的规则来选择对应的文件。</p>
+</blockquote>
+<p>举个例子，小米5的dpi是480,横向像素是1080px，根据px=dp(dpi/160)，横向的dp值是1080/(480/160),也就是360dp,系统就会去寻找是否存在value-sw360dp的文件夹以及对应的资源文件。</p>
+<p><img src="/images/android_screen_adjust05.png" alt="img"></p>
+<p><img src="/images/android_screen_adjust06.png" alt="img"></p>
+<p>smallestWidth限定符适配和宽高限定符适配最大的区别在于，有很好的容错机制，<strong>如果没有value-sw360dp文件夹，系统会向下寻找，比如离360dp最近的只有value-sw350dp，那么Android就会选择value-sw350dp文件夹下面的资源文件</strong>。这个特性就完美的解决了上文提到的宽高限定符的容错问题。</p>
+<p><strong>缺点:</strong></p>
+<blockquote>
+<ul>
+<li>侵入性强</li>
+<li>Android 私人订制的原因，宽度方面参差不齐，不可能适配所有的手机。</li>
+<li>项目中增加了N个文件夹，上拉下拉查看文件非常不方便：想看string或者color资源文件需要拉很多再能到达。</li>
+<li>通过宽度限定符就近查找的原理，可以看出来匹配出来的大小不够准确。</li>
+<li>是在Android 3.2 以后引入的，Google的本意是用它来适配平板的布局文件（但是实际上显然用于diemns适配的效果更好），不过目前SPX所有的项目应该最低支持版本应该都是5.1了，所以这问题其实也不重要了。</li>
+</ul>
+</blockquote>
+<h2 id="今日头条适配（修改手机的设备密度density）"><a href="#今日头条适配（修改手机的设备密度density）" class="headerlink" title="今日头条适配（修改手机的设备密度density）"></a>今日头条适配（修改手机的设备密度density）</h2><h3 id="梳理需求："><a href="#梳理需求：" class="headerlink" title="梳理需求："></a>梳理需求：</h3><p>首先来梳理下我们的需求，一般我们设计图都是以固定的尺寸来设计的。比如以分辨率1920px * 1080px来设计，以density为3来标注，也就是屏幕其实是640dp * 360dp。如果我们想在所有设备上显示完全一致，其实是不现实的，因为屏幕高宽比不是固定的，16:9、4:3甚至其他宽高比层出不穷，宽高比不同，显示完全一致就不可能了。但是通常下，我们只需要以宽或高一个维度去适配，比如我们Feed是上下滑动的，只需要保证在所有设备中宽的维度上显示一致即可，再比如一个不支持上下滑动的页面，那么需要保证在高这个维度上都显示一致，尤其不能存在某些设备上显示不全的情况。同时考虑到现在基本都是以dp为单位去做的适配，如果新的方案不支持dp，那么迁移成本也非常高。</p>
+<p><strong>因此，总结下大致需求如下：</strong></p>
+<blockquote>
+<ul>
+<li>支持以宽或者高一个维度去适配，保持该维度上和设计图一致；</li>
+<li>支持dp和sp单位，控制迁移成本到最小。</li>
+</ul>
+</blockquote>
+<h3 id="找方案兼容突破口"><a href="#找方案兼容突破口" class="headerlink" title="找方案兼容突破口"></a>找方案兼容突破口</h3><p>从dp和px的转换公式 ：</p>
+<blockquote>
+<p><img src="https://math.jianshu.com/math?formula=%5Ccolor%7Bred%7D%7Bpx%20=%20dp%20*%20density%7D" alt="\color{red}{px = dp * density}"></p>
+</blockquote>
+<p>可以看出，如果设计图宽为360dp，想要保证在所有设备计算得出的px值都正好是屏幕宽度的话，我们只能修改 density 的值。通过阅读源码，我们可以得知，density 是 DisplayMetrics 中的成员变量，而 DisplayMetrics 实例通过 Resources#getDisplayMetrics 可以获得，而Resouces通过Activity或者Application的Context获得。</p>
+<p>先来熟悉下 DisplayMetrics 中和适配相关的几个变量：</p>
+<blockquote>
+<ul>
+<li>DisplayMetrics#density 就是上述的density</li>
+<li>DisplayMetrics#densityDpi 就是上述的dpi</li>
+<li>DisplayMetrics#scaledDensity 字体的缩放因子，正常情况下和density相等，但是调节系统字体大小后会改变这个值</li>
+</ul>
+</blockquote>
+<h3 id="是不是Android中所有的dp和px的换算都是通过-DisplayMetrics-中相关的值来计算的呢？"><a href="#是不是Android中所有的dp和px的换算都是通过-DisplayMetrics-中相关的值来计算的呢？" class="headerlink" title="是不是Android中所有的dp和px的换算都是通过 DisplayMetrics 中相关的值来计算的呢？"></a>是不是Android中所有的dp和px的换算都是通过 DisplayMetrics 中相关的值来计算的呢？</h3><ul>
+<li>首先来看看布局文件中的dp转化，最终都是调用<strong>TypedValue#applyDimension</strong>来进行住转化</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">float</span> <span class="title">applyDimension</span><span class="params">(<span class="keyword">int</span> unit, <span class="keyword">float</span> value, DisplayMetrics metrics)</span></span>&#123;</span><br><span class="line">    <span class="keyword">switch</span>(uint)&#123;</span><br><span class="line">        <span class="keyword">case</span> COMPLEX_UNIT_PX:</span><br><span class="line">            <span class="keyword">return</span> value;</span><br><span class="line">        <span class="keyword">case</span> COMPLEX_UNIT_DIP:</span><br><span class="line">            <span class="keyword">return</span> value * metrics.density;</span><br><span class="line">        <span class="keyword">case</span> COMPLEX_UNIT_SP:</span><br><span class="line">            <span class="keyword">return</span> value * metrics.scaleDensity;</span><br><span class="line">        <span class="comment">//......</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>图片的decode，<strong>BitmapFactory#decodeResourceStream方法:</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Bitmap <span class="title">decodeResourceStream</span><span class="params">(Resource res, TypedValue value, InputStream is, Rect pad, Options opts)</span></span>&#123;</span><br><span class="line">    <span class="comment">//......</span></span><br><span class="line">    <span class="keyword">if</span>(opts.inTargetDensity == <span class="number">0</span> &amp;&amp; res != <span class="keyword">null</span>)&#123;</span><br><span class="line">        opts.inTargetDensity = res.getDisplayMetrics().densityDpi;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> decodeStream(is, pad, opts);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然还有些其他dp转换的场景，基本都是通过 DisplayMetrics 来计算的，这里不再详述。因此，想要满足上述需求，我们只需要修改<strong>DisplayMetrics 中和 dp</strong> 转换相关的变量即可。</p>
+<h3 id="最终方案"><a href="#最终方案" class="headerlink" title="最终方案"></a>最终方案</h3><p>下面假设设计图宽度是360dp，以宽维度来适配。</p>
+<p>那么适配后 自定义density = 设备真实宽(单位px) / 360，接下来只需要把我们计算好的 density 在系统中修改下即可，代码实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 适配：修改设备密度</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">float</span> sNoncompatDensity;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">float</span> sNoncompatScaledDensity;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setCustomDensity</span><span class="params">(<span class="meta">@NonNull</span> Activity activity, <span class="meta">@NonNull</span> <span class="keyword">final</span> Application application)</span> </span>&#123;</span><br><span class="line">    DisplayMetrics appDisplayMetrics = application.getResources().getDisplayMetrics();</span><br><span class="line">    <span class="keyword">if</span> (sNoncompatDensity == <span class="number">0</span>) &#123;</span><br><span class="line">        sNoncompatDensity = appDisplayMetrics.density;</span><br><span class="line">        sNoncompatScaledDensity = appDisplayMetrics.scaledDensity;</span><br><span class="line">        <span class="comment">// 防止系统切换后不起作用</span></span><br><span class="line">        application.registerComponentCallbacks(<span class="keyword">new</span> ComponentCallbacks() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onConfigurationChanged</span><span class="params">(Configuration newConfig)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">if</span> (newConfig != <span class="keyword">null</span> &amp;&amp; newConfig.fontScale &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    sNoncompatScaledDensity = application.getResources().getDisplayMetrics().scaledDensity;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onLowMemory</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">float</span> targetDensity = appDisplayMetrics.widthPixels / <span class="number">360</span>;</span><br><span class="line">    <span class="comment">// 防止字体变小</span></span><br><span class="line">    <span class="keyword">float</span> targetScaleDensity = targetDensity * (sNoncompatScaledDensity / sNoncompatDensity);</span><br><span class="line">    <span class="keyword">int</span> targetDensityDpi = (<span class="keyword">int</span>) (<span class="number">160</span> * targetDensity);</span><br><span class="line"></span><br><span class="line">    appDisplayMetrics.density = targetDensity;</span><br><span class="line">    appDisplayMetrics.scaledDensity = targetScaleDensity;</span><br><span class="line">    appDisplayMetrics.densityDpi = targetDensityDpi;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> DisplayMetrics activityDisplayMetrics = activity.getResources().getDisplayMetrics();</span><br><span class="line">    activityDisplayMetrics.density = targetDensity;</span><br><span class="line">    activityDisplayMetrics.scaledDensity = targetScaleDensity;</span><br><span class="line">    activityDisplayMetrics.densityDpi = targetDensityDpi;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同时在 Activity#onCreate 方法中调用下。代码比较简单，也没有涉及到系统非公开api的调用，因此理论上不会影响app稳定性。</p>
+<p><strong>缺点:</strong></p>
+<blockquote>
+<ul>
+<li>只能支持以高或宽中的一个作为基准进行适配。</li>
+<li>只需要修改一次 density，项目中的所有地方都会自动适配，这个看似解放了双手，减少了很多操作，但是实际上反应了一个缺点，那就是只能一刀切的将整个项目进行适配，但适配范围是不可控的。项目中如果采用了系统控件、三方库控件、等不是我们项目自身设计的控件，这时就会出现和我们项目自身的设计图尺寸差距非常大的问题。</li>
+</ul>
+</blockquote>
+<h1 id="相关的问题探讨"><a href="#相关的问题探讨" class="headerlink" title="相关的问题探讨"></a>相关的问题探讨</h1><h2 id="drawable-xhdpi中的图片放到xxhdpi的手机上，内存是如何变化的"><a href="#drawable-xhdpi中的图片放到xxhdpi的手机上，内存是如何变化的" class="headerlink" title="drawable-xhdpi中的图片放到xxhdpi的手机上，内存是如何变化的"></a>drawable-xhdpi中的图片放到xxhdpi的手机上，内存是如何变化的</h2><h3 id="图片所占内存是如何计算的？"><a href="#图片所占内存是如何计算的？" class="headerlink" title="图片所占内存是如何计算的？"></a>图片所占内存是如何计算的？</h3><p>现在有一张图片： 宽度 = 450像素，高度 = 300像素</p>
+<ol>
+<li>如果在与手机屏幕密度相同的文件夹下存在此资源，那么内存=图片的宽度（像素）图片的高度（像素） 色彩格式所占的字节数；<br>比方说 你的手机分辨率 是 xxhdpi，你有一张图片放在 drawable-xxhdpi文件夹中，图片的色彩格式为 ARGB-8888，即每个像素站4个字节；</li>
+</ol>
+<p>图片占用的内存 = 450 * 300 *4 = 540_000 字节= 527 kb</p>
+<ol start="2">
+<li>如果手机屏幕密度相同的文件夹下不存在此文件，而在大于手机屏幕密度的文件夹下存在此资源， 会进行缩小相应的倍数的平方。<br>xx-hdpi 的密度值是 480， xxx-hdpi 的密度值是640</li>
+</ol>
+<p>比方说 你的手机还是 xxhdpi ，此时你的图片放在 drawable-xxxhdpi文件夹下；</p>
+<p>图片占用的内存 = 450 / (640/480) * 300 / (640/480) * 4 = 303_750 字节 = 297kb</p>
+<ol start="3">
+<li>若在大于手机屏幕密度的文件夹下没找到此资源，则会向小于手机屏幕密度的文件夹下查找，如果存在，则会进行放大相应的倍数的平方。<br>比方说 你的手机还是 xxhdpi ，此时你的图片放在 drawable-xhdpi文件夹下；</li>
+</ol>
+<p>xx-hdpi 的密度值是 480， x-hdpi 的密度值是320</p>
+<p>图片占用的内存 = 400 * (480 / 320) * 350 * (480 / 320) * 4 = 1215_000 字节 =1187 kb</p>
+<h3 id="结果验证"><a href="#结果验证" class="headerlink" title="结果验证"></a>结果验证</h3><p>验证的手机为 华为P40：<br>分辨率为 ：2340 * 1080<br>屏幕尺寸：6.1<br>可以算出来，屏幕密度为 422，即 xx-hdpi。</p>
+<p>图片大小：450*300</p>
+<p><img src="/images/android_screen_adjust07.png" alt="image"></p>
+<p>验证1：手机屏幕密度与图片所在的文件夹分辨率相同</p>
+<p>即 图片也放在 xx-hdpi 目录下：</p>
+<p><img src="/images/android_screen_adjust08.png" alt="image"></p>
+<p>计算图片的宽度和高度：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.a1);</span><br><span class="line"><span class="keyword">int</span> width = bm.getWidth();</span><br><span class="line"><span class="keyword">int</span> height = bm.getHeight();</span><br><span class="line"></span><br><span class="line">Log.e(<span class="string">&quot;ARouterMainActivity&quot;</span>, <span class="string">&quot;width = &quot;</span> + width + <span class="string">&quot;, height = &quot;</span> + height);</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/android_screen_adjust09.png" alt="image"></p>
+<p>可以验证上面的情况1啦。</p>
+<p>验证情况2：如果手机屏幕密度相同的文件夹下不存在此文件，而在大于手机屏幕密度的文件夹下存在此资源：</p>
+<p><img src="/images/android_screen_adjust10.png" alt="image"></p>
+<p>即 宽度 = 图片宽度 450 / (640/480) = 337.5。<br>高度 = 图片宽度 300 / (640/480) = 225。<br>此时的内存= 337.5 * 225 * 4 = 303_750 字节</p>
+<p>即情况2也满足， 情况3就不验证了，感兴趣的可以自己验证下。</p>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><ol>
+<li>将图片放在比手机分辨率小的目录，图片所占的内存会 <strong>放大</strong> 手机密度/图片对应目录的密度的平方倍。</li>
+<li>将图片放在比手机分辨率大的目录，图片所占的内存会 <strong>缩小</strong> 图片对应目录的密度 <strong>/</strong> 手机密度的平方倍。</li>
+<li>相等情况下： 等于 图片的宽度 * 图片的高度 * 色彩格式对应的字节数</li>
+</ol>
+<h2 id="资源文件加载规则。比如说图片存放在drawable-hdpi和drawable-xxhdpi下，xhdpi的手机会加载哪张？"><a href="#资源文件加载规则。比如说图片存放在drawable-hdpi和drawable-xxhdpi下，xhdpi的手机会加载哪张？" class="headerlink" title="资源文件加载规则。比如说图片存放在drawable-hdpi和drawable-xxhdpi下，xhdpi的手机会加载哪张？"></a>资源文件加载规则。比如说图片存放在drawable-hdpi和drawable-xxhdpi下，xhdpi的手机会加载哪张？</h2><p>当App在特定设备上运行时对应dpi目录下没有找到某个资源时，遵循“<strong>先高再低</strong>”原则，然后按比例缩放图片。比如，当前为xhdpi设备，并且只有以下几个目录，则drawable的寻找顺序为：</p>
+<p>xhdpi-&gt;xxhdpi-&gt;xxxhdpi(如果没有更高的了)-&gt;nodpi(如果有的话)-&gt;hdpi-&gt;mdpi，如果在xxhdpi中找到目标图片，则压缩2/3来使用，如果在mdpi中找到图片，则放大2倍来使用。</p>
+<p>这很好理解，如果我们按规则放置两张图片，mdpi中为48x48，xxhdpi中为144x144，那么不管我们最后从哪个目录拿到图片，在xhdpi设备上显示的像素大小都是96x96，只是一个被拉伸而来，一个被压缩而来。由于xhdpi定义了96个像素点的物理尺寸，那么这张图的物理尺寸实际就被定下来了。同样的，mdpi中48个像素点的物理尺寸与xhdpi中96个像素点的物理尺寸是相同的，这就保证了该图片在任何设备上显示出的视觉大小一致。</p>
+<p>那么，一个结论就是，对于期望保持视觉大小一致的那部分图片而言，如果你也能接受android为你拉伸/压缩图片导致一定程度的模糊或者锐化，那么这些图片是不需要在每个drawable目录下都制作一份的。以现在主流设备来说一般可能在drawable-xxhdpi放置一份即可，这样可以尽量避免Android为我们放大图片所导致的OOM。</p>
+<p>当然，在某些情况下，我们会主观希望打破android提供的“视觉大小一致”这种机制，此时我们就可以建立另外的drawable目录来放置需要变化的图片了。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%80%BB%E7%BB%93/" rel="tag"># 总结</a>
+              <a href="/tags/%E9%80%82%E9%85%8D/" rel="tag"># 适配</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/11/24/android_hot_fix/" rel="prev" title="Android 热修复方案和原理">
+                  <i class="fa fa-chevron-left"></i> Android 热修复方案和原理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/11/30/android_launch_better_performace/" rel="next" title="Android性能优化-App启动速度优化">
+                  Android性能优化-App启动速度优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

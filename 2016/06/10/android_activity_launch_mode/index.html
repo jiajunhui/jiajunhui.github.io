@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="Activity的启动模式是android系统管理activity的重要设置项和方式。对应AndroidManifest中activity节点下的launchMode属性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Activity启动模式">
+<meta property="og:url" content="http://example.com/2016/06/10/android_activity_launch_mode/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="Activity的启动模式是android系统管理activity的重要设置项和方式。对应AndroidManifest中activity节点下的launchMode属性。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_activity_launch_mode01.jpeg">
+<meta property="og:image" content="http://example.com/images/android_activity_launch_mode02.jpeg">
+<meta property="og:image" content="http://example.com/images/android_activity_launch_mode03.jpeg">
+<meta property="og:image" content="http://example.com/images/android_activity_launch_mode04.jpeg">
+<meta property="og:image" content="http://example.com/images/android_activity_launch_mode05.jpeg">
+<meta property="og:image" content="http://example.com/images/android_activity_launch_mode06.jpeg">
+<meta property="og:image" content="http://example.com/images/android_activity_launch_mode07.jpeg">
+<meta property="article:published_time" content="2016-06-10T11:43:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:38:01.404Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="Activity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_activity_launch_mode01.jpeg">
+
+
+<link rel="canonical" href="http://example.com/2016/06/10/android_activity_launch_mode/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2016&#x2F;06&#x2F;10&#x2F;android_activity_launch_mode&#x2F;&quot;,&quot;path&quot;:&quot;2016&#x2F;06&#x2F;10&#x2F;android_activity_launch_mode&#x2F;&quot;,&quot;title&quot;:&quot;Activity启动模式&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Activity启动模式 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E5%A4%A7%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">四大启动模式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%89%E5%85%B3%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B"><span class="nav-number">2.</span> <span class="nav-text">有关启动模式的那些事</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-NEW-TASK%E5%88%86%E6%9E%90"><span class="nav-number">2.1.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_NEW_TASK分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-CLEAR-TASK%EF%BC%9A%E5%BF%85%E9%A1%BB%E9%85%8D%E5%90%88FLAG-ACTIVITY-NEW-TASK%E4%BD%BF%E7%94%A8"><span class="nav-number">2.2.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_CLEAR_TASK：必须配合FLAG_ACTIVITY_NEW_TASK使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-CLEAR-TOP"><span class="nav-number">2.3.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_CLEAR_TOP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-SINGLE-TOP"><span class="nav-number">2.4.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_SINGLE_TOP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9D%9EActivity%E5%90%AF%E5%8A%A8Activity%E8%A6%81%E5%BC%BA%E5%88%B6%E8%A7%84%E5%AE%9A%E4%BD%BF%E7%94%A8%E5%8F%82%E6%95%B0FLAG-ACTIVITY-NEW-TASK"><span class="nav-number">2.5.</span> <span class="nav-text">为什么非Activity启动Activity要强制规定使用参数FLAG_ACTIVITY_NEW_TASK</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2016/06/10/android_activity_launch_mode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Activity启动模式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-06-10 19:43:00" itemprop="dateCreated datePublished" datetime="2016-06-10T19:43:00+08:00">2016-06-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Activity的启动模式是android系统管理activity的重要设置项和方式。对应AndroidManifest中activity节点下的launchMode属性。</p>
+<span id="more"></span>
+
+<h1 id="四大启动模式"><a href="#四大启动模式" class="headerlink" title="四大启动模式"></a>四大启动模式</h1><ol>
+<li><p>standard:标准模式，默认</p>
+<p>standard是默认的启动模式，即标准模式，每启动一个Activity，都会创建一个新的实例</p>
+</li>
+<li><p>singleTop:Task栈顶复用模式</p>
+<p>singleTop:当要启动的目标Activity已经位于栈顶时，不会创建新的实例，会复用栈顶的Activity，并且其onNewIntent()方法会被调用，如果目标Activity不在栈顶，则跟standard一样创建新的实例。</p>
+</li>
+<li><p>singleTask:Task栈内复用模式</p>
+<p>这种模式启动的Activity<strong>只会存在相应的Activity的taskAffinit任务栈中</strong>，同一时刻系统中只会存在一个实例，已存在的实例被再次启动时，会重新唤起该实例，并清理当前Task任务栈该实例之上的所有Activity，同时回调onNewIntent()方法。</p>
+</li>
+<li><p>singleInstance:全局单例模式</p>
+<p>这种模式启动的Activity独自占用一个Task任务栈，同一时刻系统中只会存在一个实例，已存在的实例被再次启动时，只会唤起原实例，并回调onNewIntent()方法。</p>
+</li>
+</ol>
+<p>需要说明的是：<u><strong>上面的场景仅仅适用于Activity启动Activity，并且采用的都是默认Intent，没有额外添加任何Flag</strong>，否则表现就可能跟上面的完全不一致，尤其要注意的是FLAG_ACTIVITY_NEW_TASK的使用，后面从源码中看，依靠FLAG_ACTIVITY_NEW_TASK其实可以分为两派。</u></p>
+<h1 id="有关启动模式的那些事"><a href="#有关启动模式的那些事" class="headerlink" title="有关启动模式的那些事"></a>有关启动模式的那些事</h1><p>面试的时候，面试官经常同你随便侃侃Activity的启动模式，但Activity启动牵扯的知识点其实很多，并非能单单用四个启动模式就能概括的，默认的启动模式的表现会随着Intent Flag的设置而改变，因此侃Activity启动模式大多走流程装逼，最多结合项目遇到的问题，随便刁难一下面试者，并不太容易把控，也许最后，面试官跟面试者的答案都是错了，比如在Service中必须通过设置FLAG_ACTIVITY_NEW_TASK才能启动Activity，这个时候启动Activit会有什么样的表现呢？就这一个问题，答案就要分好几个场景：</p>
+<ul>
+<li><p>Activity的taskAffinity属性的Task栈是否存在</p>
+</li>
+<li><p>如果存在，要看Activity是否存已经存在于该Task</p>
+</li>
+<li><p>如果已经存在于该taskAffinity的Task，要看其是不是其rootActivity</p>
+</li>
+<li><p>如果是其rootActivity，还要看启动该Activity的Intent是否跟当前intent相等</p>
+</li>
+</ul>
+<p>不同场景，所表现的行为都会有所不同，再比如singleInstance属性，如果设置了，大家都知道只有一个实例，将来再启动会复用，但是如果使用Intent.FLAG_ACTIVITY_CLEAR_TASK来启动，仍然会重建，并非完全遵守singleInstance的说明，还有不同Flag在叠加使用时候也会有不同的表现，单一而论Activity启动模式其实是很难的。</p>
+<h2 id="Intent-FLAG-ACTIVITY-NEW-TASK分析"><a href="#Intent-FLAG-ACTIVITY-NEW-TASK分析" class="headerlink" title="Intent.FLAG_ACTIVITY_NEW_TASK分析"></a>Intent.FLAG_ACTIVITY_NEW_TASK分析</h2><p>从源码来看，Intent.FLAG_ACTIVITY_NEW_TASK是启动模式中最关键的一个Flag，依据该Flag启动模式可以分成两类，设置了该属性的与未设置该属性的，对于非Activity启动的Activity（比如Service或者通知中启动的Activity）需要显示的设置Intent.FLAG_ACTIVITY_NEW_TASK，而singleTask及singleInstance在AMS中被预处理后，隐形的设置了Intent.FLAG_ACTIVITY_NEW_TASK，而启动模式是standard及singletTop的Activity不会被设置Intent.FLAG_ACTIVITY_NEW_TASK，除非通过显示的intent setFlag进行设置。</p>
+<p><strong>FLAG_ACTIVITY_NEW_TASK这个属性更多的关注点是在Task，可以认为没有设置FLAG_ACTIVITY_NEW_TASK的情况下，taskAffinity可以不考虑</strong>，大多数情况下，需要将Activity引入到自己taskAffinity的Task中，<strong>Intent.FLAG_ACTIVITY_NEW_TASK的初衷是在Activity目标taskAffinity的Task中启动</strong>，非Activity启动Activity都必须添加Intent.FLAG_ACTIVITY_NEW_TASK才行，以Service启动的Activity为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent(BackGroundService.<span class="keyword">this</span>, A.class);</span><br><span class="line">intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</span><br><span class="line">startActivity(intent);</span><br></pre></td></tr></table></figure>
+
+<p>这种情况很有意思，如果目标Activity实例或者Task不存在，则一定会新建Activity，并将目标Task移动到前台，但是如果Activity存在，却并不一定复用，也不一定可见。这里假定A是standard的Activity，如果已经有一个A实例，并且所在的堆栈的taskAffinity跟A的taskAffinity一致，这个时候要看这个task的根Activity是不是A，如果是A，还要看A的intent是不是跟当前的启动的intent相等，如果都满足，只要将task可见即可。</p>
+<p>否则，就需要新建A，并根据A的task栈的存在情况而选择直接入栈还是新建栈。但是，如果Intent想要的启动的Activity的目标堆栈存在，那就将整个堆栈往前迁移，如果位于顶部的Task栈正好是目标Activity的Task栈，那就不做任何处理，连onNewIntent都不会回调，怎么判断目标的Activity的Task栈同找到的栈一致呢？<strong>如果找不到目标Task自然会启动Task，如果目标task栈根Activit的intent同新将要启动的Activit相同，就不启动新Activity，否则启动Activity</strong>。</p>
+<p><img src="/images/android_activity_launch_mode01.jpeg" alt="img"></p>
+<h2 id="Intent-FLAG-ACTIVITY-CLEAR-TASK：必须配合FLAG-ACTIVITY-NEW-TASK使用"><a href="#Intent-FLAG-ACTIVITY-CLEAR-TASK：必须配合FLAG-ACTIVITY-NEW-TASK使用" class="headerlink" title="Intent.FLAG_ACTIVITY_CLEAR_TASK：必须配合FLAG_ACTIVITY_NEW_TASK使用"></a>Intent.FLAG_ACTIVITY_CLEAR_TASK：必须配合FLAG_ACTIVITY_NEW_TASK使用</h2><p>If set in an Intent passed to Context.startActivity(), this flag will cause any existing task that would be associated with the activity to be cleared before the activity is started. That is, the activity becomes the new root of an otherwise empty task, and any old activities are finished. This can only be used in conjunction with FLAG_ACTIVITY_NEW_TASK.</p>
+<p>这个属性必须同FLAG_ACTIVITY_NEW_TASK配合使用，如果设置了FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK，如果目标task已经存在，将清空已存在的目标Task，否则，新建一个Task栈，之后，新建一个Activity作为根Activity。Intent.FLAG_ACTIVITY_CLEAR_TASK的优先级最高，基本可以无视所有的配置，包括启动模式及Intent Flag，哪怕是singleInstance也会被finish，并重建。</p>
+<p><img src="/images/android_activity_launch_mode02.jpeg" alt="img"></p>
+<h2 id="Intent-FLAG-ACTIVITY-CLEAR-TOP"><a href="#Intent-FLAG-ACTIVITY-CLEAR-TOP" class="headerlink" title="Intent.FLAG_ACTIVITY_CLEAR_TOP"></a>Intent.FLAG_ACTIVITY_CLEAR_TOP</h2><p>如果没有使用FLAG_ACTIVITY_NEW_TASK，目标是当前Task栈，根据不同的组合会产生不同的效果，如果单独使用Intent.FLAG_ACTIVITY_CLEAR_TOP，并且没有设置特殊的launchmode，那么，Google官方的示例是：如果ABCD Task中的D采用Intent.FLAG_ACTIVITY_CLEAR_TOP唤起B，这个时候首先会将CD出栈，但是至于B是否会重建，要视情况而定，如果没有设置FLAG_ACTIVITY_SINGLE_TOP，则会将B finish掉，之后创建新的入栈。如果同一个栈中原来有</p>
+<p><img src="/images/android_activity_launch_mode03.jpeg" alt="img"></p>
+<p>如果没有则新建，不会去另一个栈中寻找。</p>
+<p><img src="/images/android_activity_launch_mode04.jpeg" alt="img"></p>
+<p>如果同时设置了FLAG_ACTIVITY_SINGLE_TOP，在当前栈已有的情况下就不会重建，而是直接回调B的onNewIntent(),</p>
+<p><img src="/images/android_activity_launch_mode05.jpeg" alt="img"></p>
+<p>官方解释如下：</p>
+<p>For example, consider a task consisting of the activities: A, B, C, D. If D calls startActivity() with an Intent that resolves to the component of activity B, then C and D will be finished and B receive the given Intent, resulting in the stack now being: A, B。</p>
+<p>The currently running instance of activity B in the above example will either receive the new intent you are starting here in its onNewIntent() method, or be itself finished and restarted with the new intent. </p>
+<p>If it has declared its launch mode to be “multiple” (the default) and you have not set FLAG_ACTIVITY_SINGLE_TOP in the same intent, then it will be finished and re-created; for all other launch modes or if FLAG_ACTIVITY_SINGLE_TOP is set then this Intent will be delivered to the current instance’s onNewIntent().</p>
+<p>如果同时使用了FLAG_ACTIVITY_NEW_TASK ，这个时候，目标是Activity自己所属的Task栈，如果在自己的Task中能找到一个Activity实例，则将其上面的及自身清理掉，之后重建。</p>
+<p><img src="/images/android_activity_launch_mode06.jpeg" alt="img"></p>
+<p>如果同时在加上FLAG_ACTIVITY_SINGLE_TOP，会更特殊一些，如果topActivity不是目标Activity，就会去目标Task中去找，并唤起</p>
+<p>Intent.FLAG_ACTIVITY_CLEAR_TOP| FLAG_ACTIVITY_NEW_TASK|singleTop.jpg</p>
+<p><strong>如果topActivity是目标Activity，就直接回调topActivity的onNewIntent，无论topActivity是不是在目标Task中</strong></p>
+<p><img src="/images/android_activity_launch_mode07.jpeg" alt="img"></p>
+<h2 id="Intent-FLAG-ACTIVITY-SINGLE-TOP"><a href="#Intent-FLAG-ACTIVITY-SINGLE-TOP" class="headerlink" title="Intent.FLAG_ACTIVITY_SINGLE_TOP"></a>Intent.FLAG_ACTIVITY_SINGLE_TOP</h2><p>Intent.FLAG_ACTIVITY_SINGLE_TOP多用来做辅助作用，跟launchmode中的singleTop作用一样，在Task栈顶有的话，就不新建，栈顶没有的话，就新建，这里的Task可能是目标栈，也可能是当前Task栈，配合FLAG_ACTIVITY_NEW_TASK及FLAG_ACTIVITY_CLEAR_TOP都会有很有意思的效果。</p>
+<h2 id="为什么非Activity启动Activity要强制规定使用参数FLAG-ACTIVITY-NEW-TASK"><a href="#为什么非Activity启动Activity要强制规定使用参数FLAG-ACTIVITY-NEW-TASK" class="headerlink" title="为什么非Activity启动Activity要强制规定使用参数FLAG_ACTIVITY_NEW_TASK"></a>为什么非Activity启动Activity要强制规定使用参数FLAG_ACTIVITY_NEW_TASK</h2><p>从源码上说，ContextImpl在前期做了检查，如果没添加Intent.FLAG_ACTIVITY_NEW_TASK就抛出异常，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startActivity</span><span class="params">(Intent intent, Bundle options)</span> </span>&#123;</span><br><span class="line">	warnIfCallingFromSystemProcess();</span><br><span class="line">	<span class="keyword">if</span> ((intent.getFlags()&amp;Intent.FLAG_ACTIVITY_NEW_TASK) == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> AndroidRuntimeException(</span><br><span class="line">            <span class="string">&quot;Calling startActivity() from outside of an Activity &quot;</span></span><br><span class="line">            + <span class="string">&quot; context requires the FLAG_ACTIVITY_NEW_TASK flag.&quot;</span></span><br><span class="line">            + <span class="string">&quot; Is this really what you want?&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为什么要这么呢？其实直观很好理解，如果不是在Activity中启动的，那就可以看做不是用户主动的行为，也就说这个界面可能出现在任何APP之上，如果不用Intent.FLAG_ACTIVITY_NEW_TASK将其限制在自己的Task中，那用户可能会认为该Activity是当前可见APP的页面，这是不合理的。举个例子：我们在听音乐，这个时候如果邮件Service突然要打开一个Activity，如果不用Intent.FLAG_ACTIVITY_NEW_TASK做限制，那用户可能认为这个Activity是属于音乐APP的，因为用户点击返回的时候，可能会回到音乐，而不是邮件（如果邮件之前就有界面）。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Activity/" rel="tag"># Activity</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/06/08/java_thread_pool/" rel="prev" title="Java-线程池和阻塞队列">
+                  <i class="fa fa-chevron-left"></i> Java-线程池和阻塞队列
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/06/15/java_class_loader_and_instance/" rel="next" title="Java 类加载与对象实例化">
+                  Java 类加载与对象实例化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

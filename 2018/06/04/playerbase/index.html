@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="视频播放是我们开发中比较常见的场景。这两年关于视频方面的热度不断提升，可以说前两年是直播年，今年是小视频年，各种短视频应用铺天盖地。对于视频的业务场景也越来越丰富，功能也越来越多。对于我们开发来说播放相关组件的代码变得也越来越复杂，管理维护成本也越来越高，面对不断迭代的业务，我们需要一种有效的方案来应对这种频繁的业务变化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android播放器基础封装库PlayerBase">
+<meta property="og:url" content="http://example.com/2018/06/04/playerbase/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="视频播放是我们开发中比较常见的场景。这两年关于视频方面的热度不断提升，可以说前两年是直播年，今年是小视频年，各种短视频应用铺天盖地。对于视频的业务场景也越来越丰富，功能也越来越多。对于我们开发来说播放相关组件的代码变得也越来越复杂，管理维护成本也越来越高，面对不断迭代的业务，我们需要一种有效的方案来应对这种频繁的业务变化。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/playerbase_cover_eg01.png">
+<meta property="og:image" content="http://example.com/images/playerbase_cover_eg02.png">
+<meta property="og:image" content="http://example.com/images/playerbase_cover_eg03.png">
+<meta property="og:image" content="http://example.com/images/playerbase_cover_eg04.png">
+<meta property="og:image" content="http://example.com/images/playerbase_cover_eg05.png">
+<meta property="og:image" content="http://example.com/images/playerbase_cover_eg06.png">
+<meta property="og:image" content="http://example.com/images/playerbase_receiver_event.png">
+<meta property="og:image" content="http://example.com/images/playerbase_receivergroup.png">
+<meta property="og:image" content="http://example.com/images/playerbase_view_struct.png">
+<meta property="og:image" content="http://example.com/images/playerbase_widget_struct.png">
+<meta property="og:image" content="http://example.com/images/playerbase_dataprovider.png">
+<meta property="article:published_time" content="2018-06-04T12:31:36.000Z">
+<meta property="article:modified_time" content="2022-05-15T02:12:09.918Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="框架">
+<meta property="article:tag" content="播放器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/playerbase_cover_eg01.png">
+
+
+<link rel="canonical" href="http://example.com/2018/06/04/playerbase/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2018&#x2F;06&#x2F;04&#x2F;playerbase&#x2F;&quot;,&quot;path&quot;:&quot;2018&#x2F;06&#x2F;04&#x2F;playerbase&#x2F;&quot;,&quot;title&quot;:&quot;Android播放器基础封装库PlayerBase&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android播放器基础封装库PlayerBase | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">框架简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E7%89%B9%E8%89%B2"><span class="nav-number">2.</span> <span class="nav-text">功能特色</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%83%A8%E5%88%86%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">部分使用示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">框架的设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E5%9B%BE%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">4.1.</span> <span class="nav-text">视图的处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E6%94%B6%E8%80%85Receiver%E4%B8%8E%E8%A6%86%E7%9B%96%E5%B1%82Cover%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-number">4.2.</span> <span class="nav-text">接收者Receiver与覆盖层Cover的概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E6%94%B6%E8%80%85%E7%BB%84%E7%AE%A1%E7%90%86%EF%BC%88ReceiverGroup%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">接收者组管理（ReceiverGroup）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E9%97%B4%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB%EF%BC%88GroupValue%EF%BC%89"><span class="nav-number">4.4.</span> <span class="nav-text">组件间数据共享（GroupValue）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E5%9B%BE%E7%9A%84%E5%B8%83%E5%B1%80%E7%AE%A1%E7%90%86%EF%BC%88%E5%88%86%E7%BA%A7%E5%A1%AB%E5%85%85%EF%BC%89"><span class="nav-number">4.5.</span> <span class="nav-text">视图的布局管理（分级填充）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E7%9A%84%E5%B1%82%E7%BA%A7%E5%85%B3%E7%B3%BB"><span class="nav-number">4.6.</span> <span class="nav-text">组件的层级关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E7%94%9F%E4%BA%A7%E8%80%85%EF%BC%88EventProducer%EF%BC%89"><span class="nav-number">4.7.</span> <span class="nav-text">事件生产者（EventProducer）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%8F%90%E4%BE%9B%E8%80%85%EF%BC%88DataProvider%EF%BC%89"><span class="nav-number">4.8.</span> <span class="nav-text">数据提供者（DataProvider）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E4%BD%BF%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">功能使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VideoView%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">5.1.</span> <span class="nav-text">VideoView的使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AVPlayer%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">5.2.</span> <span class="nav-text">AVPlayer的使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E8%81%94%E5%8A%A9%E6%89%8B%E7%9A%84%E4%BD%BF%E7%94%A8%EF%BC%88RelationAssist%EF%BC%89"><span class="nav-number">5.3.</span> <span class="nav-text">关联助手的使用（RelationAssist）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E5%8A%A9%E6%89%8B%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%88EventAssistHandler%EF%BC%89"><span class="nav-number">5.4.</span> <span class="nav-text">事件助手处理器（EventAssistHandler）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Window%E6%A8%A1%E5%BC%8F%E6%92%AD%E6%94%BE"><span class="nav-number">5.5.</span> <span class="nav-text">Window模式播放</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E6%A0%B7%E5%BC%8F%E8%AE%BE%E7%BD%AE%EF%BC%88StyleSetter%EF%BC%89"><span class="nav-number">5.6.</span> <span class="nav-text">一些样式设置（StyleSetter）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E7%A0%81%E5%99%A8%E7%9A%84%E6%8E%A5%E5%85%A5"><span class="nav-number">5.7.</span> <span class="nav-text">解码器的接入</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/06/04/playerbase/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android播放器基础封装库PlayerBase
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-06-04 20:31:36" itemprop="dateCreated datePublished" datetime="2018-06-04T20:31:36+08:00">2018-06-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+    <span class="post-meta-item">
+	<span class="post-meta-item-icon">
+		<i class="fa fa-arrow-up"></i>
+	</span>
+	
+      	<span class="post-meta-item-text">
+		<font color="RED">[置顶]</font>
+	</span>
+      
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>视频播放是我们开发中比较常见的场景。这两年关于视频方面的热度不断提升，可以说前两年是直播年，今年是小视频年，各种短视频应用铺天盖地。对于视频的业务场景也越来越丰富，功能也越来越多。对于我们开发来说播放相关组件的代码变得也越来越复杂，管理维护成本也越来越高，面对不断迭代的业务，我们需要一种有效的方案来应对这种频繁的业务变化。</p>
+<span id="more"></span>
+
+<p>这几年一直在做视频相关的业务，手机端和TV端均做过适配开发。<strong>MediaPlayer</strong>、<strong>exoplayer</strong>、<strong>ijkplayer</strong>、<strong>VLC</strong>、<strong>FFmpeg</strong>等都摸索使用过。这一路遇到很多问题……说多了都是泪，为了适应多变的产品需求，中间重构了N多个版本。最终<strong>PlayerBase</strong>也就诞生了。<strong>PlayerBase3</strong> 版本进行了完整重构设计，目前大致框架基本已稳定下来。对于大部分应用视频播放组件场景都能轻松处理。</p>
+<p><strong>^_^ star传送门</strong>—&gt;<strong>项目地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/jiajunhui/PlayerBase">https://github.com/jiajunhui/PlayerBase</a></p>
+<p>QQ交流群：<strong>600201778</strong>    ，有问题群里直接提出，看到后会一一解答。</p>
+<p>P图技术有限，文中图片就凑合着看吧！</p>
+<h1 id="框架简介"><a href="#框架简介" class="headerlink" title="框架简介"></a>框架简介</h1><p><strong>请注意！</strong> <strong>请注意！</strong> <strong>请注意！</strong> <strong>PlayerBase</strong>区别于大部分播放器封装库。</p>
+<p><strong>PlayerBase</strong>是一种将解码器和播放视图组件化处理的解决方案框架。您需要什么解码器实现框架定义的抽象引入即可，对于视图，无论是播放器内的控制视图还是业务视图，均可以做到组件化处理。将播放器的开发变得清晰简单，更利于产品的迭代。</p>
+<p><strong>PlayerBase</strong>不会为您做任何多余的功能业务组件，有别于大部分播放器封装库的通过配置或者继承然后重写然后定制你需要的功能组件和屏蔽你不需要的功能组件（这种之前我也经历过，上层可能需要经常改动，感觉很low!!!）。正确的方向应该是需要什么组件就拓展添加什么组件，不需要时移除即可，而不是已经提供了该组件去选择用不用。</p>
+<h1 id="功能特色"><a href="#功能特色" class="headerlink" title="功能特色"></a>功能特色</h1><ul>
+<li><strong>视图的组件化处理</strong><br></li>
+<li><strong>视图组件的高复用、低耦合</strong><br></li>
+<li><strong>解码方案的组件化、配置化管理</strong><br></li>
+<li><strong>视图组件的完全定制</strong><br></li>
+<li><strong>视图组件的热插拔，用时添加不用时移除</strong><br></li>
+<li><strong>自定义接入各种解码方案</strong><br></li>
+<li><strong>解码方案的切换</strong><br></li>
+<li><strong>支持倍速播放</strong><br></li>
+<li><strong>支持Window模式播放</strong><br></li>
+<li><strong>支持Window模式的无缝续播</strong><br></li>
+<li><strong>支持列表模式的无缝续播</strong><br></li>
+<li><strong>支持跨页面无缝续播</strong><br></li>
+<li><strong>支持调整画面显示比例</strong><br></li>
+<li><strong>支持动态调整渲染视图类型</strong><br></li>
+<li><strong>支持VideoView切角处理，边缘阴影效果</strong><br></li>
+<li><strong>提供自定义数据提供者</strong><br></li>
+<li><strong>统一的事件下发机制</strong><br></li>
+<li><strong>扩展事件的添加</strong><br></li>
+<li><strong>等功能……</strong><br></li>
+</ul>
+<h1 id="部分使用示例"><a href="#部分使用示例" class="headerlink" title="部分使用示例"></a>部分使用示例</h1><ol>
+<li><strong>解码配置和框架初始化</strong></li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        <span class="comment">//如果您想使用默认的网络状态事件生产者，请添加此行配置。</span></span><br><span class="line">        <span class="comment">//并需要添加权限 android.permission.ACCESS_NETWORK_STATE</span></span><br><span class="line">        PlayerConfig.setUseDefaultNetworkEventProducer(<span class="keyword">true</span>);</span><br><span class="line">        <span class="comment">//设置默认解码器</span></span><br><span class="line">        <span class="keyword">int</span> defaultPlanId = <span class="number">1</span>;</span><br><span class="line">        PlayerConfig.addDecoderPlan(<span class="keyword">new</span> DecoderPlan(defaultPlanId, IjkPlayer.class.getName(), <span class="string">&quot;IjkPlayer&quot;</span>));</span><br><span class="line">PlayerConfig.setDefaultPlanId(defaultPlanId);</span><br><span class="line">        <span class="comment">//初始化库</span></span><br><span class="line">        PlayerLibrary.init(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><strong>组装组件</strong>（添加您需要的组件【组件来自用户自定义，框架不提供任何视图组件】）</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ReceiverGroup receiverGroup = <span class="keyword">new</span> ReceiverGroup();</span><br><span class="line"><span class="comment">//Loading组件</span></span><br><span class="line">receiverGroup.addReceiver(KEY_LOADING_COVER, <span class="keyword">new</span> LoadingCover(context));</span><br><span class="line"><span class="comment">//Controller组件</span></span><br><span class="line">receiverGroup.addReceiver(KEY_CONTROLLER_COVER, <span class="keyword">new</span> ControllerCover(context));</span><br><span class="line"><span class="comment">//CompleteCover组件</span></span><br><span class="line">receiverGroup.addReceiver(KEY_COMPLETE_COVER, <span class="keyword">new</span> CompleteCover(context));</span><br><span class="line"><span class="comment">//Error组件</span></span><br><span class="line">receiverGroup.addReceiver(KEY_ERROR_COVER, <span class="keyword">new</span> ErrorCover(context));</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><strong>设置组件启动播放</strong></li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BaseVideoView videoView = findViewById(R.id.videoView);</span><br><span class="line">videoView.setReceiverGroup(receiverGroup);</span><br><span class="line">DataSource data = <span class="keyword">new</span> DataSource(<span class="string">&quot;http://url...&quot;</span>);</span><br><span class="line">videoView.setDataSource(data);</span><br><span class="line">videoView.start();</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li><strong>事件的监听</strong></li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//player event</span></span><br><span class="line">videoView.setOnPlayerEventListener(<span class="keyword">new</span> OnPlayerEventListener()&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPlayerEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span></span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//receiver event</span></span><br><span class="line">videoView.setOnReceiverEventListener(<span class="keyword">new</span> OnReceiverEventListener()&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceiverEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><strong>详细使用示例请参阅github项目主页及wiki介绍</strong></p>
+<h1 id="框架的设计"><a href="#框架的设计" class="headerlink" title="框架的设计"></a>框架的设计</h1><h2 id="视图的处理"><a href="#视图的处理" class="headerlink" title="视图的处理"></a>视图的处理</h2><p>别小看一个小小的播放器，里面真的是别有洞天。有时视图组件复杂到你怀疑人生。</p>
+<p>我们先看下播放器开发时常见的一些视图场景：</p>
+<div align="center">
+<img src="/images/playerbase_cover_eg01.png" width="640" height="360">
+<img src="/images/playerbase_cover_eg02.png" width="640" height="360">
+</div>
+
+<div align="center">
+<img src="/images/playerbase_cover_eg03.png" width="640" height="360">
+<img src="/images/playerbase_cover_eg04.png" width="640" height="360">
+</div>
+
+<div align="center">
+<img src="/images/playerbase_cover_eg05.png" width="640" height="360">
+<img src="/images/playerbase_cover_eg06.png" width="640" height="360">
+</div>
+
+<p>以上是我们最常见到的一些视图（其实还有很多，比如清晰度切换、视频列表、播放完成提示页等等），这些视图如果没有一个行之有效的方案来进行管理，将逐渐会乱到失控。</p>
+<p>上面只是列出了控制器视图、加载视图、手势视图、错误视图、弹幕视图和广告视图，这一股脑的视图都是和播放紧密相连的，完全由播放状态驱动，视图之间可能共存、可能制约。</p>
+<p>那么这些视图如何进行统一的管理呢？光布局文件就够喝一壶了吧，即便用include来管理依然摆脱不了显示层级的管理问题。要是一股脑全写到一个<strong>xml</strong>中，想想都可怕……，<br>改进型的一般都是把每个组件封装成View了，然后再分别写到布局中，显然比前一种要轻松一些。但是，但是播放器和组件间的通信、组件与组件间的通信是个问题。依然有问题存在：</p>
+<ol>
+<li><em><strong>组件布局的层级完全由布局文件决定了，想调整只能去修改布局文件。并不友好。</strong></em></li>
+<li><em><strong>组件和播放器完全捆绑了，耦合度相当高，播放器和组件，组件和组件间的通信完全直接使用引用去操作，如果产品说某个组件要去掉或者大改，你就哭吧，改不好手一哆嗦就有可能带来一堆bug。组件耦合度高，并不支持插拔。这是最大阻碍。</strong></em></li>
+<li><em><strong>组件的复用困难。</strong></em></li>
+</ol>
+<p>接下来，且看PlayerBase如何做。</p>
+<h2 id="接收者Receiver与覆盖层Cover的概念"><a href="#接收者Receiver与覆盖层Cover的概念" class="headerlink" title="接收者Receiver与覆盖层Cover的概念"></a>接收者Receiver与覆盖层Cover的概念</h2><p>做过播放器开发的应该都很清楚一点，所有视图的工作都是由状态事件来驱动的，这是一条主线。有可能是来自播放器的事件（比如解码器出错了），也有可能是来自某个视图的事件（比如手势调节播放进度），还有可能是外部事件（比如网络状态变化）。</p>
+<p>这些信息我们可以归结为</p>
+<ul>
+<li>视图是事件接收者，也是事件的生产者</li>
+<li>解码器是事件生产者</li>
+<li>可能有外来的事件生产者</li>
+</ul>
+<p>也就是说我们把视图当做事件接收者，同时视图具备发送事件的能力。</p>
+<p>解码器不断发出自己工作状态的事件要传递给视图。</p>
+<p>外部的某些事件也需要传递给视图</p>
+<p><img src="/images/playerbase_receiver_event.png"></p>
+<p>至此，框架内部定义了事件接收者的概念，接收者作为事件消费者的同时也能生产事件，而覆盖层继承自接收者引入了视图View。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseReceiver</span> <span class="keyword">implements</span> <span class="title">IReceiver</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">notifyReceiverEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span></span>&#123;</span><br><span class="line">        <span class="comment">//..</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * all player event dispatch by this method.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onPlayerEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * error event.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onErrorEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * receivers event.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onReceiverEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * you can call this method dispatch private event for a receiver.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> Bundle Return value after the receiver&#x27;s response, nullable.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="function">Bundle <span class="title">onPrivateEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span></span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseCover</span> <span class="keyword">extends</span> <span class="title">BaseReceiver</span></span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> View <span class="title">onCreateCoverView</span><span class="params">(Context context)</span></span>;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>且看代码，有播放器的事件、有错误事件、有组件（Receiver）间的事件。这众多事件如何下发呢，如果有N多个接收者呢，如何破？</p>
+<h2 id="接收者组管理（ReceiverGroup）"><a href="#接收者组管理（ReceiverGroup）" class="headerlink" title="接收者组管理（ReceiverGroup）"></a>接收者组管理（ReceiverGroup）</h2><p>ReceiverGroup的出现目的就是对众多接收者进行统一的管理，统一的事件下发，当然还有下面的数据共享问题。来张图：</p>
+<p><img src="/images/playerbase_receivergroup.png"></p>
+<p>在ReceiverGroup中包含Cover（其实也是Receiver）和Receiver，提供了Receiver的添加、移除、遍历、销毁等操作。当有事件需要下发时，便可通过ReceiverGroup进行统一的遍历下发。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IReceiverGroup</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setOnReceiverGroupChangeListener</span><span class="params">(OnReceiverGroupChangeListener onReceiverGroupChangeListener)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * add a receiver, you need put a unique key for this receiver.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> receiver</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">addReceiver</span><span class="params">(String key, IReceiver receiver)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * remove a receiver by key.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">removeReceiver</span><span class="params">(String key)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * loop all receivers</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> onLoopListener</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">forEach</span><span class="params">(OnLoopListener onLoopListener)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * loop all receivers by a receiver filter.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> filter</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> onLoopListener</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">forEach</span><span class="params">(OnReceiverFilter filter, OnLoopListener onLoopListener)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * get receiver by key.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    &lt;T extends IReceiver&gt; <span class="function">T <span class="title">getReceiver</span><span class="params">(String key)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * get the ReceiverGroup group value.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">GroupValue <span class="title">getGroupValue</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * clean receivers.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">clearReceivers</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="组件间数据共享（GroupValue）"><a href="#组件间数据共享（GroupValue）" class="headerlink" title="组件间数据共享（GroupValue）"></a>组件间数据共享（GroupValue）</h2><p>播放器开发中很多时候我们需要依据某个视图的状态来限制另外视图的功能或状态，比如当处于加载中时禁止拖动进度条或者播放出错显示error后禁止其他视图操作等等。这些都属于状态上的相互制约。</p>
+<p>GroupValue就相当于提供了一个共享的数据池，当某个数据被刷新时，监听该数据的回调接口能及时收到通知，当然也可以直接去主动获取数据状态。你可以指定你要监听那些数据的更新事件，如果您注册了您要监听的数据的key值，其对应的value被更新时，您就会收到回调。然后您可以在回调中进行UI视图的控制。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomCover</span> <span class="keyword">extends</span> <span class="title">BaseCover</span></span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceiverBind</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onReceiverBind();</span><br><span class="line">        getGroupValue().registerOnGroupValueUpdateListener(mOnGroupValueUpdateListener);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="keyword">private</span> IReceiverGroup.OnGroupValueUpdateListener mOnGroupValueUpdateListener =</span><br><span class="line">            <span class="keyword">new</span> IReceiverGroup.OnGroupValueUpdateListener() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String[] filterKeys() &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> String[]&#123; DataInter.Key.KEY_COMPLETE_SHOW &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onValueUpdate</span><span class="params">(String key, Object value)</span> </span>&#123;</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceiverUnBind</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onReceiverUnBind();</span><br><span class="line">        getGroupValue().unregisterOnGroupValueUpdateListener(mOnGroupValueUpdateListener);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="视图的布局管理（分级填充）"><a href="#视图的布局管理（分级填充）" class="headerlink" title="视图的布局管理（分级填充）"></a>视图的布局管理（分级填充）</h2><p>上文中常见的视图组件，我们在使用中肯定会遇到覆盖优先级的问题。举个栗子，比如Error视图出现后其他的视图一概不可见，也就是说Error视图的优先级是最高的，谁都不能挡着它，我们创建了一个个的<strong>Cover</strong>视图，对于视图的放置就需要一个视图的优先级标量（<strong>CoverLevel</strong>）来进行控制，不同的<strong>Level</strong>的<strong>Cover</strong>视图会被放置于不同级别的容器内。</p>
+<p>总结为以下：</p>
+<ul>
+<li>指定<strong>Cover</strong>的优先级<strong>CoverLevel</strong></li>
+<li><strong>Cover</strong>组件被添加时自动根据<strong>Level</strong>值进行分别放置</li>
+</ul>
+<p>示意图<br><img src="/images/playerbase_view_struct.png"><br>代码示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomCover</span> <span class="keyword">extends</span> <span class="title">BaseCover</span></span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCoverLevel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> ICover.COVER_LEVEL_LOW;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>默认的视图容器管理器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DefaultLevelCoverContainer</span> <span class="keyword">extends</span> <span class="title">BaseLevelCoverContainer</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onAvailableCoverAdd</span><span class="params">(BaseCover cover)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onAvailableCoverAdd(cover);</span><br><span class="line">        <span class="keyword">switch</span> (cover.getCoverLevel())&#123;</span><br><span class="line">            <span class="keyword">case</span> ICover.COVER_LEVEL_LOW:</span><br><span class="line">                mLevelLowCoverContainer.addView(cover.getView(),getNewMatchLayoutParams());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> ICover.COVER_LEVEL_MEDIUM:</span><br><span class="line">                mLevelMediumCoverContainer.addView(cover.getView(),getNewMatchLayoutParams());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> ICover.COVER_LEVEL_HIGH:</span><br><span class="line">                mLevelHighCoverContainer.addView(cover.getView(),getNewMatchLayoutParams());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="组件的层级关系"><a href="#组件的层级关系" class="headerlink" title="组件的层级关系"></a>组件的层级关系</h2><p>如图：</p>
+<p><img src="/images/playerbase_widget_struct.png"></p>
+<h2 id="事件生产者（EventProducer）"><a href="#事件生产者（EventProducer）" class="headerlink" title="事件生产者（EventProducer）"></a>事件生产者（EventProducer）</h2><p>顾名思义，就是它是产生事件的源。比如系统网络状态发生了变化，发出了通知，然后各个应用根据自己的情况来调整显示或设置等。又或者电池电量的变化和低电量预警通知事件等。</p>
+<p>再比如，我们上文中的弹幕视图中需要显示弹幕数据，弹幕数据来自服务器，我们需要源源不断的从服务器上取数据，然后显示在弹幕视图。取回数据传给视图的这个过程我们可以将其看作是一个事件生产者在不断生产弹幕数据更新事件，弹幕数据更新时不断将事件发送给弹幕视图来刷新显示。</p>
+<p>框架内自带了一个网络变化事件生产者的示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NetworkEventProducer</span> <span class="keyword">extends</span> <span class="title">BaseEventProducer</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="keyword">private</span> Handler mHandler = <span class="keyword">new</span> Handler(Looper.getMainLooper())&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>.handleMessage(msg);</span><br><span class="line">            <span class="keyword">switch</span> (msg.what)&#123;</span><br><span class="line">                <span class="keyword">case</span> MSG_CODE_NETWORK_CHANGE:</span><br><span class="line">                    <span class="keyword">int</span> state = (<span class="keyword">int</span>) msg.obj;</span><br><span class="line">                    <span class="comment">//...将网络状态发送出去</span></span><br><span class="line">                    getSender().sendInt(InterKey.KEY_NETWORK_STATE, state);</span><br><span class="line">                    PLog.d(TAG,<span class="string">&quot;onNetworkChange : &quot;</span> + state);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">NetworkEventProducer</span><span class="params">(Context context)</span></span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">NetChangeBroadcastReceiver</span> <span class="keyword">extends</span> <span class="title">BroadcastReceiver</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span><span class="params">(Context context, Intent intent)</span> </span>&#123;</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">            <span class="comment">//post state message</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于事件生产者所发出的事件是针对Receiver的，所以会被回调到onReceiverEvent()中，如果发送的是key-value的数据，会被放置于GroupValue中。如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomCover</span> <span class="keyword">extends</span> <span class="title">BaseCover</span></span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceiverEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="数据提供者（DataProvider）"><a href="#数据提供者（DataProvider）" class="headerlink" title="数据提供者（DataProvider）"></a>数据提供者（DataProvider）</h2><p><strong>DataProvider</strong>是为了播控的统一以及使用上的优雅而设计的。</p>
+<p>在开发中，我们可能会遇到如下场景：你拿到的数据源可能只是个id之类的标识，并不是能直接播放的uri或者url，需要你再用这个id去请求一个接口才能拿到播放的源地址。通常我们都是先去请求接口，然后在成功回调中用拿到的源数据再设置给播放器去播放。</p>
+<p><img src="/images/playerbase_dataprovider.png"><br><strong>DataProvider</strong>的设计就是为了将此过程独立出来包装为一个数据提供者（其实也可以叫数据生产者），拿到数据后发送出去即可。而您只需要把那个id标识给<strong>DataProvider</strong>即可，接下来的过程就由<strong>DataProvider</strong>来完成了。<strong>DataProvider</strong>的具体实现需要由用户完成。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MonitorDataProvider</span> <span class="keyword">extends</span> <span class="title">BaseDataProvider</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MonitorDataProvider</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> Handler mHandler = <span class="keyword">new</span> Handler(Looper.getMainLooper());</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleSourceData</span><span class="params">(DataSource sourceData)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mDataSource = sourceData;</span><br><span class="line">        <span class="comment">//...provider start</span></span><br><span class="line">        onProviderDataStart();</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        <span class="comment">//...将数据回调出去</span></span><br><span class="line">        onProviderMediaDataSuccess(bundle);</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        <span class="comment">//...异常时</span></span><br><span class="line">        onProviderError(-<span class="number">1</span>, <span class="keyword">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...cancel something</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...destroy something</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong> 数据提供者必须要设置在启动播放前。</p>
+<h1 id="功能使用"><a href="#功能使用" class="headerlink" title="功能使用"></a>功能使用</h1><h2 id="VideoView的使用"><a href="#VideoView的使用" class="headerlink" title="VideoView的使用"></a>VideoView的使用</h2><p>大致归结为以下步骤：</p>
+<ol>
+<li>初始化<strong>VideoView</strong>，并设置相应的监听事件或者数据提供者等</li>
+<li>使用<strong>ReceiverGroup</strong>组装需要的组件Cover和Receiver</li>
+<li>把组件设置给<strong>VideoView</strong></li>
+<li>设置数据启动播放</li>
+<li>暂停恢复播放等操作</li>
+<li>销毁播放器</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoViewActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> <span class="keyword">implements</span> <span class="title">OnPlayerEventListener</span></span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    BaseVideoView mVideoView;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle saveInstance)</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(saveInstance);</span><br><span class="line">        mVideoView = findViewById(R.id.videoView);</span><br><span class="line">        mVideoView.setOnPlayerEventListener(<span class="keyword">this</span>);</span><br><span class="line">        <span class="comment">//设置数据提供者 MonitorDataProvider</span></span><br><span class="line">        MonitorDataProvider dataProvider = <span class="keyword">new</span> MonitorDataProvider();</span><br><span class="line">        mVideoView.setDataProvider(dataProvider);</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        ReceiverGroup receiverGroup = <span class="keyword">new</span> ReceiverGroup();</span><br><span class="line">        <span class="comment">//Loading组件</span></span><br><span class="line">        receiverGroup.addReceiver(KEY_LOADING_COVER, <span class="keyword">new</span> LoadingCover(context));</span><br><span class="line">        <span class="comment">//Controller组件</span></span><br><span class="line">        receiverGroup.addReceiver(KEY_CONTROLLER_COVER, <span class="keyword">new</span> ControllerCover(context));</span><br><span class="line">        <span class="comment">//CompleteCover组件</span></span><br><span class="line">        receiverGroup.addReceiver(KEY_COMPLETE_COVER, <span class="keyword">new</span> CompleteCover(context));</span><br><span class="line">        <span class="comment">//Error组件</span></span><br><span class="line">        receiverGroup.addReceiver(KEY_ERROR_COVER, <span class="keyword">new</span> ErrorCover(context));</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        DataSource data = <span class="keyword">new</span> DataSource(<span class="string">&quot;monitor_id&quot;</span>);</span><br><span class="line">        videoView.setDataSource(data);</span><br><span class="line">        videoView.start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPlayerEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span></span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> (eventCode)&#123;</span><br><span class="line">            <span class="keyword">case</span> OnPlayerEventListener.PLAYER_EVENT_ON_VIDEO_RENDER_START:</span><br><span class="line">                <span class="comment">//...</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> OnPlayerEventListener.PLAYER_EVENT_ON_PLAY_COMPLETE:</span><br><span class="line">                <span class="comment">//...</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPause</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onPause();</span><br><span class="line">        mVideoView.pause();</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResume</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onResume();</span><br><span class="line">        mVideoView.onResume();</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDestroy</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy();</span><br><span class="line">        mVideoView.stopPlayback();</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="AVPlayer的使用"><a href="#AVPlayer的使用" class="headerlink" title="AVPlayer的使用"></a>AVPlayer的使用</h2><p>如果您想直接使用<strong>AVPlayer</strong>自己进行处理播放，那么大致步骤如下：</p>
+<ol>
+<li>初始化一个<strong>AVPlayer</strong>对象。</li>
+<li>初始化一个<strong>SuperContainer</strong>对象，将<strong>ReceiverGroup</strong>设置到<strong>SuperContainer</strong>中。</li>
+<li>使用<strong>SuperContainer</strong>设置一个渲染视图<strong>Render</strong>，然后自己处理RenderCallBack并关联解码器。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">SuperContainer mSuperContainer = <span class="keyword">new</span> SuperContainer(context);</span><br><span class="line">ReceiverGroup receiverGroup = <span class="keyword">new</span> ReceiverGroup();</span><br><span class="line"><span class="comment">//...add some covers</span></span><br><span class="line">receiverGroup.addReceiver(KEY_LOADING_COVER, <span class="keyword">new</span> LoadingCover(context));</span><br><span class="line">mSuperContainer.setReceiverGroup(receiverGroup);</span><br><span class="line"><span class="comment">//...</span></span><br><span class="line"><span class="keyword">final</span> RenderTextureView render = <span class="keyword">new</span> RenderTextureView(mAppContext);</span><br><span class="line">render.setTakeOverSurfaceTexture(<span class="keyword">true</span>);</span><br><span class="line"><span class="comment">//....</span></span><br><span class="line">mPlayer.setOnPlayerEventListener(<span class="keyword">new</span> OnPlayerEventListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPlayerEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...此处需要根据事件自行实现一些特定的设置</span></span><br><span class="line">        <span class="comment">//...比如视频的尺寸需要传递Render刷新测量或者视频的角度等等</span></span><br><span class="line">        <span class="comment">//将事件分发给子视图</span></span><br><span class="line">        mSuperContainer.dispatchPlayEvent(eventCode, bundle);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">mPlayer.setOnErrorEventListener(<span class="keyword">new</span> OnErrorEventListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onErrorEvent</span><span class="params">(<span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//将事件分发给子视图</span></span><br><span class="line">        mSuperContainer.dispatchErrorEvent(eventCode, bundle);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//...</span></span><br><span class="line">render.setRenderCallback(<span class="keyword">new</span> IRender.IRenderCallback() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSurfaceCreated</span><span class="params">(IRender.IRenderHolder renderHolder, <span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> </span>&#123;</span><br><span class="line">        mRenderHolder = renderHolder;</span><br><span class="line">        bindRenderHolder(mRenderHolder);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSurfaceChanged</span><span class="params">(IRender.IRenderHolder renderHolder, <span class="keyword">int</span> format, <span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSurfaceDestroy</span><span class="params">(IRender.IRenderHolder renderHolder)</span> </span>&#123;</span><br><span class="line">        mRenderHolder = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">mSuperContainer.setRenderView(render.getRenderView());</span><br><span class="line">mPlayer.setDataSource(dataSource);</span><br><span class="line">mPlayer.start();</span><br></pre></td></tr></table></figure>
+<p>如果非必须，请尽量使用框架封装好的<strong>BaseVideoView</strong>进行播放，框架相对来说处理的比较完善且提供了丰富的回调和定制性。</p>
+<h2 id="关联助手的使用（RelationAssist）"><a href="#关联助手的使用（RelationAssist）" class="headerlink" title="关联助手的使用（RelationAssist）"></a>关联助手的使用（RelationAssist）</h2><p>现在的短视频应用都有这样的场景：</p>
+<ul>
+<li><strong>列表中播放</strong></li>
+<li><strong>列表跳详情自然过渡无停顿播放</strong></li>
+</ul>
+<p>对于第一条在列表中播放，理论上<strong>VideoView</strong>就能完成，但是<strong>VideoView</strong>用在列表中量级较重，不太适合。需要一个轻量化处理的方案。</p>
+<p>而对于第二条，<strong>VideoView</strong>就不行了，<strong>VideoView</strong>是对解码器进行了包装，当跳到下一个页面时，是一个新的页面自然有新的视图，无法使用前一个页面的播放器实例去渲染当前页面播放。</p>
+<p>其实对于这种无缝的续播，原理很简单。就是不同的渲染视图使用同一个解码实例即可。可以简单比作一个<strong>MediaPlayer</strong>去不断设置不同的<strong>surface</strong>呈现播放。如果自己处理这个过程的话想对比较繁琐，你需要处理Render的回调并关联给解码器，还需要自己处理Render的测量以及显示比例、角度等等问题。</p>
+<p><strong>RelationAssist</strong> 就是为了简化这个过程而设计的。在不同的页面或视图切换播放时，您只需要提供并传入对应位置的视图容器（<strong>ViewGroup</strong>类型）即可。内部复杂的设置项和关联由<strong>RelationAssist</strong>完成。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestActivity</span> <span class="keyword">extends</span> <span class="title">AppcompatActivity</span></span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    RelationAssist mAssist;</span><br><span class="line">    ViewGroup view2;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle saveInstance)</span></span>&#123;</span><br><span class="line">    	<span class="keyword">super</span>.onCreate(saveInstance);</span><br><span class="line">    	<span class="comment">//...</span></span><br><span class="line">    	mAssist = <span class="keyword">new</span> RelationAssist(<span class="keyword">this</span>);</span><br><span class="line">    	mAssist.setEventAssistHandler(eventHandler);</span><br><span class="line">    	mReceiverGroup = ReceiverGroupManager.get().getLiteReceiverGroup(<span class="keyword">this</span>);</span><br><span class="line">    	mAssist.setReceiverGroup(mReceiverGroup);</span><br><span class="line">    	DataSource dataSource = <span class="keyword">new</span> DataSource();</span><br><span class="line">    	dataSource.setData(<span class="string">&quot;http://...&quot;</span>);</span><br><span class="line">    	dataSource.setTitle(<span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">    	mAssist.setDataSource(dataSource);</span><br><span class="line">    	mAssist.attachContainer(mVideoContainer);</span><br><span class="line">    	mAssist.play();</span><br><span class="line">    	<span class="comment">//...</span></span><br><span class="line">    	switchPlay(view2);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">switchPlay</span><span class="params">(ViewGroup container)</span></span>&#123;</span><br><span class="line">    	 mAssist.attachContainer(container);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果您想跨页面进行关联，只需要自己将<strong>RelationAssist</strong>包装为一个单例即可。此处不做代码展示，详细代码可参见github项目demo代码。</p>
+<h2 id="事件助手处理器（EventAssistHandler）"><a href="#事件助手处理器（EventAssistHandler）" class="headerlink" title="事件助手处理器（EventAssistHandler）"></a>事件助手处理器（EventAssistHandler）</h2><p>视图中的一些基本操作，比如暂停播放、重播、重试、恢复播放等等，这些事件最终都要传递给解码器进行相关操作。可能还有用户自定义的事件比如播放下一个或上一个等。</p>
+<p>对于基本的操作事件（暂停、恢复、重播等），框架内部可自动完成，而用户自定的事件需要让用户自行处理。框架内部<strong>BaseVideoView</strong>和<strong>RelationAssist</strong>均做了<strong>EventAssistHandler</strong>的对接，使用时需要传入一个可用的事件处理器对象，可根据不同的事件参数进行相应处理。如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mVideoView.setOnVideoViewEventHandler(<span class="keyword">new</span> OnVideoViewEventHandler()&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAssistHandle</span><span class="params">(BaseVideoView assist, <span class="keyword">int</span> eventCode, Bundle bundle)</span> </span>&#123;</span><br><span class="line">            <span class="comment">//基本的事件处理已在父类super中完成，如果需要重写，重写相应方法即可。</span></span><br><span class="line">            <span class="keyword">super</span>.onAssistHandle(assist, eventCode, bundle);</span><br><span class="line">            <span class="keyword">switch</span> (eventCode)&#123;</span><br><span class="line">                <span class="keyword">case</span> DataInter.Event.EVENT_CODE_REQUEST_NEXT:</span><br><span class="line">                    <span class="comment">//...播放下一个</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Window模式播放"><a href="#Window模式播放" class="headerlink" title="Window模式播放"></a>Window模式播放</h2><p>我们有时可能为了不打断用户的浏览需要小窗播放。框架特意设计了window播放的使用。框架提供了两种window相关的组件。</p>
+<ul>
+<li><strong>WindowVideoView</strong></li>
+<li><strong>FloatWindow</strong></li>
+</ul>
+<p><strong>WindowVideoView</strong>使用上几乎和VideoView是一样的，只不过<strong>WindowVideoView</strong>是以window的形式呈现的。window默认是可以拖动的，如果您不需要，可以禁止，window的每个设置项都有默认值，window的设置示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">FloatWindowParams windowParams = <span class="keyword">new</span> FloatWindowParams();</span><br><span class="line">windowParams.setWindowType(WindowManager.LayoutParams.TYPE_TOAST)</span><br><span class="line">            .setFormat(PixelFormat.RGBA_8888)</span><br><span class="line">            .setFlag(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)</span><br><span class="line">            .setDefaultAnimation(<span class="keyword">true</span>)</span><br><span class="line">            .setX(<span class="number">100</span>)</span><br><span class="line">            .setY(<span class="number">100</span>)</span><br><span class="line">            .setWidth(width)</span><br><span class="line">            .setHeight(height)</span><br><span class="line">            .setGravity(Gravity.TOP | Gravity.LEFT));</span><br><span class="line">mWindowVideoView = <span class="keyword">new</span> WindowVideoView(<span class="keyword">this</span>,windowParams);</span><br><span class="line"><span class="comment">//...</span></span><br></pre></td></tr></table></figure>
+
+<p>而<strong>FloatWindow</strong>只是一个悬浮窗View，您可以传入您要显示的布局View。可以用于窗口切换播放时的无缝续播。此处不做代码示例展示。</p>
+<h2 id="一些样式设置（StyleSetter）"><a href="#一些样式设置（StyleSetter）" class="headerlink" title="一些样式设置（StyleSetter）"></a>一些样式设置（StyleSetter）</h2><p>样式的设置是针对 <strong>VideoView</strong>、<strong>WindowVideoView</strong> 和 <strong>FloatWindow</strong> 的。当然框架提供的<strong>StyleSetter</strong>您也可以用于别处。提供了如下的样式设置：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IStyleSetter</span> </span>&#123;</span><br><span class="line">    <span class="comment">//设置圆角</span></span><br><span class="line">    <span class="meta">@TargetApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setRoundRectShape</span><span class="params">(<span class="keyword">float</span> radius)</span></span>;</span><br><span class="line">    <span class="meta">@TargetApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setRoundRectShape</span><span class="params">(Rect rect, <span class="keyword">float</span> radius)</span></span>;</span><br><span class="line">    <span class="comment">//设置为圆形</span></span><br><span class="line">    <span class="meta">@TargetApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setOvalRectShape</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="meta">@TargetApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setOvalRectShape</span><span class="params">(Rect rect)</span></span>;</span><br><span class="line">    <span class="comment">//清除样式设置</span></span><br><span class="line">    <span class="meta">@TargetApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">clearShapeStyle</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//设置阴影</span></span><br><span class="line">    <span class="comment">//注意阴影的设置要求对应的View对象必须要有背景色（不能是TRANSPARENT）</span></span><br><span class="line">    <span class="comment">//如果您没设置，框架内部会自定设置为黑色</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setElevationShadow</span><span class="params">(<span class="keyword">float</span> elevation)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setElevationShadow</span><span class="params">(<span class="keyword">int</span> backgroundColor, <span class="keyword">float</span> elevation)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="解码器的接入"><a href="#解码器的接入" class="headerlink" title="解码器的接入"></a>解码器的接入</h2><p>框架自带了系统的MediaPlayer的解码实现，项目demo中示例接入了ijkplayer和exoplayer，如果您想接入其他的解码器，请参见示例代码，以下为简单示例，更详细的请参见项目源码。</p>
+<p><strong>接入步骤</strong></p>
+<ol>
+<li>继承自BaseInternalPlayer</li>
+<li>实现定义的抽象方法</li>
+<li>配置引入您的解码器</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">XXXPlayer</span> <span class="keyword">extends</span> <span class="title">BaseInternalPlayer</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">XXXPlayer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="comment">//implements some abstract methods.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过配置设置使用该解码器。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> planId = <span class="number">2</span>;</span><br><span class="line">PlayerConfig.addDecoderPlan(<span class="keyword">new</span> DecoderPlan(planId, XXXPlayer.class.getName(), <span class="string">&quot;XXXPlayer&quot;</span>));</span><br><span class="line">PlayerConfig.setDefaultPlanId(planId);</span><br></pre></td></tr></table></figure>
+
+<p>以上对于<strong>PlayerBase</strong>的讲解基本完成。码字好累！！！</p>
+<p>主要的模块差不多就这么多了，更详细的可参见项目源码。</p>
+<p>如有问题联系：<a href="mailto:junhui_jia@163.com">junhui_jia@163.com</a></p>
+<p>QQ交流群：<strong>600201778</strong></p>
+<p><strong>最后再附上项目地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/jiajunhui/PlayerBase">PlayerBase</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A1%86%E6%9E%B6/" rel="tag"># 框架</a>
+              <a href="/tags/%E6%92%AD%E6%94%BE%E5%99%A8/" rel="tag"># 播放器</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/03/19/android_surface_surfaceview/" rel="prev" title="Android图形系统-Surface和SurfaceView">
+                  <i class="fa fa-chevron-left"></i> Android图形系统-Surface和SurfaceView
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/06/12/glide_useage/" rel="next" title="你真的会使用Glide吗？——Glide的高级用法">
+                  你真的会使用Glide吗？——Glide的高级用法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

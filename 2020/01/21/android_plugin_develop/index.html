@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="插件化技术最初源于免安装运行 Apk的想法，这个免安装的 Apk 就可以理解为插件，而支持插件的 app 我们一般叫 宿主。 想必大家都知道，在 Android 系统中，应用是以 Apk 的形式存在的，应用都需要安装才能使用。但实际上 Android 系统安装应用的方式相当简单，其实就是把应用 Apk 拷贝到系统不同的目录下、然后把 so 解压出来而已。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 插件化开发">
+<meta property="og:url" content="http://example.com/2020/01/21/android_plugin_develop/index.html">
+<meta property="og:site_name" content="小贾的博客">
+<meta property="og:description" content="插件化技术最初源于免安装运行 Apk的想法，这个免安装的 Apk 就可以理解为插件，而支持插件的 app 我们一般叫 宿主。 想必大家都知道，在 Android 系统中，应用是以 Apk 的形式存在的，应用都需要安装才能使用。但实际上 Android 系统安装应用的方式相当简单，其实就是把应用 Apk 拷贝到系统不同的目录下、然后把 so 解压出来而已。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_plugin_develop01.png">
+<meta property="article:published_time" content="2020-01-21T13:01:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:27:37.181Z">
+<meta property="article:author" content="贾俊辉">
+<meta property="article:tag" content="框架">
+<meta property="article:tag" content="插件化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_plugin_develop01.png">
+
+
+<link rel="canonical" href="http://example.com/2020/01/21/android_plugin_develop/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2020&#x2F;01&#x2F;21&#x2F;android_plugin_develop&#x2F;&quot;,&quot;path&quot;:&quot;2020&#x2F;01&#x2F;21&#x2F;android_plugin_develop&#x2F;&quot;,&quot;title&quot;:&quot;Android 插件化开发&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android 插件化开发 | 小贾的博客</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小贾的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E5%8C%96%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">插件化的优点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8E%E7%BB%84%E4%BB%B6%E5%8C%96%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.</span> <span class="nav-text">与组件化的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E5%8C%96%E7%9A%84%E6%8A%80%E6%9C%AF%E9%9A%BE%E7%82%B9"><span class="nav-number">3.</span> <span class="nav-text">插件化的技术难点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ClassLoader-Injection"><span class="nav-number">4.</span> <span class="nav-text">ClassLoader Injection</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E4%B8%AD%E7%9A%84ClassLoader"><span class="nav-number">4.1.</span> <span class="nav-text">Java中的ClassLoader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android%E4%B8%AD%E7%9A%84ClassLoader"><span class="nav-number">4.2.</span> <span class="nav-text">Android中的ClassLoader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="nav-number">4.3.</span> <span class="nav-text">双亲委派机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%8A%A0%E8%BD%BD%E6%8F%92%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%B1%BB"><span class="nav-number">4.4.</span> <span class="nav-text">如何加载插件中的类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E6%8F%92%E4%BB%B6%E7%B1%BB%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">4.5.</span> <span class="nav-text">执行插件类的方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Runtime-Container"><span class="nav-number">5.</span> <span class="nav-text">Runtime Container</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B2%A1%E6%9C%89%E6%B3%A8%E5%86%8C%E7%9A%84-Activity-%E4%B8%8D%E8%83%BD%E5%92%8C%E7%B3%BB%E7%BB%9F%E4%BA%A4%E4%BA%92"><span class="nav-number">5.1.</span> <span class="nav-text">为什么没有注册的 Activity 不能和系统交互</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF"><span class="nav-number">5.2.</span> <span class="nav-text">运行时容器技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E6%9B%BF%E6%8D%A2"><span class="nav-number">5.3.</span> <span class="nav-text">字节码替换</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Resource-Injection"><span class="nav-number">6.</span> <span class="nav-text">Resource Injection</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="贾俊辉"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">贾俊辉</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/01/21/android_plugin_develop/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="贾俊辉">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贾的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android 插件化开发
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-01-21 21:01:00" itemprop="dateCreated datePublished" datetime="2020-01-21T21:01:00+08:00">2020-01-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>插件化技术最初源于免安装运行 <code>Apk</code>的想法，这个免安装的 <code>Apk</code> 就可以理解为插件，而支持插件的 <code>app</code> 我们一般叫 宿主。</p>
+<p>想必大家都知道，在 <code>Android</code> 系统中，应用是以 <code>Apk</code> 的形式存在的，应用都需要安装才能使用。但实际上 <code>Android</code> 系统安装应用的方式相当简单，其实就是把应用 <code>Apk</code> 拷贝到系统不同的目录下、然后把 <code>so</code> 解压出来而已。</p>
+<span id="more"></span>
+
+<p>常见的应用安装目录有：</p>
+<ul>
+<li><code>/system/app</code>：系统应用</li>
+<li><code>/system/priv-app</code>：系统应用</li>
+<li><code>/data/app</code>：用户应用</li>
+</ul>
+<p>那可能大家会想问，既然安装这个过程如此简单，<code>Android</code> 是怎么运行应用中的代码的呢，我们先看 <code>Apk</code> 的构成，一个常见的 <code>Apk</code> 会包含如下几个部分：</p>
+<ul>
+<li><code>classes.dex</code>：<code>Java</code> 代码字节码</li>
+<li><code>res</code>：资源文件</li>
+<li><code>lib</code>：<code>so</code> 文件</li>
+<li><code>assets</code>：静态资产文件</li>
+<li><code>AndroidManifest.xml</code>：清单文件</li>
+</ul>
+<p>其实 <code>Android</code> 系统在打开应用之后，也只是开辟进程，然后使用 <code>ClassLoader</code> 加载 <code>classes.dex</code> 至进程中，执行对应的组件而已。</p>
+<p>那大家可能会想一个问题，既然 <code>Android</code> 本身也是使用类似反射的形式加载代码执行，凭什么我们不能执行一个 <code>Apk</code> 中的代码呢？</p>
+<h1 id="插件化的优点"><a href="#插件化的优点" class="headerlink" title="插件化的优点"></a>插件化的优点</h1><p>插件化让 <code>Apk</code> 中的代码（主要是指 <code>Android</code> 组件）能够免安装运行，这样能够带来很多收益：</p>
+<ul>
+<li>减少安装<code>Apk</code>的体积、按需下载模块</li>
+<li>动态更新插件</li>
+<li>宿主和插件分开编译，提升开发效率</li>
+<li>解决方法数超过65535的问题</li>
+</ul>
+<p>想象一下，你的应用拥有 <code>Native</code> 应用一般极高的性能，又能获取诸如 <code>Web</code> 应用一样的收益。</p>
+<p>嗯，理想很美好不是嘛？</p>
+<h1 id="与组件化的区别"><a href="#与组件化的区别" class="headerlink" title="与组件化的区别"></a>与组件化的区别</h1><ul>
+<li><p><strong>组件化</strong>：是将一个<code>App</code>分成多个模块，每个模块都是一个组件（module），开发过程中可以让这些组件相互依赖或独立编译、调试部分组件，但是这些组件最终会合并成一个完整的<code>Apk</code>去发布到应用市场。</p>
+</li>
+<li><p><strong>插件化</strong>：是将整个App拆分成很多模块，每个模块都是一个Apk（组件化的每个模块是一个lib），最终打包的时候将宿主Apk和插件Apk分开打包，只需发布宿主Apk到应用市场，插件Apk通过动态按需下发到宿主Apk。</p>
+</li>
+</ul>
+<h1 id="插件化的技术难点"><a href="#插件化的技术难点" class="headerlink" title="插件化的技术难点"></a>插件化的技术难点</h1><p>想让插件的Apk真正运行起来，首先要先能找到插件Apk的存放位置，然后我们要能解析加载Apk里面的代码。</p>
+<p>​        但是光能执行Java代码是没有意义的，在Android系统中有四大组件是需要在系统中注册的，具体来说是在 <code>Android</code> 系统的 <code>ActivityManagerService (AMS)</code> 和 <code>PackageManagerService (PMS)</code> 中注册的，而四大组件的解析和启动都需要依赖 <code>AMS</code> 和 <code>PMS</code>，如何欺骗系统，让他承认一个未安装的 <code>Apk</code> 中的组件，如何让宿主动态加载执行插件Apk中 <code>Android</code> 组件（即 <code>Activity</code>、<code>Service</code>、<code>BroadcastReceiver</code>、<code>ContentProvider</code>、<code>Fragment</code>）等是插件化最大的难点。</p>
+<p>​         另外，应用资源引用（特指 <code>R</code> 中引用的资源，如 <code>layout</code>、<code>values</code> 等）也是一大问题，想象一下你在宿主进程中使用反射加载了一个插件 <code>Apk</code>，代码中的 <code>R</code> 对应的 <code>id</code> 却无法引用到正确的资源，会产生什么后果。</p>
+<p>总结一下，其实做到插件化的要点就这几个：</p>
+<ul>
+<li>如何加载并执行插件 <code>Apk</code> 中的代码（<code>ClassLoader Injection</code>）</li>
+<li>让系统能调用插件 <code>Apk</code> 中的组件（<code>Runtime Container</code>）</li>
+<li>正确识别插件 <code>Apk</code> 中的资源（<code>Resource Injection</code>）</li>
+</ul>
+<p>当然还有其他一些小问题，但可能不是所有场景下都会遇到，我们后面再单独说。</p>
+<h1 id="ClassLoader-Injection"><a href="#ClassLoader-Injection" class="headerlink" title="ClassLoader Injection"></a>ClassLoader Injection</h1><p>ClassLoader 是插件化中必须要掌握的，因为我们知道<code>Android</code> 应用本身是基于魔改的 <code>Java</code> 虚拟机的，而由于插件是未安装的 apk，系统不会处理其中的类，所以需要使用 <code>ClassLoader</code> 加载 <code>Apk</code>，然后反射里面的代码。</p>
+<h2 id="Java中的ClassLoader"><a href="#Java中的ClassLoader" class="headerlink" title="Java中的ClassLoader"></a>Java中的ClassLoader</h2><ul>
+<li><p>BootstrapClassLoader 负责加载 JVM 运行时的核心类，比如 JAVA_HOME/lib/rt.jar 等等</p>
+</li>
+<li><p>ExtensionClassLoader 负责加载 JVM 的扩展类，比如 JAVA_HOME/lib/ext 下面的 jar 包</p>
+</li>
+<li><p>AppClassLoader 负责加载 classpath 里的 jar 包和目录</p>
+</li>
+</ul>
+<h2 id="Android中的ClassLoader"><a href="#Android中的ClassLoader" class="headerlink" title="Android中的ClassLoader"></a>Android中的ClassLoader</h2><p>在Android系统中<code>ClassLoader</code>是用来加载<code>dex</code>文件的，有包含 dex 的 apk 文件以及 jar 文件，dex 文件是一种对class文件优化的产物，在Android中应用打包时会把所有class文件进行合并、优化（把不同的class文件重复的东西只保留一份），然后生成一个最终的class.dex文件</p>
+<ul>
+<li>PathClassLoader 用来加载系统类和应用程序类，可以加载已经安装的 apk 目录下的 dex 文件</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PathClassLoader</span> <span class="keyword">extends</span> <span class="title">BaseDexClassLoader</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PathClassLoader</span><span class="params">(String dexPath, ClassLoader parent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(dexPath, <span class="keyword">null</span>, <span class="keyword">null</span>, parent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PathClassLoader</span><span class="params">(String dexPath, String libraryPath,</span></span></span><br><span class="line"><span class="params"><span class="function">            ClassLoader parent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(dexPath, <span class="keyword">null</span>, libraryPath, parent);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>DexClassLoader 用来加载 dex 文件，可以从存储空间加载 dex 文件。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DexClassLoader</span> <span class="keyword">extends</span> <span class="title">BaseDexClassLoader</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DexClassLoader</span><span class="params">(String dexPath, String optimizedDirectory,</span></span></span><br><span class="line"><span class="params"><span class="function">            String libraryPath, ClassLoader parent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(dexPath, <span class="keyword">new</span> File(optimizedDirectory), libraryPath, parent);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们在插件化中一般使用的是 DexClassLoader。</p>
+<h2 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h2><p>每一个 ClassLoader 中都有一个 parent 对象，代表的是父类加载器，在加载一个类的时候，会先使用父类加载器去加载，如果在父类加载器中没有找到，自己再进行加载，如果 parent 为空，那么就用系统类加载器来加载。通过这样的机制可以保证系统类都是由系统类加载器加载的。 下面是 ClassLoader 的 loadClass 方法的具体实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; loadClass(String name, <span class="keyword">boolean</span> resolve)</span><br><span class="line">    <span class="keyword">throws</span> ClassNotFoundException&#123;</span><br><span class="line">    <span class="comment">// First, check if the class has already been loaded</span></span><br><span class="line">    Class&lt;?&gt; c = findLoadedClass(name);</span><br><span class="line">    <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (parent != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">// 先从父类加载器中进行加载</span></span><br><span class="line">                c = parent.loadClass(name, <span class="keyword">false</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                c = findBootstrapClassOrNull(name);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            <span class="comment">// ClassNotFoundException thrown if class not found</span></span><br><span class="line">            <span class="comment">// from the non-null parent class loader</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 没有找到，再自己加载</span></span><br><span class="line">            c = findClass(name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> c;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="如何加载插件中的类"><a href="#如何加载插件中的类" class="headerlink" title="如何加载插件中的类"></a>如何加载插件中的类</h2><p>要加载插件中的类，我们首先要创建一个 DexClassLoader，先看下 DexClassLoader 的构造函数需要哪些参数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DexClassLoader</span> <span class="keyword">extends</span> <span class="title">BaseDexClassLoader</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DexClassLoader</span><span class="params">(String dexPath, String optimizedDirectory, String librarySearchPath, ClassLoader parent)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>构造函数需要四个参数： <strong>dexPath</strong> 是需要加载的 dex / apk / jar 文件路径 <strong>optimizedDirectory</strong> 是 dex 优化后存放的位置，在 ART 上，会执行 oat 对 dex 进行优化，生成机器码，这里就是存放优化后的 odex 文件的位置 <strong>librarySearchPath</strong> 是 native 依赖的位置 <strong>parent</strong> 就是父类加载器，默认会先从 parent 加载对应的类</p>
+<p>创建出 DexClassLaoder 实例以后，只要调用其 loadClass(className) 方法就可以加载插件中的类了。具体的实现在下面：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从 assets 中拿出插件 apk 放到内部存储空间</span></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">extractPlugin</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> inputStream = assets.<span class="keyword">open</span>(<span class="string">&quot;plugin.apk&quot;</span>)</span><br><span class="line">        File(filesDir.absolutePath, <span class="string">&quot;plugin.apk&quot;</span>).writeBytes(inputStream.readBytes())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">    extractPlugin()</span><br><span class="line">        pluginPath = File(filesDir.absolutePath, <span class="string">&quot;plugin.apk&quot;</span>).absolutePath</span><br><span class="line">        nativeLibDir = File(filesDir, <span class="string">&quot;pluginlib&quot;</span>).absolutePath</span><br><span class="line">        dexOutPath = File(filesDir, <span class="string">&quot;dexout&quot;</span>).absolutePath</span><br><span class="line">        <span class="comment">// 生成 DexClassLoader 用来加载插件类</span></span><br><span class="line">        pluginClassLoader = DexClassLoader(pluginPath, dexOutPath, nativeLibDir, <span class="keyword">this</span>::<span class="keyword">class</span>.java.classLoader)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/android_plugin_develop01.png" alt="img"></p>
+<h2 id="执行插件类的方法"><a href="#执行插件类的方法" class="headerlink" title="执行插件类的方法"></a>执行插件类的方法</h2><p>通过反射来执行类的方法</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> loadClass = pluginClassLoader.loadClass(activityName)</span><br><span class="line">loadClass.getMethod(<span class="string">&quot;test&quot;</span>,<span class="literal">null</span>).invoke(loadClass)</span><br></pre></td></tr></table></figure>
+
+<p>我们称这个过程叫做 <code>ClassLoader</code> 注入。完成注入后，所有来自宿主的类使用宿主的 <code>ClassLoader</code> 进行加载，所有来自插件 <code>Apk</code> 的类使用插件 <code>ClassLoader</code> 进行加载，而由于 <code>ClassLoader</code> 的双亲委派机制，实际上系统类会不受 <code>ClassLoader</code> 的类隔离机制所影响，这样宿主 <code>Apk</code> 就可以在宿主进程中使用来自于插件的组件类了。</p>
+<h1 id="Runtime-Container"><a href="#Runtime-Container" class="headerlink" title="Runtime Container"></a>Runtime Container</h1><p>我们之前说到 Activity 插件化最大的难点是如何欺骗系统，让他承认一个未安装的 <code>Apk</code> 中的组件。 因为插件是动态加载的，所以插件的四大组件不可能注册到宿主的 Manifest 文件中，而没有在 Manifest 中注册的四大组件是不能和系统直接进行交互的。 如果直接把插件的 Activity 注册到宿主 Manifest 里就失去了插件化的动态特性，因为每次插件中新增 Activity 都要修改宿主 Manifest 并且重新打包，那就和直接写在宿主中没什么区别了。</p>
+<h2 id="为什么没有注册的-Activity-不能和系统交互"><a href="#为什么没有注册的-Activity-不能和系统交互" class="headerlink" title="为什么没有注册的 Activity 不能和系统交互"></a>为什么没有注册的 Activity 不能和系统交互</h2><p>这里的不能直接交互的含义有两个</p>
+<ol>
+<li>系统会检测 Activity 是否注册 如果我们启动一个没有在 Manifest 中注册的 Activity，会发现报如下 error：</li>
+</ol>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">android.content.ActivityNotFoundException: Unable to find explicit activity class &#123;com.zyg.commontec/com.zyg.plugin.PluginActivity&#125;; have you declared this activity in your AndroidManifest.xml?</span><br></pre></td></tr></table></figure>
+
+<p>这个 log 在 Instrumentation 的 checkStartActivityResult 方法中可以看到：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Instrumentation</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">checkStartActivityResult</span><span class="params">(<span class="keyword">int</span> res, Object intent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!ActivityManager.isStartResultFatalError(res)) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> (res) &#123;</span><br><span class="line">            <span class="keyword">case</span> ActivityManager.START_INTENT_NOT_RESOLVED:</span><br><span class="line">            <span class="keyword">case</span> ActivityManager.START_CLASS_NOT_FOUND:</span><br><span class="line">                <span class="keyword">if</span> (intent <span class="keyword">instanceof</span> Intent &amp;&amp; ((Intent)intent).getComponent() != <span class="keyword">null</span>)</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> ActivityNotFoundException(</span><br><span class="line">                            <span class="string">&quot;Unable to find explicit activity class &quot;</span></span><br><span class="line">                            + ((Intent)intent).getComponent().toShortString()</span><br><span class="line">                            + <span class="string">&quot;; have you declared this activity in your AndroidManifest.xml?&quot;</span>);</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ActivityNotFoundException(</span><br><span class="line">                        <span class="string">&quot;No Activity found to handle &quot;</span> + intent);</span><br><span class="line">                ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>Activity 的生命周期无法被调用，其实一个 Activity 主要的工作，都是在其生命周期方法中调用了，既然上一步系统检测了 Manifest 注册文件，启动 Activity 被拒绝，那么其生命周期方法也肯定不会被调用了。从而插件 Activity 也就不能正常运行了。</li>
+</ol>
+<h2 id="运行时容器技术"><a href="#运行时容器技术" class="headerlink" title="运行时容器技术"></a>运行时容器技术</h2><p>由于Android中的组件（Activity，Service，BroadcastReceiver和ContentProvider）是由系统创建的，并且由系统管理生命周期。 仅仅构造出这些类的实例是没用的，还需要管理组件的生命周期。其中以Activity最为复杂，不同框架采用的方法也不尽相同。插件化如何支持组件生命周期的管理。 大致分为两种方式：</p>
+<ul>
+<li>运行时容器技术（ProxyActivity代理）</li>
+<li>预埋StubActivity，hook系统启动Activity的过程</li>
+</ul>
+<p>我们的解决方案很简单，即运行时容器技术，简单来说就是在宿主 <code>Apk</code> 中预埋一些空的 <code>Android</code> 组件，以 <code>Activity</code> 为例，我预置一个 <code>ContainerActivity extends Activity</code> 在宿主中，并且在 <code>AndroidManifest.xml</code> 中注册它。</p>
+<p>它要做的事情很简单，就是帮助我们作为插件 <code>Activity</code> 的容器，它从 <code>Intent</code> 接受几个参数，分别是插件的不同信息，如：</p>
+<ul>
+<li><code>pluginName</code></li>
+<li><code>pluginApkPath</code></li>
+<li><code>pluginActivityName</code></li>
+</ul>
+<p>等，其实最重要的就是 <code>pluginApkPath</code> 和 <code>pluginActivityName</code>，当 <code>ContainerActivity</code> 启动时，我们就加载插件的 <code>ClassLoader</code>、<code>Resource</code>，并反射 <code>pluginActivityName</code> 对应的 <code>Activity</code> 类。当完成加载后，<code>ContainerActivity</code> 要做两件事：</p>
+<ul>
+<li>转发所有来自系统的生命周期回调至插件 <code>Activity</code></li>
+<li>接受 <code>Activity</code> 方法的系统调用，并转发回系统</li>
+</ul>
+<p>我们可以通过复写 <code>ContainerActivity</code> 的生命周期方法来完成第一步，而第二步我们需要定义一个 <code>PluginActivity</code>，然后在编写插件 <code>Apk</code> 中的 <code>Activity</code> 组件时，不再让其集成 <code>android.app.Activity</code>，而是集成自我们的 <code>PluginActivity</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ContainerActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> PluginActivity pluginActivity;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        String pluginActivityName = getIntent().getString(<span class="string">&quot;pluginActivityName&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">        pluginActivity = PluginLoader.loadActivity(pluginActivityName, <span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">if</span> (pluginActivity == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        pluginActivity.onCreate();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onResume</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (pluginActivity == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">super</span>.onResume();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        pluginActivity.onResume();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onPause</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (pluginActivity == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">super</span>.onPause();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        pluginActivity.onPause();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PluginActivity</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> ContainerActivity containerActivity;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PluginActivity</span><span class="params">(ContainerActivity containerActivity)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.containerActivity = containerActivity;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> &lt;T extends View&gt; <span class="function">T <span class="title">findViewById</span><span class="params">(<span class="keyword">int</span> id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> containerActivity.findViewById(id);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 插件 `Apk` 中真正写的组件</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestActivity</span> <span class="keyword">extends</span> <span class="title">PluginActivity</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是不是感觉有点看懂了，虽然真正搞的时候还有很多小坑，但大概原理就是这么简单，启动插件组件需要依赖容器，容器负责加载插件组件并且完成双向转发，转发来自系统的生命周期回调至插件组件，同时转发来自插件组件的系统调用至系统。</p>
+<h2 id="字节码替换"><a href="#字节码替换" class="headerlink" title="字节码替换"></a>字节码替换</h2><p>该方式虽然能够很好的实现启动插件Activity的目的，但是由于开发式侵入性很强，插件中的Activity必须继承PluginActivity，如果想把之前的模块改造成插件需要很多额外的工作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;&#125;</span><br><span class="line">-&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestActivity</span> <span class="keyword">extends</span> <span class="title">PluginActivity</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有没有什么办法能让插件组件的编写与原来没有任何差别呢？</p>
+<p><code>Shadow</code> 的做法是字节码替换插件，这是一个非常棒的想法，简单来说，<code>Android</code> 提供了一些 <code>Gradle</code> 插件开发套件，其中有一项功能叫 <code>Transform Api</code>，它可以介入项目的构建过程，在字节码生成后、<code>dex</code> 文件生成前，对代码进行某些变换，具体怎么做的不说了，可以自己看文档。</p>
+<p>实现的功能嘛，就是用户配置 <code>Gradle</code> 插件后，正常开发，依然编写：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后完成编译后，最后的字节码中，显示的却是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestActivity</span> <span class="keyword">extends</span> <span class="title">PluginActivity</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到这里基本的框架就差不多结束了。</p>
+<h1 id="Resource-Injection"><a href="#Resource-Injection" class="headerlink" title="Resource Injection"></a>Resource Injection</h1><p>最后要说的是资源注入，其实这一点相当重要，<code>Android</code> 应用的开发其实崇尚的是逻辑与资源分离的理念，所有资源（<code>layout</code>、<code>values</code> 等）都会被打包到 <code>Apk</code> 中，然后生成一个对应的 <code>R</code> 类，其中包含对所有资源的引用 <code>id</code>。</p>
+<p>资源的注入并不容易，好在 <code>Android</code> 系统给我们留了一条后路，最重要的是这两个接口：</p>
+<ul>
+<li><code>PackageManager#getPackageArchiveInfo</code>：根据 <code>Apk</code> 路径解析一个未安装的 <code>Apk</code> 的 <code>PackageInfo</code></li>
+<li><code>PackageManager#getResourcesForApplication</code>：根据 <code>ApplicationInfo</code> 创建一个 <code>Resources</code> 实例</li>
+</ul>
+<p>我们要做的就是在上面 <code>ContainerActivity#onCreate</code> 中加载插件 <code>Apk</code> 的时候，用这两个方法创建出来一份插件资源实例。具体来说就是先用 <code>PackageManager#getPackageArchiveInfo</code> 拿到插件 <code>Apk</code> 的 <code>PackageInfo</code>，有了 <code>PacakgeInfo</code> 之后我们就可以自己组装一份 <code>ApplicationInfo</code>，然后通过 <code>PackageManager#getResourcesForApplication</code> 来创建资源实例，大概代码像这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">PackageManager packageManager = getPackageManager();</span><br><span class="line">PackageInfo packageArchiveInfo = packageManager.getPackageArchiveInfo(</span><br><span class="line">    pluginApkPath,</span><br><span class="line">    PackageManager.GET_ACTIVITIES</span><br><span class="line">    | PackageManager.GET_META_DATA</span><br><span class="line">    | PackageManager.GET_SERVICES</span><br><span class="line">    | PackageManager.GET_PROVIDERS</span><br><span class="line">    | PackageManager.GET_SIGNATURES</span><br><span class="line">);</span><br><span class="line">packageArchiveInfo.applicationInfo.sourceDir = pluginApkPath;</span><br><span class="line">packageArchiveInfo.applicationInfo.publicSourceDir = pluginApkPath;</span><br><span class="line"></span><br><span class="line">Resources injectResources = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    injectResources = packageManager.getResourcesForApplication(packageArchiveInfo.applicationInfo);</span><br><span class="line">&#125; <span class="keyword">catch</span> (PackageManager.NameNotFoundException e) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>拿到资源实例后，我们需要将宿主的资源和插件资源 <code>Merge</code> 一下，编写一个新的 <code>Resources</code> 类，用这样的方式完成自动代理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PluginResources</span> <span class="keyword">extends</span> <span class="title">Resources</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Resources hostResources;</span><br><span class="line">    <span class="keyword">private</span> Resources injectResources;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PluginResources</span><span class="params">(Resources hostResources, Resources injectResources)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(injectResources.getAssets(), injectResources.getDisplayMetrics(), injectResources.getConfiguration());</span><br><span class="line">        <span class="keyword">this</span>.hostResources = hostResources;</span><br><span class="line">        <span class="keyword">this</span>.injectResources = injectResources;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getString</span><span class="params">(<span class="keyword">int</span> id, Object... formatArgs)</span> <span class="keyword">throws</span> NotFoundException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> injectResources.getString(id, formatArgs);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NotFoundException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> hostResources.getString(id, formatArgs);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们在 <code>ContainerActivity</code> 完成插件组件加载后，创建一份 <code>Merge</code> 资源，再复写 <code>ContainerActivity#getResources</code>，将获取到的资源替换掉：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ContainerActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Resources pluginResources;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        pluginResources = <span class="keyword">new</span> PluginResources(<span class="keyword">super</span>.getResources(), PluginLoader.getResources(pluginApkPath));</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Resources <span class="title">getResources</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (pluginActivity == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.getResources();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> pluginResources;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就完成了资源的注入。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A1%86%E6%9E%B6/" rel="tag"># 框架</a>
+              <a href="/tags/%E6%8F%92%E4%BB%B6%E5%8C%96/" rel="tag"># 插件化</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/12/12/android_block_monitor/" rel="prev" title="Android性能优化-App卡顿监控技术方案及原理">
+                  <i class="fa fa-chevron-left"></i> Android性能优化-App卡顿监控技术方案及原理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/03/07/algorithm_kmp/" rel="next" title="实现KMP匹配">
+                  实现KMP匹配 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">贾俊辉</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="Android的插件化开发经过这么多年的发展，已经比较成熟，也诞生了很多优秀的插件框架，比如VirtualApk、RePlugin、Shadow等。其实所有支持四大组件的插件框架，都在解决一个问题，就是绕过Manifest注册表校验。传统的做法就是通过Hook技术，欺骗Android系统，注册表插桩，让系统认为启动的是插桩的四大组件，实际loadclass插件的类。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tencent插件化框架Shadow">
+<meta property="og:url" content="http://example.com/2020/03/17/android_tencent_shadow_introduction/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="Android的插件化开发经过这么多年的发展，已经比较成熟，也诞生了很多优秀的插件框架，比如VirtualApk、RePlugin、Shadow等。其实所有支持四大组件的插件框架，都在解决一个问题，就是绕过Manifest注册表校验。传统的做法就是通过Hook技术，欺骗Android系统，注册表插桩，让系统认为启动的是插桩的四大组件，实际loadclass插件的类。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_tencent_shadow_introduction01.png">
+<meta property="og:image" content="http://example.com/images/android_tencent_shadow_introduction03.png">
+<meta property="og:image" content="http://example.com/images/android_tencent_shadow_introduction02.png">
+<meta property="article:published_time" content="2020-03-17T14:12:00.000Z">
+<meta property="article:modified_time" content="2023-02-08T13:47:06.017Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="框架">
+<meta property="article:tag" content="插件化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_tencent_shadow_introduction01.png">
+
+
+<link rel="canonical" href="http://example.com/2020/03/17/android_tencent_shadow_introduction/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2020&#x2F;03&#x2F;17&#x2F;android_tencent_shadow_introduction&#x2F;&quot;,&quot;path&quot;:&quot;2020&#x2F;03&#x2F;17&#x2F;android_tencent_shadow_introduction&#x2F;&quot;,&quot;title&quot;:&quot;Tencent插件化框架Shadow&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Tencent插件化框架Shadow | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Shadow%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">Shadow介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/17/android_tencent_shadow_introduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tencent插件化框架Shadow
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-17 22:12:00" itemprop="dateCreated datePublished" datetime="2020-03-17T22:12:00+08:00">2020-03-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Android的插件化开发经过这么多年的发展，已经比较成熟，也诞生了很多优秀的插件框架，比如VirtualApk、RePlugin、Shadow等。其实所有支持四大组件的插件框架，都在解决一个问题，就是绕过Manifest注册表校验。传统的做法就是通过Hook技术，欺骗Android系统，注册表插桩，让系统认为启动的是插桩的四大组件，实际loadclass插件的类。</p>
+<span id="more"></span>
+
+<h1 id="Shadow介绍"><a href="#Shadow介绍" class="headerlink" title="Shadow介绍"></a>Shadow介绍</h1><p>Shadow可以说算是另辟蹊径，开源之初，对外宣传的是零Hook，可关键其实源码里是有一处Hook点的，对此官方也解释了，并非必须。那么Shadow是如何“骗”系统的呢？这其实也就是Shadow设计的巧妙之处，后文会进行分析。</p>
+<p>关于Shadow在分析前，有几个点我觉得有必要搞清楚：</p>
+<p>1、Shadow是跨进程的，插件运行在插件进程，通过Binder机制通信，所以不了解Binder的，建议提前熟悉一下，否则看着会比较绕。</p>
+<p>2、Shadow的宿主和业务插件之间还有一层中间层，中间层也是以插件的形式加载，同时可以升级，有较强的灵活性。</p>
+<p>3、插件里写一个页面，比如继承自Activity，我们可以正常写，但是在编译期会修改继承关系，将其父类改为ShadowActivity，ShadowActivity实际上不是一个Activity，他持有HostActivity的代理对象，依赖此完成生命周期的回调。</p>
+<p>这个操作是靠修改字节码实现的，自定义gradle脚本，通过javassist或者asm都可以实现，不再赘述。</p>
+<p>4、我纯属因为感兴趣所有阅读了源码，实际上并没有应用在生产环境，毕竟推进公司框架层面的修改不是那么容易，而且也不一定合适。各位在选择的时候，也要考虑全面，适合自己公司业务的解决方案才是最好的。</p>
+<p><strong>思考：</strong></p>
+<p>虽然Shadow与传统插件框架的实现方式不同，但有一些基本流程还是一致的。比如插件的下载、安装、更新、卸载。解析插件apk，插件四大组件的信息解析及缓存，插件的ClassLoader、Resource的处理等。</p>
+<p>Shadow不一样的点前言已经介绍，所以可以想到，第一次加载业务插件，首先会加载中间层插件。要想代理Activity（ProxyActivity）和插件Activity(PluginActivity)关联，同时ProxyActivity的生命周期方法能调用到PluginActivity，那么ProxyActivity必然会持有PluginActivity实例话对象的引用。PluginActivity里有具体的业务实现，同时需要回调ProxyActivity的生命周期方法，那么PluginActivity也会有一个有此能力的代理对象。</p>
+<p>再次强调，PluginActivity并不是一个真实的Activity，不要被Demo里的源码所欺骗，之所以要在编译期修改继承关系，好处就是在开发阶段，我们可以按照一个真实的Activity的写法去开发，剩下的事儿由框架处理；另外插件也是可以独立运行的。</p>
+<p>可能放两张图可以表达的更清楚：</p>
+<p><img src="/images/android_tencent_shadow_introduction01.png" alt="img"></p>
+<p>下面是我反编译插件apk得到的代码</p>
+<p><img src="/images/android_tencent_shadow_introduction03.png" alt="img"></p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><p>Shadow源码较多，我们只分析一下插件Activity是如何启动及运行的。</p>
+<p>可以先看一下打包出来的apk的结构</p>
+<p><img src="/images/android_tencent_shadow_introduction02.png" alt="img"></p>
+<p>我的理解pluginmanager.apk loader.apk runtime.apk是中间层</p>
+<p>config.json 是发版信息，主要用于检查更新，其中的uuid即为当前版本的唯一标示</p>
+<p>HostApplication的onCreate方法会有一些初始化的工作，主要是把asset目录下的插件复制到指定目录，还有runtime插件的状态恢复，非核心流程，不再详述。</p>
+<p>我们直接看启动插件的逻辑，很容易就找到加载插件的缺省页PluginLoadActivity，只有一个startPlugin方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startPlugin</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        PluginHelper.getInstance().singlePool.execute(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 方法名虽然叫loadPluginManager，实际上并没有真正安装manager插件，</span></span><br><span class="line">                <span class="comment">// 只是将插件路径包装成FixedPathPmUpdater，作为构造函数的参数，创建一个DynamicPluginManager保存在Application中</span></span><br><span class="line">                HostApplication.getApp().loadPluginManager(PluginHelper.getInstance().pluginManagerFile);</span><br><span class="line">                Bundle bundle = <span class="keyword">new</span> Bundle();</span><br><span class="line">                <span class="comment">//插件的安装路径</span></span><br><span class="line">                bundle.putString(Constant.KEY_PLUGIN_ZIP_PATH, PluginHelper.getInstance().pluginZipFile.getAbsolutePath());</span><br><span class="line">                <span class="comment">//当前值是：sample-plugin-app</span></span><br><span class="line">                bundle.putString(Constant.KEY_PLUGIN_PART_KEY, getIntent().getStringExtra(Constant.KEY_PLUGIN_PART_KEY));</span><br><span class="line">                <span class="comment">//要启动的插件中的Activity路径 com.tencent.shadow.sample.plugin.app.lib.gallery.splash.SplashActivity</span></span><br><span class="line">                bundle.putString(Constant.KEY_ACTIVITY_CLASSNAME, getIntent().getStringExtra(Constant.KEY_ACTIVITY_CLASSNAME));</span><br><span class="line">                <span class="comment">//EnterCallback主要是用于处理插件加载过程中的过度状态</span></span><br><span class="line">                HostApplication.getApp().getPluginManager()</span><br><span class="line">                        .enter(PluginLoadActivity.<span class="keyword">this</span>, Constant.FROM_ID_START_ACTIVITY, bundle, <span class="keyword">new</span> EnterCallback() &#123;</span><br><span class="line">                            <span class="meta">@Override</span></span><br><span class="line">                            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onShowLoadingView</span><span class="params">(<span class="keyword">final</span> View view)</span> </span>&#123;</span><br><span class="line">                                mHandler.post(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                                    <span class="meta">@Override</span></span><br><span class="line">                                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                                        mViewGroup.addView(view);</span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125;);</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="meta">@Override</span></span><br><span class="line">                            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCloseLoadingView</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                                finish();</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="meta">@Override</span></span><br><span class="line">                            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEnterComplete</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>懒的长篇大论，相关逻辑已经写在注释里，会执行到DynamicPluginManager的enter方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">enter</span><span class="params">(Context context, <span class="keyword">long</span> fromId, Bundle bundle, EnterCallback callback)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mLogger.isInfoEnabled()) &#123;</span><br><span class="line">            mLogger.info(<span class="string">&quot;enter fromId:&quot;</span> + fromId + <span class="string">&quot; callback:&quot;</span> + callback);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//动态管理插件的更新逻辑</span></span><br><span class="line">        updateManagerImpl(context);</span><br><span class="line">        <span class="comment">//mManagerImpl的类型是SamplePluginManager</span></span><br><span class="line">        mManagerImpl.enter(context, fromId, bundle, callback);</span><br><span class="line">        mUpdater.update();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>mManagerImpl是一个接口，上面的代码其真实实例是SamplePluginManager，updateManagerImpl方法会安装pluginmanager.apk插件，同时通过反射创建一个SamplePluginManager实例，也就是上面的mManagerImpl，同时支持pluginmanager.apk插件的更新逻辑。</p>
+<p>所以进入SamplePluginManager的enter-&gt;onStartActivity，代码逻辑比较简单，没什么可说的，需要注意一点是会启动一个线程，去加载zip包下的几个插件（runtime、loader、业务插件），而后会调用到其父类FastPluginManager的startPluginActivity方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startPluginActivity</span><span class="params">(Context context, InstalledPlugin installedPlugin, String partKey, Intent pluginIntent)</span> <span class="keyword">throws</span> RemoteException, TimeoutException, FailedException </span>&#123;</span><br><span class="line">        Intent intent = convertActivityIntent(installedPlugin, partKey, pluginIntent);</span><br><span class="line">        <span class="keyword">if</span> (!(context <span class="keyword">instanceof</span> Activity)) &#123;</span><br><span class="line">            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//最终启动的是com.tencent.shadow.sample.plugin.runtime.PluginDefaultProxyActivity</span></span><br><span class="line">        <span class="comment">//PluginDefaultProxyActivity 在宿主manifest中有注册</span></span><br><span class="line">        context.startActivity(intent);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心流程就在<strong>convertActivityIntent</strong>里，从命名就可以看出来，最终会把我们要启动的插件Activity，映射成一个在Manifest里注册的真实Activity，也就是注释中标注的PluginDefaultProxyActivity。</p>
+<p>可以回看一下上文“思考”中的内容，即为Shadow第一次使用插件的主要流程，convertActivityIntent的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Intent <span class="title">convertActivityIntent</span><span class="params">(InstalledPlugin installedPlugin, String partKey, Intent pluginIntent)</span> <span class="keyword">throws</span> RemoteException, TimeoutException, FailedException </span>&#123;</span><br><span class="line">        <span class="comment">//这个partKey的真实值是&quot;sample-plugin-app&quot;</span></span><br><span class="line">        loadPlugin(installedPlugin.UUID, partKey);</span><br><span class="line">        Map map = mPluginLoader.getLoadedPlugin();</span><br><span class="line">        Boolean isCall = (Boolean) map.get(partKey);</span><br><span class="line">        <span class="keyword">if</span> (isCall == <span class="keyword">null</span> || !isCall) &#123;</span><br><span class="line">            <span class="comment">//其持有的是PluginLoaderBinder的引用</span></span><br><span class="line">            <span class="comment">//这里又是一次跨进程通信</span></span><br><span class="line">            mPluginLoader.callApplicationOnCreate(partKey);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> mPluginLoader.convertActivityIntent(pluginIntent);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>loadPlugin：先安装中间层插件再安装业务插件，当然如果已安装，直接跳过</p>
+<p>mPluginLoader：是一个比较关键的变量，具体他是什么初始化的，下面会具体分析</p>
+<p>后续的代码执行逻辑可自行看源码，首先会执行loadPluginLoaderAndRuntime方法，这个方法里会初始化插件进程的服务，同时将插件进程的binder对象赋值给mPpsController：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loadPluginLoaderAndRuntime</span><span class="params">(String uuid, String partKey)</span> <span class="keyword">throws</span> RemoteException, TimeoutException, FailedException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mPpsController == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">//partKey是启动插件的时候在PluginLoadActivity中赋值</span></span><br><span class="line">            <span class="comment">//getPluginProcessServiceName 获取插件进程服务的名字</span></span><br><span class="line">            <span class="comment">//bindPluginProcessService启动插件进程服务 由此可见，shadow宿主和插件的信息传递是进程间通信的过程</span></span><br><span class="line">            bindPluginProcessService(getPluginProcessServiceName(partKey));</span><br><span class="line">            <span class="comment">//等待链接超时时间</span></span><br><span class="line">            waitServiceConnected(<span class="number">10</span>, TimeUnit.SECONDS);</span><br><span class="line">        &#125;</span><br><span class="line">        loadRunTime(uuid);</span><br><span class="line">        loadPluginLoader(uuid);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">......</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 启动PluginProcessService</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> serviceName 注册在宿主中的插件进程管理service完整名字</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">bindPluginProcessService</span><span class="params">(<span class="keyword">final</span> String serviceName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mServiceConnecting.get()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mLogger.isInfoEnabled()) &#123;</span><br><span class="line">                mLogger.info(<span class="string">&quot;pps service connecting&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (mLogger.isInfoEnabled()) &#123;</span><br><span class="line">            mLogger.info(<span class="string">&quot;bindPluginProcessService &quot;</span> + serviceName);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mConnectCountDownLatch.set(<span class="keyword">new</span> CountDownLatch(<span class="number">1</span>));</span><br><span class="line"></span><br><span class="line">        mServiceConnecting.set(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//CountDownLatch是一个同步工具，协调多个线程之间的同步</span></span><br><span class="line">        <span class="comment">//可以看下这篇文章 https://www.cnblogs.com/Lee_xy_z/p/10470181.html</span></span><br><span class="line">        <span class="keyword">final</span> CountDownLatch startBindingLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">boolean</span>[] asyncResult = <span class="keyword">new</span> <span class="keyword">boolean</span>[<span class="number">1</span>];</span><br><span class="line">        <span class="comment">//从onStartActivity方法可知，当前线程并不是UI线程</span></span><br><span class="line">        mUiHandler.post(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                Intent intent = <span class="keyword">new</span> Intent();</span><br><span class="line">                <span class="comment">//serviceName的值是com.tencent.shadow.sample.host.PluginProcessPPS</span></span><br><span class="line">                intent.setComponent(<span class="keyword">new</span> ComponentName(mHostContext, serviceName));</span><br><span class="line">                <span class="keyword">boolean</span> binding = mHostContext.bindService(intent, <span class="keyword">new</span> ServiceConnection() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceConnected</span><span class="params">(ComponentName name, IBinder service)</span> </span>&#123;<span class="comment">//service对应的是PluginProcessService中的mPpsControllerBinder</span></span><br><span class="line">                        <span class="keyword">if</span> (mLogger.isInfoEnabled()) &#123;</span><br><span class="line">                            mLogger.info(<span class="string">&quot;onServiceConnected connectCountDownLatch:&quot;</span> + mConnectCountDownLatch);</span><br><span class="line">                        &#125;</span><br><span class="line">                        mServiceConnecting.set(<span class="keyword">false</span>);</span><br><span class="line">                        mPpsController = PluginProcessService.wrapBinder(service);</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            <span class="comment">//跨进程执行PluginProcessService的setUuidManager方法</span></span><br><span class="line">                            <span class="comment">//UuidManagerBinder内部封装了三个方法，可以让插件进程拿到loader、runtime及指定其他业务插件的相关信息</span></span><br><span class="line">                            mPpsController.setUuidManager(<span class="keyword">new</span> UuidManagerBinder(PluginManagerThatUseDynamicLoader.<span class="keyword">this</span>));</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (DeadObjectException e) &#123;</span><br><span class="line">                            <span class="keyword">if</span> (mLogger.isErrorEnabled()) &#123;</span><br><span class="line">                                mLogger.error(<span class="string">&quot;onServiceConnected RemoteException:&quot;</span> + e);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">                            <span class="keyword">if</span> (e.getClass().getSimpleName().equals(<span class="string">&quot;TransactionTooLargeException&quot;</span>)) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (mLogger.isErrorEnabled()) &#123;</span><br><span class="line">                                    mLogger.error(<span class="string">&quot;onServiceConnected TransactionTooLargeException:&quot;</span> + e);</span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            <span class="comment">//第一次拿到的是一个null</span></span><br><span class="line">                            IBinder iBinder = mPpsController.getPluginLoader();</span><br><span class="line">                            <span class="keyword">if</span> (iBinder != <span class="keyword">null</span>) &#123;</span><br><span class="line">                                mPluginLoader = <span class="keyword">new</span> BinderPluginLoader(iBinder);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (RemoteException ignored) &#123;</span><br><span class="line">                            <span class="keyword">if</span> (mLogger.isErrorEnabled()) &#123;</span><br><span class="line">                                mLogger.error(<span class="string">&quot;onServiceConnected mPpsController getPluginLoader:&quot;</span>, ignored);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        mConnectCountDownLatch.get().countDown();</span><br><span class="line">                        <span class="keyword">if</span> (mLogger.isInfoEnabled()) &#123;</span><br><span class="line">                            mLogger.info(<span class="string">&quot;onServiceConnected countDown:&quot;</span> + mConnectCountDownLatch);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceDisconnected</span><span class="params">(ComponentName name)</span> </span>&#123;</span><br><span class="line">                        <span class="keyword">if</span> (mLogger.isInfoEnabled()) &#123;</span><br><span class="line">                            mLogger.info(<span class="string">&quot;onServiceDisconnected&quot;</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                        mServiceConnecting.set(<span class="keyword">false</span>);</span><br><span class="line">                        mPpsController = <span class="keyword">null</span>;</span><br><span class="line">                        mPluginLoader = <span class="keyword">null</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;, BIND_AUTO_CREATE);</span><br><span class="line">                asyncResult[<span class="number">0</span>] = binding;</span><br><span class="line">                startBindingLatch.countDown();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//当前线程会最多等待10s，startBindingLatch的线程计数为0之前，当前线程会处在中断状态</span></span><br><span class="line">            startBindingLatch.await(<span class="number">10</span>, TimeUnit.SECONDS);</span><br><span class="line">            <span class="keyword">if</span> (!asyncResult[<span class="number">0</span>]) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;无法绑定PPS:&quot;</span> + serviceName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>上文说过，整个流程是运行在子线程，所以启动服务要post到UI线程</p>
+<p>后续执行的loadRunTime(uuid);loadPluginLoader(uuid);方法即为启动中间层插件的逻辑，大同小异，只分析loadPluginLoader的执行逻辑，因为要解释关键变量mPluginLoader是怎么来的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">loadPluginLoader</span><span class="params">(String uuid)</span> <span class="keyword">throws</span> RemoteException, FailedException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mLogger.isInfoEnabled()) &#123;</span><br><span class="line">            mLogger.info(<span class="string">&quot;loadPluginLoader mPluginLoader:&quot;</span> + mPluginLoader);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (mPluginLoader == <span class="keyword">null</span>) &#123;</span><br><span class="line">            PpsStatus ppsStatus = mPpsController.getPpsStatus();</span><br><span class="line">            <span class="keyword">if</span> (!ppsStatus.loaderLoaded) &#123;</span><br><span class="line">                <span class="comment">//动态加载sample-loader-debug.apk此插件 在插件进程创建了PluginLoaderBinder的实体</span></span><br><span class="line">                mPpsController.loadPluginLoader(uuid);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//拿到PluginLoaderBinder的引用</span></span><br><span class="line">            IBinder iBinder = mPpsController.getPluginLoader();</span><br><span class="line">            mPluginLoader = <span class="keyword">new</span> BinderPluginLoader(iBinder);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>PpsStatus：只是一个状态bean，唯一作用就是保存插件的安装状态</p>
+<p>mPpsController：怎么来的上文已经说过，所以他所调用的方法的具体实现，都是插件进程Service里，即PluginProcessService</p>
+<p>mPpsController.loadPluginLoader方法，即为安装loader插件，具体不再分析，可以自行查看Shadow源码</p>
+<p>PluginProcessService的loadPluginLoader方法调用，有个关键点要注意：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">loadPluginLoader</span><span class="params">(String uuid)</span> <span class="keyword">throws</span> FailedException </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ...</span><br><span class="line">            <span class="comment">//pluginLoader类型：PluginLoaderBinder</span></span><br><span class="line">            <span class="comment">//pluginLoader持有DynamicPluginLoader的对象 封装了一系列插件运行的方法</span></span><br><span class="line">            PluginLoaderImpl pluginLoader = <span class="keyword">new</span> LoaderImplLoader().load(installedApk, uuid, getApplicationContext());</span><br><span class="line">            pluginLoader.setUuidManager(mUuidManager);</span><br><span class="line">            mPluginLoader = pluginLoader;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>上文中提到，第一次启动插件服务的时候mPluginLoader是null，他的初始化就是在这里，反射创建了一个PluginLoaderBinder对象，也就是mPluginLoader。但是真正干活的是其持有的DynamicPluginLoader对象。具体可以看一下com.tencent.shadow.dynamic.loader.impl.LoaderFactoryImpl类</p>
+<p>不要忘了这是跨进程的，所以要这样封装，mPluginLoader也是一个binder对象。</p>
+<p>再回到FastPluginManager的loadPlugin方法</p>
+<p>中间层插件已处理完，那就到了业务插件，会调用mPluginLoader.getLoadedPlugin()，会返回已安装的插件信息，这个方法的具体实现，从上文分析可知，是在DynamicPluginLoader里。如果要加载的插件没有安装，会调用mPluginLoader.loadPlugin(partKey);安装指定插件。</p>
+<p>后续的插件安装逻辑直接看源码吧，相信大家都能看懂，会调到ShadowPluginLoader的loadPlugin方法。</p>
+<p>再回到<strong>convertActivityIntent</strong>方法</p>
+<p>如果插件是第一次启动，那么会调用mPluginLoader.callApplicationOnCreate(partKey);</p>
+<p>mPluginLoader是谁已经说了很多次，不再强调。这个方法会初始化插件的contentprovider以及broadcastreceiver</p>
+<p>我们直接看mPluginLoader.convertActivityIntent(pluginIntent)，一连串的方法调用连，最终会调用到ComponentManager类的方法:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 调用前必须先调用isPluginComponent判断Intent确实一个插件内的组件</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> Intent.<span class="title">toActivityContainerIntent</span><span class="params">()</span></span>: Intent &#123;</span><br><span class="line">        <span class="keyword">val</span> bundleForPluginLoader = Bundle()</span><br><span class="line">        <span class="keyword">val</span> pluginComponentInfo = pluginComponentInfoMap[component]!!</span><br><span class="line">        bundleForPluginLoader.putParcelable(CM_ACTIVITY_INFO_KEY, pluginComponentInfo)</span><br><span class="line">        <span class="keyword">return</span> toContainerIntent(bundleForPluginLoader)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实很好理解，这里就是将插件Activity映射到我们注册在宿主的Activity，同时将映射关系以及一些必要的数据传递。</p>
+<p>在demo里最终映射的Activity是com.tencent.shadow.sample.plugin.runtime.PluginDefaultProxyActivity</p>
+<p>这是一个真实的Activity，可以正常启动。其主要逻辑都在父类PluginContainerActivity中。</p>
+<p>先看PluginContainerActivity的初始化方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">HostActivityDelegate hostActivityDelegate;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PluginContainerActivity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    HostActivityDelegate delegate;</span><br><span class="line">    DelegateProvider delegateProvider = DelegateProviderHolder.getDelegateProvider();</span><br><span class="line">    <span class="keyword">if</span> (delegateProvider != <span class="keyword">null</span>) &#123;</span><br><span class="line">        delegate = delegateProvider.getHostActivityDelegate(<span class="keyword">this</span>.getClass());</span><br><span class="line">        delegate.setDelegator(<span class="keyword">this</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Log.e(TAG, <span class="string">&quot;PluginContainerActivity: DelegateProviderHolder没有初始化&quot;</span>);</span><br><span class="line">        delegate = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    hostActivityDelegate = delegate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>hostActivityDelegate：看命名就知道，这是宿主Activity的代理类，我猜应该是给插件Activity使用的，你们觉得呢？</p>
+<p>我们来看一下hostActivityDelegate到底是什么：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">getHostActivityDelegate</span><span class="params">(aClass: <span class="type">Class</span>&lt;<span class="type">out</span> <span class="type">HostActivityDelegator</span>&gt;)</span></span>: HostActivityDelegate &#123;</span><br><span class="line">        <span class="keyword">return</span> ShadowActivityDelegate(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>回到PluginContainerActivity，以onCreate方法为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">final</span> <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">       ...</span><br><span class="line">       <span class="keyword">if</span> (hostActivityDelegate != <span class="keyword">null</span>) &#123;</span><br><span class="line">           hostActivityDelegate.onCreate(savedInstanceState);</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           ...</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里会调用hostActivityDelegate的onCreate，也就是ShadowActivityDelegate类的onCreate方法:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * com.tencent.shadow.core.loader.delegates.ShadowActivityDelegate</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">val</span> aClass = mPluginClassLoader.loadClass(pluginActivityClassName)</span><br><span class="line">            <span class="keyword">val</span> pluginActivity = PluginActivity::<span class="keyword">class</span>.java.cast(aClass.newInstance())</span><br><span class="line">            initPluginActivity(pluginActivity)</span><br><span class="line">            mPluginActivity = pluginActivity</span><br><span class="line"></span><br><span class="line">            ...</span><br><span class="line">            pluginActivity.onCreate(pluginSavedInstanceState)</span><br><span class="line">            mPluginActivityCreated = <span class="literal">true</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">            <span class="keyword">throw</span> RuntimeException(e)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">initPluginActivity</span><span class="params">(pluginActivity: <span class="type">PluginActivity</span>)</span></span> &#123;</span><br><span class="line">        pluginActivity.setHostActivityDelegator(mHostActivityDelegator)</span><br><span class="line">        pluginActivity.setPluginResources(mPluginResources)</span><br><span class="line">        pluginActivity.setHostContextAsBase(mHostActivityDelegator.hostActivity <span class="keyword">as</span> Context)</span><br><span class="line">        pluginActivity.setPluginClassLoader(mPluginClassLoader)</span><br><span class="line">        pluginActivity.setPluginComponentLauncher(mComponentManager)</span><br><span class="line">        pluginActivity.setPluginApplication(mPluginApplication)</span><br><span class="line">        pluginActivity.setShadowApplication(mPluginApplication)</span><br><span class="line">        pluginActivity.applicationInfo = mPluginApplication.applicationInfo</span><br><span class="line">        pluginActivity.setBusinessName(mBusinessName)</span><br><span class="line">        pluginActivity.setPluginPartKey(mPartKey)</span><br><span class="line">        pluginActivity.remoteViewCreatorProvider = mRemoteViewCreatorProvider</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>省略掉一些常规代码</p>
+<p>val aClass = mPluginClassLoader.loadClass(pluginActivityClassName)</p>
+<p>pluginActivityClassName：我们要启动的插件Activity的类路径即为SplashActivity</p>
+<p>反射实例化保存在mPluginActivity，用于调用插件Activity的生命周期等系统方法</p>
+<p>那么插件Activity要调用super方法，比如onCreate的super方法怎么办呢？</p>
+<p>在initPluginActivity方法中会将mHostActivityDelegator 传递给插件activity使用：</p>
+<p>pluginActivity.setHostActivityDelegator(mHostActivityDelegator)</p>
+<p>本文最开始说过，插件Activity会在编译期修改其继承关系为ShadowActivity，ShadowActivity继承自PluginActivity：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">PluginActivity</span> <span class="keyword">extends</span> <span class="title">ShadowContext</span> <span class="keyword">implements</span> <span class="title">Window</span>.<span class="title">Callback</span> </span>&#123;</span><br><span class="line">    HostActivityDelegator mHostActivityDelegator;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        mHostActivityDelegator.superOnCreate(savedInstanceState);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>宿主调用插件onCrate方法，插件会通过mHostActivityDelegator回调到宿主的super，即mHostActivityDelegator.superOnCreate(savedInstanceState);</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">superOnCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>到这整个流程就跑通了。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A1%86%E6%9E%B6/" rel="tag"># 框架</a>
+              <a href="/tags/%E6%8F%92%E4%BB%B6%E5%8C%96/" rel="tag"># 插件化</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/01/21/android_plugin_develop/" rel="prev" title="Android 插件化开发">
+                  <i class="fa fa-chevron-left"></i> Android 插件化开发
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

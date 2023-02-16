@@ -2636,7 +2636,7 @@
 <h2 id="具体优化方案-1"><a href="#具体优化方案-1" class="headerlink" title="具体优化方案"></a>具体优化方案</h2><p><img src="/images/android_layout_draw_performance03.png" alt="image"></p>
 <h3 id="降低View-onDraw（）的复杂度"><a href="#降低View-onDraw（）的复杂度" class="headerlink" title="降低View.onDraw（）的复杂度"></a>降低View.onDraw（）的复杂度</h3><h4 id="onDraw（）中不要创建新的局部对象"><a href="#onDraw（）中不要创建新的局部对象" class="headerlink" title="onDraw（）中不要创建新的局部对象"></a>onDraw（）中不要创建新的局部对象</h4><p><img src="/images/android_layout_draw_performance04.png" alt="image"></p>
 <h4 id="避免onDraw（）执行大量-amp-耗时操作"><a href="#避免onDraw（）执行大量-amp-耗时操作" class="headerlink" title="避免onDraw（）执行大量 &amp; 耗时操作"></a>避免onDraw（）执行大量 &amp; 耗时操作</h4><p><img src="/images/android_layout_draw_performance05.png" alt="image"></p>
-<h3 id="避免过度绘制"><a href="#避免过度绘制" class="headerlink" title="避免过度绘制"></a>避免过度绘制</h3><h4 id="过度绘制的简介"><a href="#过度绘制的简介" class="headerlink" title="过度绘制的简介"></a>过度绘制的简介</h4><p><img src="/images%5Candroid_layout_draw_performance06.png" alt="image"></p>
+<h3 id="避免过度绘制"><a href="#避免过度绘制" class="headerlink" title="避免过度绘制"></a>避免过度绘制</h3><h4 id="过度绘制的简介"><a href="#过度绘制的简介" class="headerlink" title="过度绘制的简介"></a>过度绘制的简介</h4><p><img src="/images/android_layout_draw_performance06.png" alt="image"></p>
 <h4 id="过度绘制的表现形式"><a href="#过度绘制的表现形式" class="headerlink" title="过度绘制的表现形式"></a>过度绘制的表现形式</h4><p>过度绘制 会导致屏幕显示的色块不同，具体如下</p>
 <p><img src="/images/android_layout_draw_performance07.png" alt="image"></p>
 <p>示例说明</p>
@@ -3479,8 +3479,8 @@
         <category>Android</category>
       </categories>
       <tags>
-        <tag>系统机制</tag>
         <tag>总结</tag>
+        <tag>系统机制</tag>
         <tag>IPC</tag>
       </tags>
   </entry>
@@ -4175,8 +4175,8 @@
         <category>算法</category>
       </categories>
       <tags>
-        <tag>数组</tag>
         <tag>双指针</tag>
+        <tag>数组</tag>
       </tags>
   </entry>
   <entry>
@@ -5815,8 +5815,8 @@
         <category>C++</category>
       </categories>
       <tags>
-        <tag>双指针</tag>
         <tag>算法</tag>
+        <tag>双指针</tag>
       </tags>
   </entry>
   <entry>
@@ -5963,31 +5963,6 @@
       </tags>
   </entry>
   <entry>
-    <title>链表-单链表的分解</title>
-    <url>/2017/08/07/algorithm_linkedlist_partition/</url>
-    <content><![CDATA[<p>给你一个链表的头节点 head 和一个特定值 x ，请你对链表进行分隔，使得所有 小于 x 的节点都出现在 大于或等于 x 的节点之前。</p>
-<p>你应当 保留 两个分区中每个节点的初始相对位置。</p>
-<span id="more"></span>
-
-<p>示例 1：</p>
-<p><img src="/images/algorithm_linkedlist_partition.jpg" alt="img"></p>
-<p>输入：head = [1,4,3,2,5,2], x = 3<br>输出：[1,2,2,4,3,5]<br>示例 2：</p>
-<p>输入：head = [2,1], x = 2<br>输出：[1,2]</p>
-<hr>
-<p>在合并两个有序链表时让你合二为一，而这里需要分解让你把原链表一分为二。具体来说，我们可以把原链表分成两个小链表，一个链表中的元素大小都小于 <code>x</code>，另一个链表中的元素都大于等于 <code>x</code>，最后再把这两条链表接到一起，就得到了题目想要的结果。</p>
-<p>整体逻辑和合并有序链表非常相似，细节直接看代码吧，注意虚拟头结点的运用：</p>
-<p>代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">partition</span><span class="params">(ListNode head, <span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 存放小于 x 的链表的虚拟头结点</span></span><br><span class="line">    ListNode lowDummy = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">    ListNode low = lowDummy;</span><br><span class="line">    <span class="comment">// 存放大于等于 x 的链表的虚拟头结点</span></span><br><span class="line">    ListNode highDummy = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">    ListNode high = highDummy;</span><br><span class="line">    <span class="comment">// p 负责遍历原链表，类似合并两个有序链表的逻辑</span></span><br><span class="line">    <span class="comment">// 这里是将一个链表分解成两个链表</span></span><br><span class="line">    ListNode p = head;</span><br><span class="line">    <span class="keyword">while</span> (p!=<span class="keyword">null</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span>(p.val &lt; x)&#123;</span><br><span class="line">            low.next = p;</span><br><span class="line">            low = low.next;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            high.next = p;</span><br><span class="line">            high = high.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 断开原链表中的每个节点的 next 指针</span></span><br><span class="line">        ListNode temp = p.next;</span><br><span class="line">        p.next = <span class="keyword">null</span>;</span><br><span class="line">        p = temp;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 连接两个链表</span></span><br><span class="line">    low.next = highDummy.next;</span><br><span class="line">    <span class="keyword">return</span> lowDummy.next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>算法</category>
-      </categories>
-      <tags>
-        <tag>链表</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>链表-合并K个有序链表</title>
     <url>/2017/08/07/algorithm_linkedlist_mergeklist/</url>
     <content><![CDATA[<p>给你一个链表数组，每个链表都已经按升序排列。</p>
@@ -6006,6 +5981,31 @@
 
 <p>这个算法是面试常考题，它的时间复杂度是多少呢？</p>
 <p>优先队列 <code>pq</code> 中的元素个数最多是 <code>k</code>，所以一次 <code>poll</code> 或者 <code>add</code> 方法的时间复杂度是 <code>O(logk)</code>；所有的链表节点都会被加入和弹出 <code>pq</code>，<strong>所以算法整体的时间复杂度是 <code>O(Nlogk)</code>，其中 <code>k</code> 是链表的条数，<code>N</code> 是这些链表的节点总数</strong>。</p>
+]]></content>
+      <categories>
+        <category>算法</category>
+      </categories>
+      <tags>
+        <tag>链表</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>链表-单链表的分解</title>
+    <url>/2017/08/07/algorithm_linkedlist_partition/</url>
+    <content><![CDATA[<p>给你一个链表的头节点 head 和一个特定值 x ，请你对链表进行分隔，使得所有 小于 x 的节点都出现在 大于或等于 x 的节点之前。</p>
+<p>你应当 保留 两个分区中每个节点的初始相对位置。</p>
+<span id="more"></span>
+
+<p>示例 1：</p>
+<p><img src="/images/algorithm_linkedlist_partition.jpg" alt="img"></p>
+<p>输入：head = [1,4,3,2,5,2], x = 3<br>输出：[1,2,2,4,3,5]<br>示例 2：</p>
+<p>输入：head = [2,1], x = 2<br>输出：[1,2]</p>
+<hr>
+<p>在合并两个有序链表时让你合二为一，而这里需要分解让你把原链表一分为二。具体来说，我们可以把原链表分成两个小链表，一个链表中的元素大小都小于 <code>x</code>，另一个链表中的元素都大于等于 <code>x</code>，最后再把这两条链表接到一起，就得到了题目想要的结果。</p>
+<p>整体逻辑和合并有序链表非常相似，细节直接看代码吧，注意虚拟头结点的运用：</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">partition</span><span class="params">(ListNode head, <span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 存放小于 x 的链表的虚拟头结点</span></span><br><span class="line">    ListNode lowDummy = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">    ListNode low = lowDummy;</span><br><span class="line">    <span class="comment">// 存放大于等于 x 的链表的虚拟头结点</span></span><br><span class="line">    ListNode highDummy = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">    ListNode high = highDummy;</span><br><span class="line">    <span class="comment">// p 负责遍历原链表，类似合并两个有序链表的逻辑</span></span><br><span class="line">    <span class="comment">// 这里是将一个链表分解成两个链表</span></span><br><span class="line">    ListNode p = head;</span><br><span class="line">    <span class="keyword">while</span> (p!=<span class="keyword">null</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span>(p.val &lt; x)&#123;</span><br><span class="line">            low.next = p;</span><br><span class="line">            low = low.next;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            high.next = p;</span><br><span class="line">            high = high.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 断开原链表中的每个节点的 next 指针</span></span><br><span class="line">        ListNode temp = p.next;</span><br><span class="line">        p.next = <span class="keyword">null</span>;</span><br><span class="line">        p = temp;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 连接两个链表</span></span><br><span class="line">    low.next = highDummy.next;</span><br><span class="line">    <span class="keyword">return</span> lowDummy.next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <categories>
         <category>算法</category>

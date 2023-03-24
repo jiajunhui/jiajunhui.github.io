@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="在 Android 7.0 发布之前，Android 仅使用 GNU Make 描述和执行其构建规则。Make 构建系统得到了广泛的支持和使用，但在 Android 层面变得缓慢、容易出错、无法扩展且难以测试。Soong 构建系统正好提供了 Android build 所需的灵活性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AOSP-Android.bp">
+<meta property="og:url" content="http://example.com/2021/03/13/android_aosp_android_bp/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="在 Android 7.0 发布之前，Android 仅使用 GNU Make 描述和执行其构建规则。Make 构建系统得到了广泛的支持和使用，但在 Android 层面变得缓慢、容易出错、无法扩展且难以测试。Soong 构建系统正好提供了 Android build 所需的灵活性。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:56:00.000Z">
+<meta property="article:modified_time" content="2023-03-17T15:02:21.572Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="AOSP">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/03/13/android_aosp_android_bp/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2021&#x2F;03&#x2F;13&#x2F;android_aosp_android_bp&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;03&#x2F;13&#x2F;android_aosp_android_bp&#x2F;&quot;,&quot;title&quot;:&quot;AOSP-Android.bp&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>AOSP-Android.bp | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3ninjia"><span class="nav-number">1.</span> <span class="nav-text">了解ninjia</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3Soong"><span class="nav-number">2.</span> <span class="nav-text">了解Soong</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Make%E5%92%8CSoong%E6%AF%94%E8%BE%83"><span class="nav-number">3.</span> <span class="nav-text">Make和Soong比较</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Make%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.1.</span> <span class="nav-text">Make示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Soong%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.2.</span> <span class="nav-text">Soong示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-bp%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">Android.bp文件格式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97"><span class="nav-number">4.1.</span> <span class="nav-text">模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Glob"><span class="nav-number">4.3.</span> <span class="nav-text">Glob</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E9%87%8F"><span class="nav-number">4.4.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E9%87%8A"><span class="nav-number">4.5.</span> <span class="nav-text">注释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">4.6.</span> <span class="nav-text">运算符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%AF%AD%E5%8F%A5"><span class="nav-number">4.7.</span> <span class="nav-text">条件语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E8%AE%BE%E7%BD%AE%E5%B7%A5%E5%85%B7"><span class="nav-number">4.8.</span> <span class="nav-text">格式设置工具</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-bp%E5%B8%B8%E7%94%A8%E6%A8%A1%E5%9D%97%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.</span> <span class="nav-text">Android.bp常用模块类型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#android-app"><span class="nav-number">5.1.</span> <span class="nav-text">android_app</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-library"><span class="nav-number">5.2.</span> <span class="nav-text">java_library</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-library-static"><span class="nav-number">5.3.</span> <span class="nav-text">java_library_static</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#android-library"><span class="nav-number">5.4.</span> <span class="nav-text">android_library</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cc-library"><span class="nav-number">5.5.</span> <span class="nav-text">cc_library</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-bp%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">Android.bp常见用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#bp%E4%B8%8B%E7%9A%84%E5%B8%B8%E8%A7%81%E5%B1%9E%E6%80%A7"><span class="nav-number">6.1.</span> <span class="nav-text">.bp下的常见属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E5%85%A5%E7%AC%AC%E4%B8%89%E6%96%B9jar%E5%8C%85"><span class="nav-number">6.2.</span> <span class="nav-text">引入第三方jar包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-bp%E4%B8%8EAndroid-mk%E5%AF%B9%E6%AF%94"><span class="nav-number">7.</span> <span class="nav-text">Android.bp与Android.mk对比</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%88%90Java%E5%BA%93"><span class="nav-number">7.1.</span> <span class="nav-text">编译成Java库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%88%90Java%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">7.2.</span> <span class="nav-text">编译成Java静态库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%88%90APP%E5%BA%94%E7%94%A8"><span class="nav-number">7.3.</span> <span class="nav-text">编译成APP应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%88%90Native%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">7.4.</span> <span class="nav-text">编译成Native动态库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%88%90Native%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">7.5.</span> <span class="nav-text">编译成Native静态库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%88%90Native%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F"><span class="nav-number">7.6.</span> <span class="nav-text">编译成Native执行程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%88%90%E5%A4%B4%E6%96%87%E4%BB%B6%E5%BA%93"><span class="nav-number">7.7.</span> <span class="nav-text">编译成头文件库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E5%A4%B4%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84"><span class="nav-number">7.8.</span> <span class="nav-text">本地头文件路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E7%9A%84%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">7.9.</span> <span class="nav-text">依赖的静态库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E7%9A%84%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">7.10.</span> <span class="nav-text">依赖的动态库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E7%9A%84Java%E5%BA%93"><span class="nav-number">7.11.</span> <span class="nav-text">依赖的Java库</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/13/android_aosp_android_bp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AOSP-Android.bp
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-13 00:56:00" itemprop="dateCreated datePublished" datetime="2021-03-13T00:56:00+08:00">2021-03-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android系统开发</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在 Android 7.0 发布之前，Android 仅使用 GNU Make 描述和执行其构建规则。Make 构建系统得到了广泛的支持和使用，但在 Android 层面变得缓慢、容易出错、无法扩展且难以测试。Soong 构建系统正好提供了 Android build 所需的灵活性。</p>
+<span id="more"></span>
+
+<p>Soong 构建系统是在 Android 7.0 (Nougat) 中引入的，旨在取代 Make。它利用 Kati GNU Make 克隆工具和 Ninja 构建系统组件来加速 Android 的构建。</p>
+<h1 id="了解ninjia"><a href="#了解ninjia" class="headerlink" title="了解ninjia"></a>了解ninjia</h1><p>Ninja 的配置文件就是Android.bp，Android 系统使用 Soong 工具来解析 Android.bp 转换生成 ninja文件。<br>为了兼容老的 mk 配置文件，Android 当初也开发了 Kati 工具来转换 mk 文件生成ninja，目前 Android Q 里边，还是支持 Android.mk 方式的。</p>
+<p>kati是Android开发的一个基于Golang和C++的工具，主要功能是把Android中的Android.mk文件转换成Ninja文件。</p>
+<p>相信在将来的版本中，会彻底让 mk 文件废弃，同时 Kati 也就淘汰了，只保留 bp 配置方式。</p>
+<p>其实ninja是一个编译框架，会根据相应的ninja格式的配置文件进行编译，ninja文件一般不会手动修改，而是通过将Android.bp文件转换成ninja格文件来编译。</p>
+<h1 id="了解Soong"><a href="#了解Soong" class="headerlink" title="了解Soong"></a>了解Soong</h1><p>Soong类似于之前的Makefile编译系统的核心，负责提供Android.bp语义解析，并将之转换成Ninja文件。</p>
+<p>Soong还会编译生成一个androidmk命令，用于将Android.mk文件转换为Android.bp文件，不过这个转换功能仅限于没有分支、循环等流程控制的Android.mk才有效。</p>
+<h1 id="Make和Soong比较"><a href="#Make和Soong比较" class="headerlink" title="Make和Soong比较"></a>Make和Soong比较</h1><p>以下是 Make 配置与 Soong 在 Soong 配置（Blueprint 或 <code>.bp</code>）文件中完成相同操作的比较。</p>
+<h2 id="Make示例"><a href="#Make示例" class="headerlink" title="Make示例"></a>Make示例</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">LOCAL_PATH := <span class="variable">$(<span class="built_in">call</span> my-<span class="built_in">dir</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(CLEAR_VARS)</span></span><br><span class="line">LOCAL_MODULE := libxmlrpc++</span><br><span class="line">LOCAL_MODULE_HOST_OS := linux</span><br><span class="line"></span><br><span class="line">LOCAL_RTTI_FLAG := -frtti</span><br><span class="line">LOCAL_CPPFLAGS := -Wall -Werror -fexceptions</span><br><span class="line">LOCAL_EXPORT_C_INCLUDES := <span class="variable">$(LOCAL_PATH)</span>/src</span><br><span class="line"></span><br><span class="line">LOCAL_SRC_FILES := <span class="variable">$(<span class="built_in">call</span> \</span></span><br><span class="line"><span class="variable">     all-cpp-files-under,src)</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_SHARED_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Soong示例"><a href="#Soong示例" class="headerlink" title="Soong示例"></a>Soong示例</h2><figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>shared &#123;</span><br><span class="line">     name: “libxmlrpc++”,</span><br><span class="line"></span><br><span class="line">     rtti: true,</span><br><span class="line">     cppflags: [</span><br><span class="line">           “-Wall”,</span><br><span class="line">           “-Werror”,</span><br><span class="line">           “-fexceptions”,</span><br><span class="line">     ],</span><br><span class="line">     export<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [“src”],</span><br><span class="line">     srcs: [“src/**/*.cpp”],</span><br><span class="line"></span><br><span class="line">     target: &#123;</span><br><span class="line">           darwin: &#123;</span><br><span class="line">                enabled: false,</span><br><span class="line">           &#125;,</span><br><span class="line">     &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Android-bp文件格式"><a href="#Android-bp文件格式" class="headerlink" title="Android.bp文件格式"></a>Android.bp文件格式</h1><p>根据设计，<code>Android.bp</code> 文件很简单。它们不包含任何条件语句，也不包含控制流语句；所有复杂问题都由用 Go 编写的构建逻辑处理。</p>
+<h2 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h2><p><code>Android.bp</code> 文件中的模块以<a target="_blank" rel="noopener" href="https://ci.android.com/builds/latest/branches/aosp-build-tools/targets/linux/view/soong_build.html?hl=zh-cn">模块类型</a>开头，后跟一组 <code>name: &quot;value&quot;,</code> 格式的属性：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cc<span class="built_in">_</span>binary &#123;</span><br><span class="line">    name: &quot;gzip&quot;,</span><br><span class="line">    srcs: [&quot;src/test/minigzip.c&quot;],</span><br><span class="line">    shared<span class="built_in">_</span>libs: [&quot;libz&quot;],</span><br><span class="line">    stl: &quot;none&quot;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每个模块都必须具有 <code>name</code> 属性，并且相应值在所有 <code>name</code> 文件中必须是唯一的，仅有两个例外情况是命名空间和预构建模块中的 <code>Android.bp</code> 属性值，这两个值可能会重复。</p>
+<p><code>srcs</code> 属性以字符串列表的形式指定用于构建模块的源文件。您可以使用模块引用语法 <code>&quot;:&lt;module-name&gt;&quot;</code> 来引用生成源文件的其他模块的输出，如 <code>genrule</code> 或 <code>filegroup</code>。</p>
+<h2 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h2><p>变量和属性是强类型，变量根据第一项赋值动态变化，属性由模块类型静态设置。支持的类型为：</p>
+<ul>
+<li>布尔值（<code>true</code> 或 <code>false</code>）</li>
+<li>整数 (<code>int</code>)</li>
+<li>字符串 (<code>&quot;string&quot;</code>)</li>
+<li>字符串列表 (<code>[&quot;string1&quot;, &quot;string2&quot;]</code>)</li>
+<li>映射 (<code>&#123;key1: &quot;value1&quot;, key2: [&quot;value2&quot;]&#125;</code>)</li>
+</ul>
+<p>映射可以包含任何类型的值，包括嵌套映射。列表和映射可能在最后一个值后面有终止逗号。</p>
+<h2 id="Glob"><a href="#Glob" class="headerlink" title="Glob"></a>Glob</h2><p>接受文件列表的属性（例如 <code>srcs</code>）也可以采用 glob 模式。glob 模式可以包含普通的 UNIX 通配符 <code>*</code>，例如 <code>*.java</code>。glob 模式还可以包含单个 <code>**</code> 通配符作为路径元素，与零个或多个路径元素匹配。例如，<code>java/**/*.java</code> 同时匹配 <code>java/Main.java</code> 和 <code>java/com/android/Main.java</code> 模式。</p>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p><code>Android.bp</code> 文件可能包含顶级变量赋值：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gzip<span class="built_in">_</span>srcs = [&quot;src/test/minigzip.c&quot;],</span><br><span class="line">cc<span class="built_in">_</span>binary &#123;</span><br><span class="line">    name: &quot;gzip&quot;,</span><br><span class="line">    srcs: gzip<span class="built_in">_</span>srcs,</span><br><span class="line">    shared<span class="built_in">_</span>libs: [&quot;libz&quot;],</span><br><span class="line">    stl: &quot;none&quot;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>变量的作用域限定在声明它们的文件的其余部分，以及所有子 Blueprint 文件。变量是不可变的，但有一个例外情况：可以使用 <code>+=</code> 赋值将变量附加到别处，但只能在引用它们之前附加。</p>
+<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><p><code>Android.bp</code> 文件可以包含 C 样式的多行 <code>/* */</code> 注释以及 C++ 样式的单行 <code>//</code> 注释。</p>
+<h2 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h2><p>可以使用 + 运算符附加字符串、字符串列表和映射。可以使用 <code>+</code> 运算符对整数求和。附加映射会生成两个映射中键的并集，并附加在两个映射中都存在的所有键的值。</p>
+<h2 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h2><p>Soong 不支持 <code>Android.bp</code> 文件中的条件语句。但是，编译规则中需要条件语句的复杂问题将在 Go（在这种语言中，您可以使用高级语言功能，并且可以跟踪条件语句引入的隐式依赖项）中处理。大多数条件语句都会转换为映射属性，其中选择了映射中的某个值并将其附加到顶级属性。</p>
+<p>例如，要支持特定于架构的文件，请使用以下命令：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">cc<span class="built_in">_</span>library &#123;</span><br><span class="line">    ...</span><br><span class="line">    srcs: [&quot;generic.cpp&quot;],</span><br><span class="line">    arch: &#123;</span><br><span class="line">        arm: &#123;</span><br><span class="line">            srcs: [&quot;arm.cpp&quot;],</span><br><span class="line">        &#125;,</span><br><span class="line">        x86: &#123;</span><br><span class="line">            srcs: [&quot;x86.cpp&quot;],</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="格式设置工具"><a href="#格式设置工具" class="headerlink" title="格式设置工具"></a>格式设置工具</h2><p>Soong 包含一个针对 Blueprint 文件的规范格式设置工具，类似于 <a target="_blank" rel="noopener" href="https://golang.org/cmd/gofmt/">gofmt</a>。如需以递归方式重新设置当前目录中所有 <code>Android.bp</code> 文件的格式，请运行以下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bpfmt -w .</span><br></pre></td></tr></table></figure>
+
+<p>规范格式包括缩进四个空格、多元素列表的每个元素后面有换行符，以及列表和映射末尾有英文逗号。</p>
+<h1 id="Android-bp常用模块类型"><a href="#Android-bp常用模块类型" class="headerlink" title="Android.bp常用模块类型"></a>Android.bp常用模块类型</h1><p>在Android.bp中我们会基于模块类型来构建我们所需要的东西，常用的有以下几种类型</p>
+<h2 id="android-app"><a href="#android-app" class="headerlink" title="android_app"></a>android_app</h2><p>用于构建Android 应用程序安装包，是Android系统应用开发中常用的模块类型，与Android.mk中的<code>BUILD_PACKAGE</code>作用相同。</p>
+<h2 id="java-library"><a href="#java-library" class="headerlink" title="java_library"></a>java_library</h2><p><code>java_library</code>用于将源代码构建并链接到设备的<code>.jar</code>文件中。默认情况下，<code>java_library</code>只有一个变量，它生成一个包含根据设备引导类路径编译的<code>.class</code>文件的<code>.jar</code>包。生成的jar不适合直接安装在设备上，通过会用作另一个模块的<code>static_libs</code>依赖项。</p>
+<p>如果指定“installable:true”将生成一个包含“classes.dex”文件的“.jar”文件，适合在设备上安装。指定’host_supported:true’将产生两个变量，一个根据device的bootclasspath编译，另一个根据host的bootclasspath编译。</p>
+<h2 id="java-library-static"><a href="#java-library-static" class="headerlink" title="java_library_static"></a>java_library_static</h2><p><code>java_library_static</code>作用等同于<code>java_library</code>，但是<code>java_library_static</code>已经过时，不推荐使用</p>
+<h2 id="android-library"><a href="#android-library" class="headerlink" title="android_library"></a>android_library</h2><p><code>android_library</code>将源代码与android资源文件一起构建并链接到设备的“.jar”文件中。android_library有一个单独的变体，它生成一个包含根据device的bootclasspath编译的<code>.class</code>文件的<code>.jar</code>文件，以及一个包含使用aapt2编译的android资源的<code>.package-res.apk</code>文件。生成的apk文件不能直接安装在设备上，但可以用作<code>android_app</code>模块的<code>static_libs</code>依赖项。</p>
+<h2 id="cc-library"><a href="#cc-library" class="headerlink" title="cc_library"></a>cc_library</h2><p><code>cc_library</code>为device或host创建静态库或共享库。默认情况下，<code>cc_library</code>具有针对设备的单一变体。指定’host_supported:true’还会创建一个以主机为目标的库。与cc_library相关的模块类型还有<code>cc_library_shared</code>、<code>cc_library_headers</code>、<code>cc_library_static</code>等。</p>
+<h1 id="Android-bp常见用法"><a href="#Android-bp常见用法" class="headerlink" title="Android.bp常见用法"></a>Android.bp常见用法</h1><h2 id="bp下的常见属性"><a href="#bp下的常见属性" class="headerlink" title=".bp下的常见属性"></a>.bp下的常见属性</h2><p>介绍一些使用频率比较高的属性。</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">// 构建可执行程序</span><br><span class="line">android<span class="built_in">_</span>app &#123;</span><br><span class="line">    // 设定可执行的程序的名称，编译后会生成一个 CarNotification.apk</span><br><span class="line">    name: &quot;CarNotification&quot;,</span><br><span class="line">    // 指定java源码的位置</span><br><span class="line">    srcs: [&quot;src/**/*.java&quot;],</span><br><span class="line">    // 指定资源文件的位置</span><br><span class="line">    resource<span class="built_in">_</span>dirs: [&quot;res&quot;],</span><br><span class="line">    // 允许使用系统hide api</span><br><span class="line">    platform<span class="built_in">_</span>apis: true,</span><br><span class="line">    // 设定apk签名为 platform</span><br><span class="line">    certificate: &quot;platform&quot;,</span><br><span class="line">    // 如果集成的是apk且使用原签名，则使用该属性</span><br><span class="line">    presigned: true,</span><br><span class="line">    // 设定apk安装路径为priv-app</span><br><span class="line">    privileged: true,</span><br><span class="line">    // 是否启用代码优化，android<span class="built_in">_</span>app中默认为true，java<span class="built_in">_</span>library中默认为false</span><br><span class="line">    optimize: &#123;</span><br><span class="line">        enabled: false,</span><br><span class="line">    &#125;,</span><br><span class="line">    // 是否预先生成dex文件，默认为true。该属性会影响应用的首次启动速度以及Android系统的启动速度</span><br><span class="line">    dex<span class="built_in">_</span>preopt: &#123;</span><br><span class="line">        enabled: false,</span><br><span class="line">    &#125;,</span><br><span class="line">    // 引入java静态库</span><br><span class="line">    static<span class="built_in">_</span>libs: [</span><br><span class="line">        &quot;androidx.cardview<span class="built_in">_</span>cardview&quot;,</span><br><span class="line">        &quot;androidx.recyclerview<span class="built_in">_</span>recyclerview&quot;,</span><br><span class="line">        &quot;androidx.palette<span class="built_in">_</span>palette&quot;,</span><br><span class="line">        &quot;car-assist-client-lib&quot;,</span><br><span class="line">        &quot;android.car.userlib&quot;,</span><br><span class="line">        &quot;androidx-constraintlayout<span class="built_in">_</span>constraintlayout&quot;</span><br><span class="line">    ],</span><br><span class="line">    // 引入java库</span><br><span class="line">    libs: [&quot;android.car&quot;],</span><br><span class="line">    product<span class="built_in">_</span>variables: &#123;</span><br><span class="line">        pdk: &#123;</span><br><span class="line">            enabled: false,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">    // 设定依赖模块。如果安装了此模块，则要还需要安装的其他模块的名称</span><br><span class="line">    required: [&quot;privapp<span class="built_in">_</span>whitelist<span class="built_in">_</span>com.android.car.notification&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="引入第三方jar包"><a href="#引入第三方jar包" class="headerlink" title="引入第三方jar包"></a>引入第三方jar包</h2><p>在项目的根目录新建 libs文件夹，放入要导入的jar包，比如 CarServicelib.jar，然后在Android.bp中引入该jar</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">java<span class="built_in">_</span>import &#123;</span><br><span class="line">  name: &quot;CarServicelib.jar&quot;,</span><br><span class="line">  jars: [&quot;libs/CarServicelib.jar&quot;],</span><br><span class="line">&#125;</span><br><span class="line">android<span class="built_in">_</span>app &#123;</span><br><span class="line">    // 省去其它属性</span><br><span class="line">    // 引入AndroidX库下的lib</span><br><span class="line">    static<span class="built_in">_</span>libs: [</span><br><span class="line">        &quot;CarServicelib.jar&quot;</span><br><span class="line">    ],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Android-bp与Android-mk对比"><a href="#Android-bp与Android-mk对比" class="headerlink" title="Android.bp与Android.mk对比"></a>Android.bp与Android.mk对比</h1><h2 id="编译成Java库"><a href="#编译成Java库" class="headerlink" title="编译成Java库"></a>编译成Java库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_JAVA_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">java<span class="built_in">_</span>library &#123;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译成Java静态库"><a href="#编译成Java静态库" class="headerlink" title="编译成Java静态库"></a>编译成Java静态库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_STATIC_JAVA_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">java<span class="built_in">_</span>library<span class="built_in">_</span>static &#123;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译成APP应用"><a href="#编译成APP应用" class="headerlink" title="编译成APP应用"></a>编译成APP应用</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_PACKAGE)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">android<span class="built_in">_</span>app &#123;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译成Native动态库"><a href="#编译成Native动态库" class="headerlink" title="编译成Native动态库"></a>编译成Native动态库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_SHARED_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>shared &#123;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译成Native静态库"><a href="#编译成Native静态库" class="headerlink" title="编译成Native静态库"></a>编译成Native静态库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_STATIC_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>static &#123;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译成Native执行程序"><a href="#编译成Native执行程序" class="headerlink" title="编译成Native执行程序"></a>编译成Native执行程序</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_EXECUTABLE)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">cc<span class="built_in">_</span>binary &#123;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译成头文件库"><a href="#编译成头文件库" class="headerlink" title="编译成头文件库"></a>编译成头文件库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_HEADER_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>headers &#123;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="本地头文件路径"><a href="#本地头文件路径" class="headerlink" title="本地头文件路径"></a>本地头文件路径</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line">LOCAL_C_INCLUDES :=</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">local<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [&quot;xxx&quot;, ...]</span><br></pre></td></tr></table></figure>
+
+<h2 id="依赖的静态库"><a href="#依赖的静态库" class="headerlink" title="依赖的静态库"></a>依赖的静态库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line">LOCAL_STATIC_LIBRARIES :=</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">static<span class="built_in">_</span>libs: [&quot;xxx&quot;, &quot;xxx&quot;, ...]</span><br></pre></td></tr></table></figure>
+
+<h2 id="依赖的动态库"><a href="#依赖的动态库" class="headerlink" title="依赖的动态库"></a>依赖的动态库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line">LOCAL_SHARED_LIBRARIES :=</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">shared<span class="built_in">_</span>libs: [&quot;xxx&quot;, &quot;xxx&quot;, ...]</span><br></pre></td></tr></table></figure>
+
+<h2 id="依赖的Java库"><a href="#依赖的Java库" class="headerlink" title="依赖的Java库"></a>依赖的Java库</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.mk</span><br><span class="line">LOCAL_STATIC_JAVA_LIBRARIES :=</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android.bp</span><br><span class="line">static<span class="built_in">_</span>libs: [&quot;xxx&quot;, &quot;xxx&quot;, ...]</span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AOSP/" rel="tag"># AOSP</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/10/android_aosp_system_service_lifecycle/" rel="prev" title="AOSP-系统服务生命周期">
+                  <i class="fa fa-chevron-left"></i> AOSP-系统服务生命周期
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/03/17/android_aosp_car_launcher_introduction/" rel="next" title="AOSP-CarLauncher介绍">
+                  AOSP-CarLauncher介绍 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

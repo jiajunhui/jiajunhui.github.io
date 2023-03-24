@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="CarService是车载Android系统的核心服务之一，所有应用都需要通过CarService来查询、控制整车的状态。不仅仅是车辆控制，实际上CarService几乎就是整个车载Framework最核心的组件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android车载核心服务-CarService">
+<meta property="og:url" content="http://example.com/2022/02/23/android_aosp_car_service/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="CarService是车载Android系统的核心服务之一，所有应用都需要通过CarService来查询、控制整车的状态。不仅仅是车辆控制，实际上CarService几乎就是整个车载Framework最核心的组件。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_service01.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_service02.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_service03.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_service04.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_service05.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_service06.png">
+<meta property="article:published_time" content="2022-02-22T16:09:00.000Z">
+<meta property="article:modified_time" content="2023-03-24T13:11:45.136Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="AOSP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_aosp_car_service01.png">
+
+
+<link rel="canonical" href="http://example.com/2022/02/23/android_aosp_car_service/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2022&#x2F;02&#x2F;23&#x2F;android_aosp_car_service&#x2F;&quot;,&quot;path&quot;:&quot;2022&#x2F;02&#x2F;23&#x2F;android_aosp_car_service&#x2F;&quot;,&quot;title&quot;:&quot;Android车载核心服务-CarService&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android车载核心服务-CarService | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CarService-%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">2.</span> <span class="nav-text">CarService 的组成</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Car-API-%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">Car API 使用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Car-API-%E7%AE%80%E4%BB%8B"><span class="nav-number">3.1.</span> <span class="nav-text">Car API 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91-Car-API"><span class="nav-number">3.2.</span> <span class="nav-text">编译 Car API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Car-API"><span class="nav-number">3.3.</span> <span class="nav-text">使用 Car API</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Car-API-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">Car API 实现原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CarService-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">5.</span> <span class="nav-text">CarService 的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CarService-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">5.1.</span> <span class="nav-text">CarService 启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CarService-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">5.2.</span> <span class="nav-text">CarService 初始化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/23/android_aosp_car_service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android车载核心服务-CarService
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-02-23 00:09:00" itemprop="dateCreated datePublished" datetime="2022-02-23T00:09:00+08:00">2022-02-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android系统开发</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/%E8%BD%A6%E8%81%94%E7%BD%91/" itemprop="url" rel="index"><span itemprop="name">车联网</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><code>CarService</code>是车载Android系统的核心服务之一，所有应用都需要通过<code>CarService</code>来查询、控制整车的状态。不仅仅是车辆控制，实际上<code>CarService</code>几乎就是整个车载Framework最核心的组件。</p>
+<span id="more"></span>
+
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>CarService源码位置：<code>/packages/service/Car/service</code></p>
+<p>Android系统主要应用于中控和副驾屏幕，原生的车载Android本质上可以看作是Android OS + Automotive Services + Automotive APPs组成的系统。用户会通过显示在中控屏幕上App，将对车辆的操作信息通过Car API 传递给<code>Framework Service</code>，Service再通过HIDL将信息处理后传递给<code>HAL Service</code>，<code>HAL Service</code>再将数据处理后传递给<code>MCU</code>，<code>MCU</code>通过<code>CAN bus</code>将信息传递给汽车上的各个ECU（中间忽略了一些不需要理解的步骤），然后由ECU控制汽车的机械零部件进行活动，这样就完成了一次从Android APP到车辆机械零部件间的通信。</p>
+<blockquote>
+<p>HIDL是一种类似于AIDL的跨进程通信手段，主要应用于HAL层程序的跨进程通信。Google在Android 8中引入并在Android 10中废弃，Android 10 以后被AIDL取代。</p>
+</blockquote>
+<p><img src="/images/android_aosp_car_service01.png" alt="img"></p>
+<p>以上通信过程起到承上启下作用的Framework Service就是我们的主角 — <code>CarService</code>。</p>
+<blockquote>
+<p>原生Android Automotive 系统里<code>CarService</code>实现的功能非常多，架构图里描述的只是其中的冰山一角，架构图描述的意义只是为了引出<code>CarService</code>。</p>
+</blockquote>
+<h1 id="CarService-的组成"><a href="#CarService-的组成" class="headerlink" title="CarService 的组成"></a>CarService 的组成</h1><p>作为 Android Automotive 的核心进程，原生的<code>CarService</code>业务量非常庞大，包含了许多与汽车相关的服务，主要有以下几个：</p>
+<ul>
+<li><strong>CarPropertyService</strong></li>
+</ul>
+<p>此类实现<code>ICarProperty</code>的binder接口。有助于更容易地创建处理车辆属性的多个Manager。</p>
+<ul>
+<li><strong>CarInputService</strong></li>
+</ul>
+<p><code>CarInputService</code>通过车辆HAL监控和处理输入事件。</p>
+<ul>
+<li><strong>CarLocationService</strong></li>
+</ul>
+<p>此服务在车辆停放时存储<code>LocationManager</code>中最后一个已知位置，并在车辆通电时恢复该位置。</p>
+<ul>
+<li><strong>CarMediaService</strong></li>
+</ul>
+<p><code>CarMediaService</code>管理汽车应用程序的当前活动媒体源。这与<code>MediaSessionManager</code>的活动会话不同，因为同一时间内车内只能有一个活动源。</p>
+<p>在车内，活动的媒体源不一定有活动的<code>MediaSession</code>，例如，如果只是在浏览它。但是，该源仍然被视为活动源，并且应该是任何媒体相关UI（媒体中心、主屏幕等）中显示的源。</p>
+<ul>
+<li><strong>CarPowerManagementService</strong></li>
+</ul>
+<p>汽车电源管理服务。控制电源状态并与系统的其他部分交互以确保其自身状态。</p>
+<ul>
+<li><strong>CarProjectionService</strong></li>
+</ul>
+<p>汽车投屏服务。</p>
+<ul>
+<li><strong>CarAudioService</strong></li>
+</ul>
+<p>负责与汽车音响系统交互的服务。</p>
+<ul>
+<li><strong>AppFocusService</strong></li>
+</ul>
+<p>应用程序焦点服务确保一次只有一个应用程序类型的实例处于活动状态。</p>
+<ul>
+<li><strong>GarageModeService</strong></li>
+</ul>
+<p>车库模式。车库模式启用车内空闲时间。</p>
+<ul>
+<li><strong>InstrumentClusterService</strong></li>
+</ul>
+<p>负责与汽车仪表盘交互的服务。</p>
+<ul>
+<li><strong>CarPackageManagerService</strong></li>
+</ul>
+<p>汽车包管理服务。</p>
+<ul>
+<li><strong>CarUserService</strong></li>
+</ul>
+<p>汽车多用户服务。在启动时管理用户。包括：</p>
+<ol>
+<li>创建用作驱动程序的用户。</li>
+<li>创建用作乘客的用户。</li>
+<li>首次运行时创建辅助管理员用户。</li>
+<li>切换驾驶员。</li>
+</ol>
+<ul>
+<li>CarStorageMonitoringService</li>
+</ul>
+<p>提供存储监视数据（如I/O统计数据）的服务。为了接收此类数据，用户需要实现<code>IIoStatsListener</code>并根据此服务注册自己。</p>
+<ul>
+<li>CarBluetoothService</li>
+</ul>
+<p>车载蓝牙服务-维护当前用户的蓝牙设备和配置文件连接。</p>
+<ul>
+<li>FixedActivityService</li>
+</ul>
+<p>监控显示器顶部的Activity，并确保在固定模式下的Activity在崩溃或因任何原因进入后台时重新启动。此组件还监视目标包的更新，并在更新完成后重新启动它。</p>
+<ul>
+<li>CarBugreportManagerService</li>
+</ul>
+<p>Bug report服务</p>
+<ul>
+<li>CarConfigurationService</li>
+</ul>
+<p>该服务将查看系统上的默认JSON配置文件并解析其结果。该服务将查找映射到<code>R.raw.car_config</code>的JSON文件。如果此值不存在或格式不正确，则此服务不会失败；相反，它返回各种配置的默认值。</p>
+<ul>
+<li>CarDiagnosticService</li>
+</ul>
+<p>汽车诊断服务。工程模式会用到此服务。</p>
+<ul>
+<li>CarDrivingStateService</li>
+</ul>
+<p>推断车辆当前驾驶状态的服务。它通过侦听<code>CarPropertyService</code>的相关属性来计算驾驶状态。</p>
+<ul>
+<li>CarExperimentalFeatureServiceController</li>
+</ul>
+<p>控制与<code>ExperimentalCarService</code>的绑定以及实验功能的接口。</p>
+<ul>
+<li>CarFeatureController</li>
+</ul>
+<p>控制汽车特性的部件。</p>
+<ul>
+<li>CarNightService</li>
+</ul>
+<p>用于处理用于将车辆设置为夜间模式的事件。</p>
+<ul>
+<li>CarOccupantZoneService</li>
+</ul>
+<p>用于实现<code>CarOccupantZoneManager</code>API的服务。</p>
+<ul>
+<li>CarTestService</li>
+</ul>
+<p>允许测试/模拟车辆HAL的服务。该服务直接使用车辆HAL API，因为车辆HAL模拟无论如何都需要直接访问该级别。</p>
+<ul>
+<li>CarUxRestrictionsManagerService</li>
+</ul>
+<p>用户体验限制的服务。根据监听到的车辆当前驾驶状态，限制HMI显示。</p>
+<ul>
+<li>OccupantAwarenessService</li>
+</ul>
+<p>一种服务，通过HAL边界监听占用者感知检测系统，并通过<code>OccupantAwarenessManager</code>将数据暴露给Android中的系统客户端。</p>
+<ul>
+<li>SystemActivityMonitoringService</li>
+</ul>
+<p>监控AMS新Activity或Service启动的服务。</p>
+<ul>
+<li>SystemStateControllerService</li>
+</ul>
+<p>系统状态控制服务。原生系统中是一个空服务，并没有实现。</p>
+<ul>
+<li>CarMonitoringService</li>
+</ul>
+<p>监视应用程序资源使用情况的服务。</p>
+<ul>
+<li>CarTrustedDeviceService</li>
+</ul>
+<p>汽车服务中启用受信任设备功能的部分。可信设备是一项功能，其中远程设备注册为可信设备，可以授权Android用户而不是用户输入密码或PIN。</p>
+<ul>
+<li>CarUserNoticeService</li>
+</ul>
+<p>向用户显示初始通知UI的服务。它仅在启用设置时启动它，并根据用户的请求通知UI自行关闭。</p>
+<ul>
+<li>VmsBrokerService</li>
+</ul>
+<p>VMS客户端实现，使用HAL特定消息编码将VmsPublisher/VmsSubscriber API调用代理到车辆HAL。</p>
+<ul>
+<li>CarWatchdogService</li>
+</ul>
+<p>实现<code>CarWatchdogManager</code>API的服务。<code>CarWatchdogService</code>作为汽车监控中介运行，它检查客户端的健康状况，并将结果报告给汽车监控服务器。</p>
+<blockquote>
+<p>加粗的各个<code>Service</code>属于<code>CarService</code>中比较重要的功能，以后都会单独开坑讲。</p>
+<p>往简单地说，车载Framework的功能性开发基本就是围绕着<code>CarService</code>中的这些服务做增改，如果能把所有这些服务和背后原理都理解透彻，车载Framework基本就算完事了。当然可能也有些过于理想化了，因为还有android自身的Framework需要修改，比如网络系统、蓝牙协议栈等等。</p>
+</blockquote>
+<hr>
+<p>以上就是Android Automotive中<code>CarService</code>支持的所有功能，虽然冠名了xxxService但这些服务其实并不是四大组件意义上的<code>Service</code>，它们没有继承自<code>android.app.Service</code>，相反它们都继承自<code>ICarxxxx.Stub</code>，本质上属于AIDL接口的实现类。到这一步也可以看出<code>CarService</code>本质上只是作为这些服务的容器而存在的，本身并没有实现业务逻辑上的功能。</p>
+<p>既然这些Service都是AIDL接口的实现类，本质上就是AIDL的Server端，那应用就还需要通过相应的API SDK才能调用Server的方法，这个API SDK就是Car API。</p>
+<h1 id="Car-API-使用方式"><a href="#Car-API-使用方式" class="headerlink" title="Car API 使用方式"></a>Car API 使用方式</h1><p>不同的公司或车机系统项目对于Car API的定位、实现并不相同，本文主要从原生Android Automotive的角度介绍。</p>
+<p>Car API 源码位置<code>/packages/service/Car/car-lib</code></p>
+<h2 id="Car-API-简介"><a href="#Car-API-简介" class="headerlink" title="Car API 简介"></a>Car API 简介</h2><p>在上面的介绍中，我们提到<code>CarService</code>中各个服务本质上是AIDL接口的实现类，属于Server端，而对应的Client端就需要一个<code>IBinder</code>对象来访问Server端的方法，这些<code>IBinder</code>对象在Car API中被封装在一个个<code>XXXManager</code>类中。</p>
+<p>Car API与<code>CarService</code>中的服务，名称上存在对应关系，所以很好理解。例如：<code>CarWatchdogManager</code>对应<code>CarWatchdogService</code>，<code>CarMediaManager</code>对应<code>CarMediaService</code>。</p>
+<p>不过也有例外：<code>CarInfoManager</code>、<code>CarSensorManager</code>、<code>CarHvacManager</code>、<code>CarCabinManager</code>、<code>CarVendorExtensionManager</code>都对应<code>CarPropertyService</code>。但是在Android 11中这些Manager都已经过时，Google建议统一使用<code>CarPropertyManager</code>。</p>
+<blockquote>
+<p>实际项目中我们不一定要按照Google建议的那样编写Car API，可以按实际情况实施。我个人也经历过某个把Car API源码整个移除，从头重写CarService的项目。</p>
+</blockquote>
+<h2 id="编译-Car-API"><a href="#编译-Car-API" class="headerlink" title="编译 Car API"></a>编译 Car API</h2><p>在使用Car API之前，我们需要先将Car API编译成jar也就是CarLib，这样才能让其它的系统应用使用。</p>
+<p>编译CarLib有三种不同指令：</p>
+<p><strong>1）make android.car</strong></p>
+<p>编译成功后的jar存放在<code>/out/soong/.intermediates/packages/services/Car/car-lib/android.car/android_common/javac/</code>目录下。</p>
+<p>编译出的CarLib库<strong>包含Car API中定义的所有方法以及实现细节</strong>。导入到android studio中打开后，如下所示：</p>
+<p><img src="/images/android_aosp_car_service02.png" alt="img"></p>
+<p><strong>2）make android.car-system-stubs</strong></p>
+<p>编译成功后的jar存放在<code>/out/soong/.intermediates/packages/services/Car/car-lib/android.car-system-stubs/android_common/javac/</code>目录下。</p>
+<p>编译出的CarLib库<code>包含CarAPI中定义的所有方法，但是不包含实现细节，一些与实现细节有关的变量也会被隐藏</code>。实际项目中这种模式较为常用。导入到android studio中打开后，如下所示：</p>
+<p><img src="/images/android_aosp_car_service03.png" alt="img"></p>
+<p><strong>3）make android.car-stubs</strong></p>
+<p>编译成功后的jar存放在<code>/out/soong/.intermediates/packages/services/Car/car-lib/android.car-stubs/android_common/javac/</code>目录下。</p>
+<p>编译出的CarLib库<strong>仅包含没有被@SystemApi修饰方法，而且方法同样不包含实现细节，是最严格的编译模式</strong>。此模式下编译出的CarLib甚至已经没有<code>CarDiagnosticManager</code>这个系统API了。</p>
+<p>上述的编译步骤对应的是使用Android Studio开发的系统应用。原生android automotive中的系统应用则是直接在android.bp中将CarLib引入，可以参考<code>Settings/Android.bp</code>的引入方式。</p>
+<p><img src="/images/android_aosp_car_service04.png" alt="image"></p>
+<h2 id="使用-Car-API"><a href="#使用-Car-API" class="headerlink" title="使用 Car API"></a>使用 Car API</h2><p>Car API 的使用并不复杂，大致有以下几个步骤。</p>
+<p>通过<code>Car.createCar()</code>方法可以创建出Car的对象。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) &#123;</span><br><span class="line">    Car carApiClient = Car.createCar(context, mCarServiceConnection);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>通过getPackageManager().hasSystemFeature(String string)判断系统是否支持特定的模块功能</p>
+</blockquote>
+<p><code>Car.createCar()</code>需要传入<code>ServiceConnection</code>，并在service连接成功后，获取想要的Manager实例，实现方式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ServiceConnection mCarServiceConnection = <span class="keyword">new</span> ServiceConnection() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceConnected</span><span class="params">(ComponentName name, IBinder service)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                CarHvacManager manager = (CarHvacManager) mCarApiClient.getCarManager(Car.HVAC_SERVICE);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (CarNotConnectedException e) &#123;</span><br><span class="line">                Log.e(TAG, <span class="string">&quot;Car not connected in onServiceConnected&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceDisconnected</span><span class="params">(ComponentName name)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>构建出Car对象后还需要调用<code>connect()</code>才会连接到<code>CarService</code>上。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">carApiClient<span class="selector-class">.connect</span>();</span><br></pre></td></tr></table></figure>
+
+<p><code>connect()</code>只能调用一次，如果当前已经处于连接状态，再次调用<code>connect()</code>会抛出异常，client如果没有捕获该异常，则会引起client端程序崩溃（血的教训！）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Deprecated</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">connect</span><span class="params">()</span> <span class="keyword">throws</span> IllegalStateException </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mConnectionState != STATE_DISCONNECTED) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;already connected or connecting&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        mConnectionState = STATE_CONNECTING;</span><br><span class="line">        startCarService();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>与<code>connect()</code>对应的还有<code>disconnect()</code>。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">carApiClient<span class="selector-class">.disconnect</span>();</span><br></pre></td></tr></table></figure>
+
+<p>不知道你有没有注意到，<code>connect()</code>被标记为Deprecated过时的方法了。</p>
+<p>这是因为在android 10 以后，Google改写了Car API的使用方式，Android 10以后构建Car对象不再建议传入<code>ServiceConnection</code>而是使用下面的方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) &#123;</span><br><span class="line">    Car carApiClient = Car.createCar(context);</span><br><span class="line">    CarHvacManager manager = (CarHvacManager) mCarApiClient.getCarManager(Car.HVAC_SERVICE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Android 10以后Car Api的调用方式由异步方法改为了同步方法，保留了<code>disconnect()</code>，但是不再需要调用<code>connect()</code>，这样使用起来更简单。</p>
+<p>这种调用方式是乐观的认为<code>CarService</code>不会发生异常，与<code>CarService</code>的连接也不会断开。但是如果<code>CarService</code>发生异常，连接被断开的话，client端调用方就会直接被杀死，使用下面这种调用方式可以避免这种情况。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Car car = Car.createCar(<span class="keyword">this</span>, workThreadHandler, <span class="number">2000</span>, <span class="keyword">new</span> Car.CarServiceLifecycleListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onLifecycleChanged</span><span class="params">(<span class="meta">@NonNull</span> Car car, <span class="keyword">boolean</span> ready)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// ready 在Service断开连接时会变为false</span></span><br><span class="line"><span class="keyword">if</span> (ready) &#123;</span><br><span class="line">            </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// CarService 发生异常或连接被断开了，需要client端处理。</span></span><br><span class="line">&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>为什么上面的那种调用方式会导致client端的进程被杀死呢？这就需要我们继续深入的探究一下Car Api是如何实现的。</p>
+<h1 id="Car-API-实现原理"><a href="#Car-API-实现原理" class="headerlink" title="Car API 实现原理"></a>Car API 实现原理</h1><p>探讨Car API的实现原理我们可以它的入口类Car开始。源码位置：</p>
+<p><code>/packages/services/Car/car-lib/src/android/car/Car.java</code></p>
+<p><code>createCar</code>有三个不同的重载方法，分别如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public static Car createCar(Context context)</span><br><span class="line">public static Car createCar(Context context, @Nullable Handler handler)</span><br><span class="line"></span><br><span class="line">public static Car createCar(@NonNull Context context,</span><br><span class="line">                            @Nullable Handler handler, long waitTimeoutMs,</span><br><span class="line">                            @NonNull CarServiceLifecycleListener statusChangeListener) </span><br></pre></td></tr></table></figure>
+
+<p><code>createCar(context)</code>在实现上是直接调用了<code>createCar(context, handler)</code>，如下所示：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Car <span class="title">createCar</span>(<span class="params">Context context</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> createCar(context, (Handler) <span class="literal">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>createCar(context, handler)</code>与<code>createCar(context, handler, waitTimeoutMs, statusChangeListener)</code>之间则没有调用关系，各自有各自的实现方式，但是逻辑上大致相同，并且第三种的<code>createCar(context, handler, waitTimeoutMs, statusChangeListener)</code>逻实现上要更复杂一些。所以我们直接看<code>createCar(context, handler, waitTimeoutMs, statusChangeListener)</code>是实现的就可以了。</p>
+<ul>
+<li><strong>createCar(context, handler, waitTimeoutMs, statusChangeListener)</strong></li>
+</ul>
+<p><strong>Handler handler</strong>：将所有CarXXXManager事件发送到此handler。但是<code>statusChangeListener</code>将始终调度到主线程。传递null会导致将所有CarXXXManager回调发送到主线程。</p>
+<p><strong>long waitTimeoutMs</strong>：将其设置为<code>CAR_WAIT_TIMEOUT_DO_NOT_WAIT</code>则不等待<code>CarService</code>连接就绪。将此设置为<code>CAR_WAIT_TIMEOUT_WAIT_FOREVER</code>将阻塞调用，直到<code>CarService</code>连接成功为止。</p>
+<p>设置的值大于0则为超时时间，当存在有限的超时时间时，返回的Car对象不能保证是可用的。</p>
+<p><strong>CarServiceLifecycleListener statusChangeListener：</strong> 监听<code>CarService</code>是否连接就绪。</p>
+<hr>
+<p><code>createCar</code>在实现流程上可以分为三个部分：</p>
+<p>第一步，计算出绑定<code>CarService</code>的最大重试次数。这个次数决定了后面，多久会显示连接异常的日志。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Car <span class="title">createCar</span><span class="params">(@NonNull Context context,</span></span></span><br><span class="line"><span class="params"><span class="function">                            @Nullable Handler handler, <span class="keyword">long</span> waitTimeoutMs,</span></span></span><br><span class="line"><span class="params"><span class="function">                            @NonNull CarServiceLifecycleListener statusChangeListener)</span> </span>&#123;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">long</span> maxRetryCount = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (waitTimeoutMs &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        maxRetryCount = waitTimeoutMs / CAR_SERVICE_BINDER_POLLING_INTERVAL_MS; <span class="comment">// 50 ms</span></span><br><span class="line"> <span class="comment">// 如果是正值，则至少等待一次。</span></span><br><span class="line"><span class="keyword">if</span> (maxRetryCount == <span class="number">0</span>) &#123;</span><br><span class="line">            maxRetryCount = <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">   ...    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第二步也是最关键的一步，构造出Car对象并返回给调用方，同时将状态通过<code>statusChangeListener</code>回调给调用方。正常流程下到createCar()方法执行到这里就已经结束了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Car <span class="title">createCar</span><span class="params">(<span class="meta">@NonNull</span> Context context,</span></span></span><br><span class="line"><span class="params"><span class="function">                            <span class="meta">@Nullable</span> Handler handler, <span class="keyword">long</span> waitTimeoutMs,</span></span></span><br><span class="line"><span class="params"><span class="function">                            <span class="meta">@NonNull</span> CarServiceLifecycleListener statusChangeListener)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    Car car = <span class="keyword">null</span>;</span><br><span class="line">    IBinder service = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">boolean</span> started = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">int</span> retryCount = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">boolean</span> isMainThread = Looper.myLooper() == Looper.getMainLooper();</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="comment">// 这个 CAR_SERVICE_BINDER_SERVICE_NAME 是在CarService启动时添加的。</span></span><br><span class="line">        service = ServiceManager.getService(CAR_SERVICE_BINDER_SERVICE_NAME);</span><br><span class="line">        <span class="keyword">if</span> (car == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// service可以为空，构造方法对于空service是安全的。</span></span><br><span class="line">car = <span class="keyword">new</span> Car(context, ICar.Stub.asInterface(service), <span class="keyword">null</span>, statusChangeListener,</span><br><span class="line">                    handler);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (service != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!started) &#123;</span><br><span class="line">                car.dispatchCarReadyToMainThread(isMainThread);</span><br><span class="line">                car.startCarService();</span><br><span class="line">                <span class="comment">// 正常流程下，while (true)循环执行到这里就结束了，后面的方法只有CarService启动出现异常时才会出现。 </span></span><br><span class="line">                <span class="keyword">return</span> car;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (!started) &#123;</span><br><span class="line">            car.startCarService();</span><br><span class="line">            started = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果连接失败，每隔50毫秒重试一次，尝试达到一定的阈值后,日志上会显示异常</span></span><br><span class="line">retryCount++;</span><br><span class="line">        <span class="keyword">if</span> (waitTimeoutMs &lt; <span class="number">0</span> &amp;&amp; retryCount &gt;= CAR_SERVICE_BINDER_POLLING_MAX_RETRY</span><br><span class="line">&amp;&amp; retryCount % CAR_SERVICE_BINDER_POLLING_MAX_RETRY == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 日志警告</span></span><br><span class="line">Log.w(TAG_CAR, <span class="string">&quot;car_service not ready, waited for car service (ms):&quot;</span></span><br><span class="line">                            + retryCount * CAR_SERVICE_BINDER_POLLING_INTERVAL_MS,</span><br><span class="line">                    <span class="keyword">new</span> RuntimeException());</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (waitTimeoutMs &gt;= <span class="number">0</span> &amp;&amp; retryCount &gt; maxRetryCount) &#123;</span><br><span class="line">            <span class="keyword">if</span> (waitTimeoutMs &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                Log.w(TAG_CAR, <span class="string">&quot;car_service not ready, waited for car service (ms):&quot;</span></span><br><span class="line">                                + waitTimeoutMs,</span><br><span class="line">                        <span class="keyword">new</span> RuntimeException());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> car;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 休眠 50 ms</span></span><br><span class="line">Thread.sleep(CAR_SERVICE_BINDER_POLLING_INTERVAL_MS);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">            Log.w(TAG_CAR, <span class="string">&quot;interrupted&quot;</span>, <span class="keyword">new</span> RuntimeException());</span><br><span class="line">            <span class="keyword">return</span> car;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后一步，主要是应对一些异常情况，正常情况不会触发。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Car <span class="title">createCar</span><span class="params">(<span class="meta">@NonNull</span> Context context,</span></span></span><br><span class="line"><span class="params"><span class="function">                            <span class="meta">@Nullable</span> Handler handler, <span class="keyword">long</span> waitTimeoutMs,</span></span></span><br><span class="line"><span class="params"><span class="function">                            <span class="meta">@NonNull</span> CarServiceLifecycleListener statusChangeListener)</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 加锁是为了让 mServiceConnectionListener 能在主线程中正常访问 car 实例</span></span><br><span class="line"><span class="keyword">synchronized</span> (car.mLock) &#123;</span><br><span class="line">        Log.w(TAG_CAR,</span><br><span class="line">                <span class="string">&quot;waited for car_service (ms):&quot;</span></span><br><span class="line">                        + retryCount * CAR_SERVICE_BINDER_POLLING_INTERVAL_MS,</span><br><span class="line">                <span class="keyword">new</span> RuntimeException());</span><br><span class="line">        <span class="comment">// ServiceConnection 已经处理了一切，直接返回 car 实例</span></span><br><span class="line"><span class="keyword">if</span> (car.mService != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> car;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// mService check in ServiceConnection prevents calling onLifecycleChanged.</span></span><br><span class="line"> <span class="comment">// So onLifecycleChanged should be called explicitly but do it outside lock.</span></span><br><span class="line">car.mService = ICar.Stub.asInterface(service);</span><br><span class="line">        car.mConnectionState = STATE_CONNECTED;</span><br><span class="line">    &#125;</span><br><span class="line">    car.dispatchCarReadyToMainThread(isMainThread);</span><br><span class="line">    <span class="keyword">return</span> car;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>createCar()</code>方法中分发Car实例状态时，会调用<code>startCarService()</code>绑定<code>CarService</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startCarService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Intent intent = <span class="keyword">new</span> Intent();</span><br><span class="line">    intent.setPackage(CAR_SERVICE_PACKAGE);</span><br><span class="line">    intent.setAction(Car.CAR_SERVICE_INTERFACE_NAME);</span><br><span class="line">    <span class="keyword">boolean</span> bound = mContext.bindServiceAsUser(intent, mServiceConnectionListener,</span><br><span class="line">            Context.BIND_AUTO_CREATE, UserHandle.CURRENT_OR_SELF);</span><br><span class="line">    <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!bound) &#123;</span><br><span class="line">            <span class="comment">// 绑定失败时的重试机制</span></span><br><span class="line">            mConnectionRetryCount++;</span><br><span class="line">            <span class="keyword">if</span> (mConnectionRetryCount &gt; CAR_SERVICE_BIND_MAX_RETRY) &#123;</span><br><span class="line">                Log.w(TAG_CAR, <span class="string">&quot;cannot bind to car service after max retry&quot;</span>);</span><br><span class="line">                mMainThreadEventHandler.post(mConnectionRetryFailedRunnable);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mEventHandler.postDelayed(mConnectionRetryRunnable,</span><br><span class="line">                        CAR_SERVICE_BIND_RETRY_INTERVAL_MS);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 绑定成功时要取消重试机制</span></span><br><span class="line">            mEventHandler.removeCallbacks(mConnectionRetryRunnable);</span><br><span class="line">            mMainThreadEventHandler.removeCallbacks(mConnectionRetryFailedRunnable);</span><br><span class="line">            mConnectionRetryCount = <span class="number">0</span>;</span><br><span class="line">            mServiceBound = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Runnable mConnectionRetryRunnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        startCarService();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Runnable mConnectionRetryFailedRunnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mServiceConnectionListener.onServiceDisconnected(<span class="keyword">new</span> ComponentName(CAR_SERVICE_PACKAGE,</span><br><span class="line">                CAR_SERVICE_CLASS));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在绑定<code>CarService</code>时，需要使用<code>ServiceConnection</code>监听与<code>CarService</code>的连接状态，并处理service连接成功与连接断开的情况。</p>
+<p>1）连接成功：由于在createCar中已经创建好了mService，所以正常流程下，执行到return就结束了，后面流程基本都是出现异常触发了重连。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ServiceConnection mServiceConnectionListener = <span class="keyword">new</span> ServiceConnection() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceConnected</span><span class="params">(ComponentName name, IBinder service)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">                    ICar newService = ICar.Stub.asInterface(service);</span><br><span class="line">                    <span class="keyword">if</span> (newService == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        Log.wtf(TAG_CAR, <span class="string">&quot;null binder service&quot;</span>, <span class="keyword">new</span> RuntimeException());</span><br><span class="line">                        <span class="keyword">return</span>;  <span class="comment">// 这不应该发生</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> (mService != <span class="keyword">null</span> &amp;&amp; mService.asBinder().equals(newService.asBinder())) &#123;</span><br><span class="line">                        <span class="comment">// 由于在createCar中已经创建好了mService，所以正常流程下，执行到这一步就结束了</span></span><br><span class="line"><span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    mConnectionState = STATE_CONNECTED;</span><br><span class="line">                    mService = newService;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 分发连接状态</span></span><br><span class="line"><span class="keyword">if</span> (mStatusChangeCallback != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mStatusChangeCallback.onLifecycleChanged(Car.<span class="keyword">this</span>, <span class="keyword">true</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mServiceConnectionListenerClient != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mServiceConnectionListenerClient.onServiceConnected(name, service);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    ...</span><br><span class="line">        &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>2）连接断开：分发Car对象的状态，此时Client不应该再使用Car的实例。所以如果Client端调用createCar()时没有监听连接状态，Car Api会触发<code>finishClient()</code>，直接杀死client端。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ServiceConnection mServiceConnectionListener = <span class="keyword">new</span> ServiceConnection() &#123;</span><br><span class="line">    ...</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceDisconnected</span><span class="params">(ComponentName name)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 重新启动后，CarService可以接收功能更改。</span></span><br><span class="line">mFeatures.resetCache();</span><br><span class="line">                <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (mConnectionState  == STATE_DISCONNECTED) &#123;</span><br><span class="line">                        <span class="comment">// 当客户端调用在 onServiceDisconnected 调用之前断开连接时，可能会发生这种情况。</span></span><br><span class="line"><span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    handleCarDisconnectLocked();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (mStatusChangeCallback != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mStatusChangeCallback.onLifecycleChanged(Car.<span class="keyword">this</span>, <span class="keyword">false</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mServiceConnectionListenerClient != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mServiceConnectionListenerClient.onServiceDisconnected(name);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// client端没有正确处理CarService会重新启动的情况，因此直接杀死client端</span></span><br><span class="line">finishClient();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>finishClient()</code>中会根据传入client传入的context类型，执行不同的操作。</p>
+<p>情景一：context = null，在Client端抛出异常。</p>
+<p>情景二：context 是 Activity，结束该Activity，不会终止Client端的进程。</p>
+<p>情景三：context 是 Service，终止Client端的进程。</p>
+<p>情景四：context 不是以上的情况，终止Client端的进程。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">private void finishClient() &#123;</span><br><span class="line">    if (mContext == null) &#123;</span><br><span class="line">        throw new IllegalStateException(&quot;Car service has crashed, null Context&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    if (mContext instanceof Activity) &#123;</span><br><span class="line">        Activity activity = (Activity) mContext;</span><br><span class="line">        if (!activity.isFinishing()) &#123;</span><br><span class="line">            Log.w ( TAG_CAR,</span><br><span class="line">                    &quot;Car service crashed, client not handling it, finish Activity, created &quot;</span><br><span class="line">                            + &quot;from &quot; + mConstructionStack);</span><br><span class="line">            activity.finish();</span><br><span class="line">        &#125;</span><br><span class="line">        return;</span><br><span class="line">    &#125; else if (mContext instanceof Service) &#123;</span><br><span class="line">        Service service = (Service) mContext;</span><br><span class="line">        killClient(service.getPackageName() + &quot;,&quot; + service.getClass().getSimpleName());</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        killClient(/ * clientInfo= */  null);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private void killClient(@Nullable String clientInfo) &#123;</span><br><span class="line">    Log.w ( TAG_CAR, &quot;**Car service has crashed. Client(&quot; + clientInfo + &quot;) is not handling it.&quot;</span><br><span class="line">                    + &quot; Client should use Car.createCar(..., CarServiceLifecycleListener, ..&quot;</span><br><span class="line">                    + &quot;.) to handle it properly. Check pritned callstack to check where other &quot;</span><br><span class="line">                    + &quot;version of Car.createCar() was called. Killing the client process**&quot;,</span><br><span class="line">            mConstructionStack);</span><br><span class="line">    Process.killProcess( Process.myPid( ));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>正是由于<code>finishClient()</code>这种机制的存在，所以调用方应该要监听CarService的连接状态。</p>
+<p>最后我们再看一下<code>getCarManager()</code>这个方法是如何实现的。</p>
+<p><code>getCarManager()</code>实现机制上利用了BinderPool的思路，使用<code>ICar.aidl</code>的<code>getService()</code>来获取Server端的Binder对象，然后将Binder对象封装在Manager里面，同时将Manager对象缓存在一个Map集合中，后续就可以从Map取出需要的Manager，减少IPC通信开销。如下所示：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">public</span> Object getCarManager(String serviceName) &#123;</span><br><span class="line">    CarManagerBase manager;</span><br><span class="line">    synchronized (mLock) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mService == <span class="literal">null</span>) &#123;</span><br><span class="line">            Log.w(TAG_CAR, <span class="string">&quot;getCarManager not working while car service not ready&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        manager = mServiceMap.<span class="keyword">get</span>(serviceName);</span><br><span class="line">        <span class="keyword">if</span> (manager == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                IBinder binder = mService.getCarService(serviceName);</span><br><span class="line">                <span class="keyword">if</span> (binder == <span class="literal">null</span>) &#123;</span><br><span class="line">                    Log.w(TAG_CAR, <span class="string">&quot;getCarManager could not get binder for service:&quot;</span></span><br><span class="line">                            + serviceName);</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                manager = createCarManagerLocked(serviceName, binder);</span><br><span class="line">                <span class="keyword">if</span> (manager == <span class="literal">null</span>) &#123;</span><br><span class="line">                    Log.w(TAG_CAR, <span class="string">&quot;getCarManager could not create manager for service:&quot;</span></span><br><span class="line">                            + serviceName);</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                mServiceMap.put(serviceName, manager);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">                handleRemoteExceptionFromCarService(e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> manager;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> CarManagerBase createCarManagerLocked(String serviceName, IBinder binder) &#123;</span><br><span class="line">    CarManagerBase manager = <span class="literal">null</span>;</span><br><span class="line">    switch (serviceName) &#123;</span><br><span class="line">        case AUDIO_SERVICE:</span><br><span class="line">            manager = new CarAudioManager(<span class="keyword">this</span>, binder);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        case SENSOR_SERVICE:</span><br><span class="line">            manager = new CarSensorManager(<span class="keyword">this</span>, binder);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        case INFO_SERVICE:</span><br><span class="line">            manager = new CarInfoManager(<span class="keyword">this</span>, binder);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">            ...</span><br><span class="line">        default:</span><br><span class="line">            <span class="comment">// Experimental or non-existing</span></span><br><span class="line">String className = <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                className = mService.getCarManagerClassForFeature(serviceName);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">                handleRemoteExceptionFromCarService(e);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (className == <span class="literal">null</span>) &#123;</span><br><span class="line">                Log.e(TAG_CAR, <span class="string">&quot;Cannot construct CarManager for service:&quot;</span> + serviceName</span><br><span class="line">                        + <span class="string">&quot; : no class defined&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            manager = constructCarManager(className, binder);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> manager;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上就Car API的实现过和原理了。注意在<code>createCar()</code>中有这样一段代码。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">IBinder service = <span class="literal">null</span>;</span><br><span class="line">service = ServiceManager.getService(CAR_SERVICE_BINDER_SERVICE_NAME);</span><br></pre></td></tr></table></figure>
+
+<p>在Client端与<code>CarService</code>建立连接之前，通过<code>ServiceManager.getService()</code>就可以直接取出IBinder对象，而不用等到与service建立连接后再从<code>onServiceConnected(ComponentName name, IBinder service)</code>中取。</p>
+<p>但是这样操作的前提是使用<code>ServiceManager.addService()</code>添加了这个IBinder，那么是哪里添加的呢，IBinder是Server端实现的，那么答案就需要去<code>CarService</code>中寻找了。</p>
+<h1 id="CarService-的实现原理"><a href="#CarService-的实现原理" class="headerlink" title="CarService 的实现原理"></a>CarService 的实现原理</h1><p>想要说清楚<code>CarService</code>实现方式，我们需要搞明白<code>CarService</code>是怎么启动的。</p>
+<h2 id="CarService-启动流程"><a href="#CarService-启动流程" class="headerlink" title="CarService 启动流程"></a>CarService 启动流程</h2><p><code>CarService</code>作为Android Automotive的核心服务，它是在<code>SystemServer</code>中启动的，<code>SystemServer</code>会在<code>startOtherServices()</code>方法中让<code>SystemServiceManager</code>先通过反射的形式创建出<code>StartCarServiceHelperService</code>这个对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startOtherServices</span><span class="params">(@NonNull TimingsTraceAndSlog t)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 仅在automotive中启动</span></span><br><span class="line">    <span class="keyword">if</span> (mPackageManager.<span class="built_in">hasSystemFeature</span>(PackageManager.FEATURE_AUTOMOTIVE)) &#123;</span><br><span class="line">        t.<span class="built_in">traceBegin</span>(<span class="string">&quot;StartCarServiceHelperService&quot;</span>);</span><br><span class="line">        mSystemServiceManager.<span class="built_in">startService</span>(CAR_SERVICE_HELPER_SERVICE_CLASS);</span><br><span class="line">        t.<span class="built_in">traceEnd</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后在<code>SystemServiceManager</code>中调用<code>StartCarServiceHelperService</code>的<code>onStart()</code>方法。</p>
+<p><code>CarServiceHelperService</code>是<code>CarService</code>的SystemService端的配套服务。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> SystemService <span class="title">startService</span><span class="params">(String className)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Class&lt;SystemService&gt; serviceClass = loadClassFromLoader(className,</span><br><span class="line">            <span class="keyword">this</span>.getClass().getClassLoader());</span><br><span class="line">    <span class="keyword">return</span> startService(serviceClass);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startService</span><span class="params">(<span class="meta">@NonNull</span> <span class="keyword">final</span> SystemService service)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Register it.</span></span><br><span class="line">mServices.add(service);</span><br><span class="line">    <span class="keyword">long</span> time = SystemClock.elapsedRealtime();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        service.onStart();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Failed to start service &quot;</span> + service.getClass().getName()</span><br><span class="line">                + <span class="string">&quot;: onStart threw an exception&quot;</span>, ex);</span><br><span class="line">    &#125;</span><br><span class="line">    warnIfTooLong(SystemClock.elapsedRealtime() - time, service, <span class="string">&quot;onStart&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终在<code>onStart()</code>方法中启动<code>CarService</code>，并加载jni库为<code>CarService</code>提供必要的API。</p>
+<blockquote>
+<p>CarServiceHelperService 源码位置：</p>
+<p><code>/frameworks/opt/car/services/src/com/android/internal/car/CarServiceHelperService.java</code></p>
+<p>注意：CarServiceHelperService并不是android.app.Service</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    Intent intent = <span class="keyword">new</span> Intent();</span><br><span class="line">    intent.setPackage(<span class="string">&quot;com.android.car&quot;</span>);</span><br><span class="line">    intent.setAction(ICarConstants.CAR_SERVICE_INTERFACE);</span><br><span class="line">    <span class="keyword">if</span> (!mContext.bindServiceAsUser(intent, mCarServiceConnection, Context.BIND_AUTO_CREATE,</span><br><span class="line">            UserHandle.SYSTEM)) &#123;</span><br><span class="line">        Slog.wtf(TAG, <span class="string">&quot;cannot start car service&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    loadNativeLibrary();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">loadNativeLibrary</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.loadLibrary(<span class="string">&quot;car-framework-service-jni&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过以上的步骤<code>CarService</code>就完成了启动，<code>CarService</code>的启动时序如下所示：</p>
+<p><img src="/images/android_aosp_car_service05.png" alt="img"></p>
+<h2 id="CarService-初始化"><a href="#CarService-初始化" class="headerlink" title="CarService 初始化"></a>CarService 初始化</h2><p><code>CarService</code>进入启动时序后，会<code>onCreate()</code>方法中进行一系列的自身的初始化操作，步骤如下：</p>
+<p>1）通过HIDL接口获取到HAL层的IHwBinder对象-<code>IVehicle</code>，与AIDL的用法类似，必须持有IHwBinder对象我们才可以与Vehicle HAL层进行通信。有关HIDL、VechicleHAL以后都会单独介绍。</p>
+<p>2）创建ICarImpl对象，并调用<code>init</code>方法，它就是<code>ICar.aidl</code>接口的实现类，我们需要通过它才能拿到其他的Service的IBinder对象。</p>
+<p>3）将<code>ICar.aidl</code>的实现类添加到ServiceManager中。这就解答了我们在Car API中疑问。</p>
+<p>4）设定SystemProperty，将<code>CarService</code>设定为创建完成状态，只有包含<code>CarService</code>在内的所有的核心Service都完成初始化，才能结束开机动画并发送开机广播。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Log.i(CarLog.TAG_SERVICE, <span class="string">&quot;Service onCreate&quot;</span>);</span><br><span class="line">    mCanBusErrorNotifier = <span class="keyword">new</span> CanBusErrorNotifier(<span class="keyword">this</span> <span class="comment">/* context */</span> );</span><br><span class="line">    mVehicle = getVehicle();</span><br><span class="line">    EventLog.writeEvent(EventLogTags.CAR_SERVICE_CREATE, mVehicle == <span class="keyword">null</span> ? <span class="number">0</span> : <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mVehicle == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Vehicle HAL service is not available.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        mVehicleInterfaceName = mVehicle.interfaceDescriptor();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Unable to get Vehicle HAL interface descriptor&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Log.i(CarLog.TAG_SERVICE, <span class="string">&quot;Connected to &quot;</span> + mVehicleInterfaceName);</span><br><span class="line">    EventLog.writeEvent(EventLogTags.CAR_SERVICE_CONNECTED, mVehicleInterfaceName);</span><br><span class="line"></span><br><span class="line">    mICarImpl = <span class="keyword">new</span> ICarImpl(<span class="keyword">this</span>,</span><br><span class="line">            mVehicle,</span><br><span class="line">            SystemInterface.Builder.defaultSystemInterface(<span class="keyword">this</span>).build(),</span><br><span class="line">            mCanBusErrorNotifier,</span><br><span class="line">            mVehicleInterfaceName);</span><br><span class="line">    mICarImpl.init();</span><br><span class="line">    <span class="comment">// 处理 HIDL 连接</span></span><br><span class="line">linkToDeath(mVehicle, mVehicleDeathRecipient);</span><br><span class="line"></span><br><span class="line">    ServiceManager.addService(<span class="string">&quot;car_service&quot;</span>, mICarImpl);</span><br><span class="line">    SystemProperties.set(<span class="string">&quot;boot.car_service_created&quot;</span>, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">    <span class="keyword">super</span>.onCreate();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> IVehicle <span class="title">getVehicle</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> String instanceName = SystemProperties.get(<span class="string">&quot;ro.vehicle.hal&quot;</span>, <span class="string">&quot;default&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> android.hardware.automotive.vehicle.V2_0.IVehicle.getService(instanceName);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">        Log.e(CarLog.TAG_SERVICE, <span class="string">&quot;Failed to get IVehicle/&quot;</span> + instanceName + <span class="string">&quot; service&quot;</span>, e);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NoSuchElementException e) &#123;</span><br><span class="line">        Log.e(CarLog.TAG_SERVICE, <span class="string">&quot;IVehicle/&quot;</span> + instanceName + <span class="string">&quot; service not registered yet&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着我们再来看<code>ICarImpl</code>的实现，如下所示：</p>
+<p>1）创建各个核心服务对象。</p>
+<p>2）把服务对象缓存到CarLocalServices中，这里主要是为了方便Service之间的相互访问。</p>
+<blockquote>
+<p>ICarImpl的源码位置：<code>/packages/services/Car/service/src/com/android/car/ICar</code></p>
+</blockquote>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">ICarImpl(Context serviceContext, IVehicle vehicle, SystemInterface systemInterface,</span><br><span class="line">         CanBusErrorNotifier errorNotifier, String vehicleInterfaceName,</span><br><span class="line">         <span class="meta">@Nullable</span> CarUserService carUserService,</span><br><span class="line">         <span class="meta">@Nullable</span> CarWatchdogService carWatchdogService) &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 创建 核心服务对象</span></span><br><span class="line">mCarPowerManagementService = new CarPowerManagementService(mContext, mHal.getPowerHal(),</span><br><span class="line">            systemInterface, mCarUserService);</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将重要的服务缓存到 CarLocalServices</span></span><br><span class="line">CarLocalServices.addService(CarPowerManagementService.<span class="keyword">class</span>, mCarPowerManagementService);</span><br><span class="line">    CarLocalServices.addService(CarPropertyService.<span class="keyword">class</span>, mCarPropertyService);</span><br><span class="line">    CarLocalServices.addService(CarUserService.<span class="keyword">class</span>, mCarUserService);</span><br><span class="line">    CarLocalServices.addService(CarTrustedDeviceService.<span class="keyword">class</span>, mCarTrustedDeviceService);</span><br><span class="line">    CarLocalServices.addService(CarUserNoticeService.<span class="keyword">class</span>, mCarUserNoticeService);</span><br><span class="line">    CarLocalServices.addService(SystemInterface.<span class="keyword">class</span>, mSystemInterface);</span><br><span class="line">    CarLocalServices.addService(CarDrivingStateService.<span class="keyword">class</span>, mCarDrivingStateService);</span><br><span class="line">    CarLocalServices.addService(PerUserCarServiceHelper.<span class="keyword">class</span>, mPerUserCarServiceHelper);</span><br><span class="line">    CarLocalServices.addService(FixedActivityService.<span class="keyword">class</span>, mFixedActivityService);</span><br><span class="line">    CarLocalServices.addService(VmsBrokerService.<span class="keyword">class</span>, mVmsBrokerService);</span><br><span class="line">    CarLocalServices.addService(CarOccupantZoneService.<span class="keyword">class</span>, mCarOccupantZoneService);</span><br><span class="line">    CarLocalServices.addService(AppFocusService.<span class="keyword">class</span>, mAppFocusService);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将创建的服务对象依次添加到一个list中保存起来</span></span><br><span class="line">List&lt;CarServiceBase&gt; allServices = new ArrayList&lt;&gt;();</span><br><span class="line">    allServices.add(mFeatureController);</span><br><span class="line">    allServices.add(mCarUserService);</span><br><span class="line">    ...</span><br><span class="line">    allServices.add(mCarWatchdogService);</span><br><span class="line">    <span class="comment">// Always put mCarExperimentalFeatureServiceController in last.</span></span><br><span class="line">addServiceIfNonNull(allServices, mCarExperimentalFeatureServiceController);</span><br><span class="line">    mAllServices = allServices.toArray(new CarServiceBase[allServices.size()]);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3）将服务对象放置一个list中。这样init方法中就可以以循环的形式直接调用服务对象的init，而不需要一个个调用。VechicleHAL的程序也会在这里完成初始化。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@MainThread</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    mBootTiming = <span class="keyword">new</span> TimingsTraceLog(VHAL_TIMING_TAG, Trace.TRACE_TAG_HAL);</span><br><span class="line">    traceBegin(<span class="string">&quot;VehicleHal.init&quot;</span>);</span><br><span class="line">    <span class="comment">// 初始化 Vechicle HAL</span></span><br><span class="line">    mHal.init();</span><br><span class="line">    </span><br><span class="line">    traceEnd();</span><br><span class="line">    traceBegin(<span class="string">&quot;CarService.initAllServices&quot;</span>);</span><br><span class="line">    <span class="comment">// 初始化所有服务</span></span><br><span class="line">    <span class="keyword">for</span> (CarServiceBase service : mAllServices) &#123;</span><br><span class="line">        service.init();</span><br><span class="line">    &#125;</span><br><span class="line">    traceEnd();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>4）最后实现<code>ICar.aidl</code>中定义的各个接口就可以了，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> IBinder <span class="title">getCarService</span><span class="params">(String serviceName)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!mFeatureController.isFeatureEnabled(serviceName)) &#123;</span><br><span class="line">        Log.w(CarLog.TAG_SERVICE, <span class="string">&quot;getCarService for disabled service:&quot;</span> + serviceName);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">switch</span> (serviceName) &#123;</span><br><span class="line">        <span class="keyword">case</span> Car.AUDIO_SERVICE:</span><br><span class="line">            <span class="keyword">return</span> mCarAudioService;</span><br><span class="line">        <span class="keyword">case</span> Car.APP_FOCUS_SERVICE:</span><br><span class="line">            <span class="keyword">return</span> mAppFocusService;</span><br><span class="line">        <span class="keyword">case</span> Car.PACKAGE_SERVICE:</span><br><span class="line">            <span class="keyword">return</span> mCarPackageManagerService;</span><br><span class="line">       ...</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            IBinder service = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">if</span> (mCarExperimentalFeatureServiceController != <span class="keyword">null</span>) &#123;</span><br><span class="line">                service = mCarExperimentalFeatureServiceController.getCarService(serviceName);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (service == <span class="keyword">null</span>) &#123;</span><br><span class="line">                Log.w(CarLog.TAG_SERVICE, <span class="string">&quot;getCarService for unknown service:&quot;</span></span><br><span class="line">                        + serviceName);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> service;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总结一下<code>CarService</code>的启动时序如下所示：</p>
+<p><img src="/images/android_aosp_car_service06.png" alt="img"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本篇讲解了<code>CarService</code>的总体结构，以及Car API 的实现原理，<code>CarService</code>中实现的功能非常庞大，就像文章中反复在强调的那样，在<code>CarService</code>实现的功能几乎就是覆盖整个车载Framework的核心。</p>
+<p>然而现实中为了保证各个核心服务的稳定性，同时降低<code>CarService</code>协同开发的难度，一般会选择将一些重要的服务拆分单独作为一个独立的Service运行在独立的进程中，导致有的车机系统中<code>CarService</code>只实现了<code>CarPropertyService</code>的功能。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AOSP/" rel="tag"># AOSP</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/12/17/android_aosp_car_widget/" rel="prev" title="Android车载-小组件Widget">
+                  <i class="fa fa-chevron-left"></i> Android车载-小组件Widget
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

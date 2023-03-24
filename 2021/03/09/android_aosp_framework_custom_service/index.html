@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="我们开发过程中常见的ActivityManagerService，WindowManagerService，PackageManagerService等等都属于系统服务，运行于SystemServer进程，并且向ServiceManager进程注册了Binder以便其他进程获取binder与对应的服务进行通信。同样，在AOSP中我们也可以加入我们自定义的系统服务。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AOSP-Framework自定义系统服务">
+<meta property="og:url" content="http://example.com/2021/03/09/android_aosp_framework_custom_service/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="我们开发过程中常见的ActivityManagerService，WindowManagerService，PackageManagerService等等都属于系统服务，运行于SystemServer进程，并且向ServiceManager进程注册了Binder以便其他进程获取binder与对应的服务进行通信。同样，在AOSP中我们也可以加入我们自定义的系统服务。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_aosp_framework_custom_service01.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_framework_custom_service02.png">
+<meta property="article:published_time" content="2021-03-08T18:25:00.000Z">
+<meta property="article:modified_time" content="2023-03-17T15:01:30.517Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="AOSP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_aosp_framework_custom_service01.png">
+
+
+<link rel="canonical" href="http://example.com/2021/03/09/android_aosp_framework_custom_service/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2021&#x2F;03&#x2F;09&#x2F;android_aosp_framework_custom_service&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;03&#x2F;09&#x2F;android_aosp_framework_custom_service&#x2F;&quot;,&quot;title&quot;:&quot;AOSP-Framework自定义系统服务&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>AOSP-Framework自定义系统服务 | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">增加自定义服务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E6%9C%8D%E5%8A%A1%E6%8E%A5%E5%8F%A3aidl"><span class="nav-number">1.1.</span> <span class="nav-text">编写服务接口aidl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Context%E4%B8%AD%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%B8%B8%E9%87%8F%E5%90%8D"><span class="nav-number">1.2.</span> <span class="nav-text">Context中定义服务的常量名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%9A%B4%E9%9C%B2%E7%BB%99%E5%A4%96%E9%83%A8%E8%B0%83%E7%94%A8%E7%9A%84Manager%E7%B1%BBTaurusManager"><span class="nav-number">1.3.</span> <span class="nav-text">创建暴露给外部调用的Manager类TaurusManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0%E7%B1%BB%E5%8D%B3aidl%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%B1%BBTaurusManagerService"><span class="nav-number">1.4.</span> <span class="nav-text">创建服务的具体实现类即aidl接口的实现类TaurusManagerService</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ServiceManager%E4%B8%AD%E6%B3%A8%E5%86%8CBinder%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.5.</span> <span class="nav-text">ServiceManager中注册Binder实例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SystemServiceRegistry%E4%B8%AD%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1%E8%8E%B7%E5%8F%96%E5%99%A8"><span class="nav-number">1.6.</span> <span class="nav-text">SystemServiceRegistry中注册服务获取器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%9C%A8%E8%BF%99%E9%87%8C%E6%B3%A8%E5%86%8C%EF%BC%9F"><span class="nav-number">1.6.1.</span> <span class="nav-text">为什么要在这里注册？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AESELinux%E6%9D%83%E9%99%90"><span class="nav-number">1.7.</span> <span class="nav-text">配置SELinux权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E5%B9%B6%E7%BC%96%E8%AF%91"><span class="nav-number">1.8.</span> <span class="nav-text">更新并编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%94%99%E8%AF%AF"><span class="nav-number">1.9.</span> <span class="nav-text">遇到的错误</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">使用自定义服务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9SDK%E9%85%8D%E7%BD%AE"><span class="nav-number">2.1.</span> <span class="nav-text">修改SDK配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%B7%E8%B4%9D%E5%87%BAaosp%E4%B8%8B%E7%BC%96%E8%AF%91%E7%9A%84SDK%E7%9A%84jar%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.1.</span> <span class="nav-text">拷贝出aosp下编译的SDK的jar文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEstudio%E4%BD%BF%E7%94%A8%E7%9A%84SDK"><span class="nav-number">2.1.2.</span> <span class="nav-text">配置studio使用的SDK</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E5%86%99app%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text">编写app使用自定义服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9gradle%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.1.</span> <span class="nav-text">修改gradle配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E8%B0%83%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81"><span class="nav-number">2.2.2.</span> <span class="nav-text">编写调用自定义服务的测试代码</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/09/android_aosp_framework_custom_service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AOSP-Framework自定义系统服务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-09 02:25:00" itemprop="dateCreated datePublished" datetime="2021-03-09T02:25:00+08:00">2021-03-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android系统开发</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>我们开发过程中常见的ActivityManagerService，WindowManagerService，PackageManagerService等等都属于系统服务，运行于SystemServer进程，并且向ServiceManager进程注册了Binder以便其他进程获取binder与对应的服务进行通信。同样，在AOSP中我们也可以加入我们自定义的系统服务。</p>
+<span id="more"></span>
+
+<h1 id="增加自定义服务"><a href="#增加自定义服务" class="headerlink" title="增加自定义服务"></a>增加自定义服务</h1><p>AndroidStudio导入AOSP源码后，使用studio编写相关代码。</p>
+<h2 id="编写服务接口aidl"><a href="#编写服务接口aidl" class="headerlink" title="编写服务接口aidl"></a>编写服务接口aidl</h2><p>在<code>frameworks/base/core/java/android/app</code>目录下创建<code>ITaurusManager.aidl</code>文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ITaurusManager.aidl</span></span><br><span class="line"><span class="keyword">package</span> android.app;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* System private API for talking with the activity manager service. This</span></span><br><span class="line"><span class="comment">* provides calls from the application back to the activity manager.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* &#123;<span class="doctag">@hide</span>&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">ITaurusManager</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">request</span><span class="params">(String msg)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Context中定义服务的常量名"><a href="#Context中定义服务的常量名" class="headerlink" title="Context中定义服务的常量名"></a>Context中定义服务的常量名</h2><p>在<code>frameworks/base/core/java/android/content/Context.java</code>中加入常量</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//......</span></span><br><span class="line"><span class="comment">/** <span class="doctag">@hide</span> */</span></span><br><span class="line"><span class="meta">@StringDef(suffix = &#123; &quot;_SERVICE&quot; &#125;, value = &#123;</span></span><br><span class="line"><span class="meta">        POWER_SERVICE,</span></span><br><span class="line"><span class="meta">        //@hide: POWER_STATS_SERVICE,</span></span><br><span class="line"><span class="meta">        WINDOW_SERVICE,</span></span><br><span class="line"><span class="meta">        LAYOUT_INFLATER_SERVICE,</span></span><br><span class="line"><span class="meta">        ACCOUNT_SERVICE,</span></span><br><span class="line"><span class="meta">        ACTIVITY_SERVICE,</span></span><br><span class="line"><span class="meta">        TAURUS_SERVICE,</span></span><br><span class="line"><span class="meta">        ALARM_SERVICE,</span></span><br><span class="line"><span class="meta">        //......</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> ServiceName &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * TaurusService</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String TAURUS_SERVICE=<span class="string">&quot;taurus&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//......</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="创建暴露给外部调用的Manager类TaurusManager"><a href="#创建暴露给外部调用的Manager类TaurusManager" class="headerlink" title="创建暴露给外部调用的Manager类TaurusManager"></a>创建暴露给外部调用的Manager类TaurusManager</h2><p>如同我们使用ActivityManager一样，我们需要一个自己的Manager</p>
+<p>在<code>frameworks/base/core/java/android/app</code> 下编写</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> android.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.annotation.Nullable;</span><br><span class="line"><span class="keyword">import</span> android.annotation.SystemService;</span><br><span class="line"><span class="keyword">import</span> android.compat.annotation.UnsupportedAppUsage;</span><br><span class="line"><span class="keyword">import</span> android.content.Context;</span><br><span class="line"><span class="keyword">import</span> android.os.IBinder;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> android.os.ServiceManager;</span><br><span class="line"><span class="keyword">import</span> android.util.Singleton;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SystemService(Context.TAURUS_SERVICE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TaurusManager</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@hide</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">TaurusManager</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@UnsupportedAppUsage</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton&lt;ITaurusManager&gt; iTaurusManagerSingleton</span><br><span class="line">            = <span class="keyword">new</span> Singleton&lt;ITaurusManager&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> ITaurusManager <span class="title">create</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">final</span> IBinder b = ServiceManager.getService(Context.TAURUS_SERVICE);</span><br><span class="line">            <span class="keyword">final</span> ITaurusManager im = ITaurusManager.Stub.asInterface(b);</span><br><span class="line">            <span class="keyword">return</span> im;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@hide</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ITaurusManager <span class="title">getService</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> iTaurusManagerSingleton.get();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//相当于aidl的代理方法</span></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">request</span><span class="params">( <span class="meta">@Nullable</span> String msg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> getService().request(msg);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> e.rethrowFromSystemServer();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建服务的具体实现类即aidl接口的实现类TaurusManagerService"><a href="#创建服务的具体实现类即aidl接口的实现类TaurusManagerService" class="headerlink" title="创建服务的具体实现类即aidl接口的实现类TaurusManagerService"></a>创建服务的具体实现类即aidl接口的实现类TaurusManagerService</h2><p>在<code>frameworks/base/services/core/java/com/android/service/taurus</code> 中编写</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.android.server.taurus;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> android.app.ITaurusManager;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * TaurusManagerService</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TaurusManagerService</span> <span class="keyword">extends</span> <span class="title">ITaurusManager</span>.<span class="title">Stub</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">request</span><span class="params">(String msg)</span> <span class="keyword">throws</span> RemoteException</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;TaurusManagerService receive data : &quot;</span> + msg;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="ServiceManager中注册Binder实例"><a href="#ServiceManager中注册Binder实例" class="headerlink" title="ServiceManager中注册Binder实例"></a>ServiceManager中注册Binder实例</h2><p>在<code>frameworks/base/services/java/com/android/server/SystemServer.java</code>中 注册系统服务</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.android.server.taurus.TaurusManagerService;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startOtherServices</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//......</span></span><br><span class="line">    ServiceManager.addService(Context.TAURUS_SERVICE,<span class="keyword">new</span> TaurusManagerService());</span><br><span class="line">    <span class="comment">//......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="SystemServiceRegistry中注册服务获取器"><a href="#SystemServiceRegistry中注册服务获取器" class="headerlink" title="SystemServiceRegistry中注册服务获取器"></a>SystemServiceRegistry中注册服务获取器</h2><h3 id="为什么要在这里注册？"><a href="#为什么要在这里注册？" class="headerlink" title="为什么要在这里注册？"></a>为什么要在这里注册？</h3><p>通过ActivityManager的获取，我们追溯一下。</p>
+<p>使用ActivityManager时</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);</span><br></pre></td></tr></table></figure>
+
+<p>我们追溯到<code>ContextImpl</code>中的<code>getSystemService</code>方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//......</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getSystemService</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (vmIncorrectContextUseEnabled()) &#123;</span><br><span class="line">            <span class="comment">// Check incorrect Context usage.</span></span><br><span class="line">            <span class="keyword">if</span> (WINDOW_SERVICE.equals(name) &amp;&amp; !isUiContext()) &#123;</span><br><span class="line">                <span class="keyword">final</span> String errorMessage = <span class="string">&quot;Tried to access visual service &quot;</span></span><br><span class="line">                        + SystemServiceRegistry.getSystemServiceClassName(name)</span><br><span class="line">                        + <span class="string">&quot; from a non-visual Context:&quot;</span> + getOuterContext();</span><br><span class="line">                <span class="keyword">final</span> String message = <span class="string">&quot;WindowManager should be accessed from Activity or other &quot;</span></span><br><span class="line">                        + <span class="string">&quot;visual Context. Use an Activity or a Context created with &quot;</span></span><br><span class="line">                        + <span class="string">&quot;Context#createWindowContext(int, Bundle), which are adjusted to &quot;</span></span><br><span class="line">                        + <span class="string">&quot;the configuration and visual bounds of an area on screen.&quot;</span>;</span><br><span class="line">                <span class="keyword">final</span> Exception exception = <span class="keyword">new</span> IllegalAccessException(errorMessage);</span><br><span class="line">                StrictMode.onIncorrectContextUsed(message, exception);</span><br><span class="line">                Log.e(TAG, errorMessage + <span class="string">&quot; &quot;</span> + message, exception);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SystemServiceRegistry.getSystemService(<span class="keyword">this</span>, name);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">//......</span></span><br></pre></td></tr></table></figure>
+
+<p>看最后return的代码，是从<code>SystemServiceRegistry</code>中进行获取的。所以，我们需要在<code>SystemServiceRegistry</code>中进行注册获取器。</p>
+<p>在<code>frameworks/base/core/java/android/app/SystemServiceRegistry.java</code>的静态代码块中增加如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//......</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        registerService(Context.TAURUS_SERVICE, TaurusManager.class,</span><br><span class="line">                <span class="keyword">new</span> CachedServiceFetcher&lt;TaurusManager&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> TaurusManager <span class="title">createService</span><span class="params">(ContextImpl ctx)</span> <span class="keyword">throws</span> ServiceNotFoundException </span>&#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="keyword">new</span> TaurusManager();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">        <span class="comment">//......</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">//......</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置SELinux权限"><a href="#配置SELinux权限" class="headerlink" title="配置SELinux权限"></a>配置SELinux权限</h2><p>在<code>system/sepolicy/prebuilts/api/31.0/private/</code> 与 <code>system/sepolicy/private/</code> 目录下，分别修改：service_contexts、service.te、untrusted_app_all.te</p>
+<p><strong>service_contexts</strong></p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//......</span><br><span class="line">activity 				u:object<span class="built_in">_</span>r:activity<span class="built_in">_</span>service:s0</span><br><span class="line"><span class="params">#</span>配置自定义服务selinux角色</span><br><span class="line">taurus 					u:object<span class="built_in">_</span>r:taurus<span class="built_in">_</span>service:s0<span class="keyword">\</span></span><br><span class="line"><span class="keyword"></span>//......</span><br></pre></td></tr></table></figure>
+
+<p><strong>service.te</strong></p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="params">#</span>配置自定义服务类型</span><br><span class="line">type taurus<span class="built_in">_</span>service, 		app<span class="built_in">_</span>api<span class="built_in">_</span>service, ephemeral<span class="built_in">_</span>app<span class="built_in">_</span>api<span class="built_in">_</span>service,system<span class="built_in">_</span>server<span class="built_in">_</span>service,service<span class="built_in">_</span>manager<span class="built_in">_</span>type;</span><br></pre></td></tr></table></figure>
+
+<p><strong>untrusted_app_all.te</strong></p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="params">#</span>允许所有app使用自定义服务</span><br><span class="line">allow untrusted<span class="built_in">_</span>app<span class="built_in">_</span>all taurus<span class="built_in">_</span>service:service<span class="built_in">_</span>manager find;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：两个目录下文件需要一致，否则报错，如：<br>Files system/sepolicy/prebuilts/api/31.0/private/untrusted_app_all.te and<br>system/sepolicy/private/untrusted_app_all.te differ<br>ninja failed with: exit status 1</p>
+</blockquote>
+<h2 id="更新并编译"><a href="#更新并编译" class="headerlink" title="更新并编译"></a>更新并编译</h2><p>在终端中操作以下命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 更新api</span></span><br><span class="line">make update-api</span><br><span class="line"><span class="meta">#</span><span class="bash"> 编译</span></span><br><span class="line">m</span><br><span class="line"><span class="meta">#</span><span class="bash">运行模拟器</span></span><br><span class="line">emulator</span><br></pre></td></tr></table></figure>
+
+<p>模拟器启动后，可以通过adb shell去查看服务是否存在</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jia@jia-virtual-machine:~/AOSP/aosp$ adb shell service list| grep taurus</span><br><span class="line"><span class="meta">#</span><span class="bash">输出： 表示成功加入自定义服务</span></span><br><span class="line">102 taurus: [android.app.ITaurusManager]</span><br></pre></td></tr></table></figure>
+
+<h2 id="遇到的错误"><a href="#遇到的错误" class="headerlink" title="遇到的错误"></a>遇到的错误</h2><p>由于Android12编译时，开启了lint检查，在Android12新增系统服务后，执行update-api过程中遇到如下问题：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">out/srcjars/android/app/ITaurusManager.java:135: error: Methods calling system APIs should</span><br><span class="line">rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)</span><br><span class="line">[RethrowRemoteException]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:135: error: Missing nullability on method</span><br><span class="line">`request` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:135: error: Missing nullability on parameter</span><br><span class="line">`msg` in method `request` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:11: error: Methods calling system APIs should</span><br><span class="line">rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)</span><br><span class="line">[RethrowRemoteException]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:11: error: Missing nullability on method</span><br><span class="line">`request` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:11: error: Missing nullability on parameter</span><br><span class="line">`msg` in method `request` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:15: error: Missing nullability on method</span><br><span class="line">`asBinder` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:20: error: Raw AIDL interfaces must not be</span><br><span class="line">exposed: Stub extends Binder [RawAidl]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:28: error: Missing nullability on method</span><br><span class="line">`asInterface` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:32: error: Missing nullability on parameter</span><br><span class="line">`obj` in method `asInterface` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:43: error: Missing nullability on method</span><br><span class="line">`asBinder` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:47: error: Methods calling system APIs should</span><br><span class="line">rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)</span><br><span class="line">[RethrowRemoteException]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:47: error: Missing nullability on parameter</span><br><span class="line">`data` in method `onTransact` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:47: error: Missing nullability on parameter</span><br><span class="line">`reply` in method `onTransact` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:117: error: Missing nullability on parameter</span><br><span class="line">`impl` in method `setDefaultImpl` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:130: error: Missing nullability on method</span><br><span class="line">`getDefaultImpl` return [MissingNullability]</span><br><span class="line">frameworks/base/core/java/android/app/TaurusManager.java:15: error: Managers must always be</span><br><span class="line">obtained from Context; no direct constructors [ManagerConstructor]</span><br><span class="line">frameworks/base/core/java/android/app/TaurusManager.java:20: error: Missing nullability on</span><br><span class="line">method `getService` return [MissingNullability]Error: metalava detected the following</span><br><span class="line">problems:</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:135: error: Methods calling system APIs should</span><br><span class="line">rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)</span><br><span class="line">[RethrowRemoteException]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:135: error: Missing nullability on method</span><br><span class="line">`request` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:135: error: Missing nullability on parameter</span><br><span class="line">`msg` in method `request` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:11: error: Methods calling system APIs should</span><br><span class="line">rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)</span><br><span class="line">[RethrowRemoteException]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:11: error: Missing nullability on method</span><br><span class="line">`request` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:11: error: Missing nullability on parameter</span><br><span class="line">`msg` in method `request` [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:15: error: Missing nullability on method</span><br><span class="line">`asBinder` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:20: error: Raw AIDL interfaces must not be</span><br><span class="line">exposed: Stub extends Binder [RawAidl]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:28: error: Missing nullability on method</span><br><span class="line">`asInterface` return [MissingNullability]</span><br><span class="line">out/srcjars/android/app/ITaurusManager.java:32: error: Missing nullability on parameter</span><br><span class="line">`obj` in method `asInterface` [MissingNullability]</span><br></pre></td></tr></table></figure>
+
+<p>仔细查看日志，发现问题主要由TaurusManager以及aidl接口生成的ITaurusManager报错。主要是因为改加@hide与@Nullable注解的地方没有加上注解。</p>
+<h1 id="使用自定义服务"><a href="#使用自定义服务" class="headerlink" title="使用自定义服务"></a>使用自定义服务</h1><h2 id="修改SDK配置"><a href="#修改SDK配置" class="headerlink" title="修改SDK配置"></a>修改SDK配置</h2><h3 id="拷贝出aosp下编译的SDK的jar文件"><a href="#拷贝出aosp下编译的SDK的jar文件" class="headerlink" title="拷贝出aosp下编译的SDK的jar文件"></a>拷贝出aosp下编译的SDK的jar文件</h3><p>通过<code>make sdk</code>生成SDK的jar包</p>
+<p>在<code>out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar</code>路径下。</p>
+<h3 id="配置studio使用的SDK"><a href="#配置studio使用的SDK" class="headerlink" title="配置studio使用的SDK"></a>配置studio使用的SDK</h3><p>在SDK/platforms 目录下复制一份android-31（Android12）目录并改名为：android-31.car</p>
+<p><img src="/images/android_aosp_framework_custom_service01.png" alt="image"></p>
+<p>将classes.jar拷贝至该目录，删除原有的android.jar，重命名classes.jar为android.jar。</p>
+<p><img src="/images/android_aosp_framework_custom_service02.png" alt="image"></p>
+<p>同样，在SDK/sources 目录下复制一份android-31（Android12）目录并改名为：android-31.car</p>
+<p>修改SDK/platforms/android-31.car目录下的source.properties为：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="params">#</span>指定自定义平台标识为311（可以是任意数字，但为了与原生标识区分，请使用三位数）</span><br><span class="line"><span class="params">#</span>修改：</span><br><span class="line">Pkg.Desc=Android SDK Platform 311</span><br><span class="line">Pkg.UserSrc=false</span><br><span class="line"><span class="params">#</span>修改：</span><br><span class="line">Platform.Version=311</span><br><span class="line">Platform.CodeName=</span><br><span class="line">Pkg.Revision=1</span><br><span class="line"><span class="params">#</span>修改：</span><br><span class="line">AndroidVersion.ApiLevel=311</span><br><span class="line">Layoutlib.Api=15</span><br><span class="line">Layoutlib.Revision=1</span><br><span class="line">Platform.MinToolsRev=22</span><br></pre></td></tr></table></figure>
+
+<p>最后将SDK/platforms/package.xml中最后的内容改为：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">localPackage</span> <span class="attr">path</span>=<span class="string">&quot;platforms;android-311&quot;</span> <span class="attr">obsolete</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">type-details</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xsi:type</span>=<span class="string">&quot;ns5:platformDetailsType&quot;</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 修改 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">api-level</span>&gt;</span>311<span class="tag">&lt;/<span class="name">api-level</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">codename</span>&gt;</span><span class="tag">&lt;/<span class="name">codename</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layoutlib</span> <span class="attr">api</span>=<span class="string">&quot;15&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">type-details</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">revision</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">major</span>&gt;</span>1<span class="tag">&lt;/<span class="name">major</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">revision</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 修改 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">display-name</span>&gt;</span>Android SDK Platform 311<span class="tag">&lt;/<span class="name">display-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-license</span> <span class="attr">ref</span>=<span class="string">&quot;android-sdk-license&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">localPackage</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>修改SDK/sources/android-31.car目录下的source.properties为：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Pkg.UserSrc=false</span><br><span class="line">Pkg.Revision=1</span><br><span class="line">AndroidVersion.ApiLevel=311</span><br></pre></td></tr></table></figure>
+
+<p>修改SDK/sources/android-31.car目录下的package.xml最后的为：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">localPackage</span> <span class="attr">path</span>=<span class="string">&quot;sources;android-311&quot;</span> <span class="attr">obsolete</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">type-details</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xsi:type</span>=<span class="string">&quot;ns11:sourceDetailsType&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">api-level</span>&gt;</span>311<span class="tag">&lt;/<span class="name">api-level</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">codename</span>&gt;</span><span class="tag">&lt;/<span class="name">codename</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">base-extension</span>&gt;</span>true<span class="tag">&lt;/<span class="name">base-extension</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">type-details</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">revision</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">major</span>&gt;</span>1<span class="tag">&lt;/<span class="name">major</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">revision</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">display-name</span>&gt;</span>Sources for Android 311<span class="tag">&lt;/<span class="name">display-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-license</span> <span class="attr">ref</span>=<span class="string">&quot;android-sdk-license&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">localPackage</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="编写app使用自定义服务"><a href="#编写app使用自定义服务" class="headerlink" title="编写app使用自定义服务"></a>编写app使用自定义服务</h2><p>创建测试应用TestService</p>
+<h3 id="修改gradle配置"><a href="#修改gradle配置" class="headerlink" title="修改gradle配置"></a>修改gradle配置</h3><figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    namespace <span class="string">&#x27;com.example.testservice&#x27;</span></span><br><span class="line">    <span class="comment">//指定为修改的SDK版本</span></span><br><span class="line">    compileSdk <span class="number">311</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.example.testservice&quot;</span></span><br><span class="line">        minSdk <span class="number">24</span></span><br><span class="line">        <span class="comment">//指定为修改的SDK版本</span></span><br><span class="line">        targetSdk <span class="number">311</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line"></span><br><span class="line">        testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    compileOptions &#123;</span><br><span class="line">        sourceCompatibility JavaVersion.VERSION_1_8</span><br><span class="line">        targetCompatibility JavaVersion.VERSION_1_8</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改后同步一下gradle配置。</p>
+<h3 id="编写调用自定义服务的测试代码"><a href="#编写调用自定义服务的测试代码" class="headerlink" title="编写调用自定义服务的测试代码"></a>编写调用自定义服务的测试代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.testservice;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> androidx.appcompat.app.AppCompatActivity;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.app.TaurusManager;</span><br><span class="line"><span class="keyword">import</span> android.content.Context;</span><br><span class="line"><span class="keyword">import</span> android.os.Bundle;</span><br><span class="line"><span class="keyword">import</span> android.widget.Toast;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line"></span><br><span class="line">        TaurusManager taurusManager = (TaurusManager) getSystemService(Context.TAURUS_SERVICE);</span><br><span class="line"></span><br><span class="line">        String result = taurusManager.request(<span class="string">&quot;AppRequest&quot;</span>);</span><br><span class="line">        Toast.makeText(<span class="keyword">this</span>, result, Toast.LENGTH_SHORT).show();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可正常引用到SDK中添加的自定义服务类。安装到aosp下编译出的模拟器上，运行即可正常调用。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AOSP/" rel="tag"># AOSP</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/02/android_aosp_built_in_app/" rel="prev" title="AOSP-预置APP历险记">
+                  <i class="fa fa-chevron-left"></i> AOSP-预置APP历险记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/03/10/android_aosp_system_service_lifecycle/" rel="next" title="AOSP-系统服务生命周期">
+                  AOSP-系统服务生命周期 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

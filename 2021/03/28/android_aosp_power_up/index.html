@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="对于任何系统的学习来讲，开机过程的了解都是个比较重要的知识点。开机时间的优化都是一个很关键的工作。如果用户每次启动设备都需要等待很长的时间，那么其用户体验是很差的。所以，对于任何开机过程的修改以及优化的前提都是要对开机过程有个较为详细的了解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android系统开机过程解析">
+<meta property="og:url" content="http://example.com/2021/03/28/android_aosp_power_up/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="对于任何系统的学习来讲，开机过程的了解都是个比较重要的知识点。开机时间的优化都是一个很关键的工作。如果用户每次启动设备都需要等待很长的时间，那么其用户体验是很差的。所以，对于任何开机过程的修改以及优化的前提都是要对开机过程有个较为详细的了解。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up01.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up02.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up03.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up04.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up05.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up06.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up07.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up08.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up09.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up10.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up11.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up12.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up13.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up14.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up15.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_power_up16.png">
+<meta property="article:published_time" content="2021-03-28T15:41:00.000Z">
+<meta property="article:modified_time" content="2023-03-23T15:32:08.746Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="AOSP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_aosp_power_up01.png">
+
+
+<link rel="canonical" href="http://example.com/2021/03/28/android_aosp_power_up/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2021&#x2F;03&#x2F;28&#x2F;android_aosp_power_up&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;03&#x2F;28&#x2F;android_aosp_power_up&#x2F;&quot;,&quot;title&quot;:&quot;Android系统开机过程解析&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android系统开机过程解析 | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android%E5%BC%80%E6%9C%BA%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">Android开机过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Boot-ROM"><span class="nav-number">1.1.</span> <span class="nav-text">Boot ROM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bootloader"><span class="nav-number">1.2.</span> <span class="nav-text">Bootloader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kernel"><span class="nav-number">1.3.</span> <span class="nav-text">Kernel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#init%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">init进程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#FirstStageMain"><span class="nav-number">1.4.1.</span> <span class="nav-text">FirstStageMain</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SetupSelinux"><span class="nav-number">1.4.2.</span> <span class="nav-text">SetupSelinux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SecondStageMain"><span class="nav-number">1.4.3.</span> <span class="nav-text">SecondStageMain</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zygote"><span class="nav-number">1.5.</span> <span class="nav-text">Zygote</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SystemServer"><span class="nav-number">1.6.</span> <span class="nav-text">SystemServer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%BC%80%E6%9C%BA%E6%97%B6%E9%97%B4"><span class="nav-number">2.</span> <span class="nav-text">分析开机时间</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%BC%80%E6%9C%BA%E6%97%A5%E5%BF%97"><span class="nav-number">2.1.</span> <span class="nav-text">分析开机日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-start"><span class="nav-number">2.2.</span> <span class="nav-text">boot_progress_start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-preload-start"><span class="nav-number">2.3.</span> <span class="nav-text">boot_progress_preload_start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-system-run"><span class="nav-number">2.4.</span> <span class="nav-text">boot_progress_system_run</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-pms-start"><span class="nav-number">2.5.</span> <span class="nav-text">boot_progress_pms_start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-pms-system-scan-start"><span class="nav-number">2.6.</span> <span class="nav-text">boot_progress_pms_system_scan_start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-pms-data-scan-start"><span class="nav-number">2.7.</span> <span class="nav-text">boot_progress_pms_data_scan_start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-pms-scan-end"><span class="nav-number">2.8.</span> <span class="nav-text">boot_progress_pms_scan_end</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-pms-ready"><span class="nav-number">2.9.</span> <span class="nav-text">boot_progress_pms_ready</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-ams-ready"><span class="nav-number">2.10.</span> <span class="nav-text">boot_progress_ams_ready</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-progress-enable-screen"><span class="nav-number">2.11.</span> <span class="nav-text">boot_progress_enable_screen</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sf-stop-bootanim"><span class="nav-number">2.12.</span> <span class="nav-text">sf_stop_bootanim</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#wm-boot-animation-done"><span class="nav-number">2.13.</span> <span class="nav-text">wm_boot_animation_done</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8bootchart%E5%B7%A5%E5%85%B7"><span class="nav-number">2.14.</span> <span class="nav-text">使用bootchart工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%93%E5%8F%96bootchart%E6%95%B0%E6%8D%AE"><span class="nav-number">2.14.1.</span> <span class="nav-text">抓取bootchart数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="nav-number">2.14.2.</span> <span class="nav-text">分析数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%93%E5%8F%96boottrace"><span class="nav-number">2.15.</span> <span class="nav-text">抓取boottrace</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/28/android_aosp_power_up/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android系统开机过程解析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-28 23:41:00" itemprop="dateCreated datePublished" datetime="2021-03-28T23:41:00+08:00">2021-03-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android系统开发</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>对于任何系统的学习来讲，开机过程的了解都是个比较重要的知识点。开机时间的优化都是一个很关键的工作。如果用户每次启动设备都需要等待很长的时间，那么其用户体验是很差的。所以，对于任何开机过程的修改以及优化的前提都是要对开机过程有个较为详细的了解。</p>
+<span id="more"></span>
+
+<h1 id="Android开机过程"><a href="#Android开机过程" class="headerlink" title="Android开机过程"></a>Android开机过程</h1><p>开机过程从CPU上电开始，到锁屏界面显示出来结束。下图为比较简洁的开机流程图。</p>
+<p><img src="/images/android_aosp_power_up01.png" alt="img"></p>
+<p>再来看一张比较详细的开机流程图</p>
+<p><img src="/images/android_aosp_power_up02.png" alt="img"></p>
+<p>总的来说，开机过程分为以下六主要子过程</p>
+<h2 id="Boot-ROM"><a href="#Boot-ROM" class="headerlink" title="Boot ROM"></a>Boot ROM</h2><p>Boot ROM是硬编码在CPU内部固定地址的一段ROM(在一些较老的系统上也可能使用外挂Boot ROM（相对CPU来说）)，这块代码是由CPU制造商提供。当用户按下电源键或者系统重启之后，触发CPU上电动作，此时其它硬件还未初始化，然而这块ROM就已经可读了。CPU首先执行PBL(Primary Boot Loader，主引导加载程序，固化在ROM上)代码。在必要的硬件初始化之后，Boot ROM开始加载Bootloader到RAM中，然后PC指针跳过去执行bootloader。在加载 Bootloader之前，PBL也可以进行验证。如果验证无法通过，则不会加载运行Bootloader，从而开机失败。</p>
+<p><img src="/images/android_aosp_power_up03.png" alt="img"></p>
+<blockquote>
+<ul>
+<li><p><strong>A.</strong> CPU刚上电时，CPU 处于未初始化状态，还没有设定内部时钟，此时只有内部 RAM 可用。当电源稳定后会开始执行 Boot ROM 代码。Boot ROM通过系统寄存器映射到 ASIC (Application Specific Integrated Circuit, 即专用集成电路，是指应特定用户要求和特定电子系统的需要而设计、制造的集成电路)中的物理区域来找到boot media，进而可以找到Bootloader</p>
+</li>
+<li><p><strong>B.</strong> boot  media序列确定之后，Boot ROM 加载 Bootloader到内部 RAM 中，之后Boot ROM代码会跳到Bootloader</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="Bootloader"><a href="#Bootloader" class="headerlink" title="Bootloader"></a>Bootloader</h2><p>Bootloader是一个特殊的独立于内核的程序，是CPU复位后进入操作系统之前执行的一段代码。Bootloader完成由硬件启动到操作系统启动的过渡，从而为操作系统提供基本的运行环境，如初始化CPU、时钟、堆栈、存储器系统等。Bootloader功能类似于PC机的BIOS程序,其代码与CPU芯片的内核结构、具体型号、应用系统的配置及使用的操作系统等因素有关，因此不可能有通用的bootloader,开发时需要用户根据具体情况进行移植。嵌入式Linux系统中常用的Bootloader有armboot、redboot、blob、U-Boot、Bios-lt、Bootldr等，其中U-Boot是当前比较流行，功能比较强大的Bootloader，可以支持多种体系结构，但相对也比较复杂。硬件初始化完成之后，Bootloader将boot.img(kernel + ramdisk(ramdisk.img中主要是存放android启动后第一个用户进程init可执行文件和init.*.rc等相关启动脚本以及sbin目录下的adbd工具))从flash上copy到RAM里面，然后CPU执行转向kernel。</p>
+<p><img src="/images/android_aosp_power_up04.png" alt="img"></p>
+<blockquote>
+<ul>
+<li><p><strong>A.</strong> Bootloader第一阶段首先会检测和设置外部RAM</p>
+</li>
+<li><p><strong>B.</strong> 外部 RAM可用之后，将Bootloader代码加载到外部RAM中</p>
+</li>
+<li><p><strong>C.</strong> Bootloader第二阶段包含了设置文件系统，内存，网络等等。</p>
+</li>
+<li><p><strong>D.</strong> Bootloader查找Linux内核并将其从boot media (或者其他地方，这取决于系统配置) 加载到 RAM 中，并且会配置一些内核启动时需要的启动参数</p>
+</li>
+<li><p><strong>E.</strong> Bootloader执行完之后会跳转到 Linux 内核执行</p>
+</li>
+</ul>
+</blockquote>
+<p>一般也可将Bootloader程序的执行分为两个阶段，如下图所示</p>
+<p><img src="/images/android_aosp_power_up05.png" alt="img"></p>
+<p>执行Bootloader程序过程中，如果镜像验证失败、BootLinux (&amp;Info) 函数启动失败或者接收到启动至 fastboot 的命令（比如使用 adb reboot bootloader进行重启、在启动时按下了电源键+下音量键组合）时，会进入到Fastboot模式(Fastboot 是一种电脑通过USB数据线对手机固件进行刷写、擦除/格式化、调试、传输各种指令的固件通信协议, 俗称线刷模式或快速引导模式)。</p>
+<h2 id="Kernel"><a href="#Kernel" class="headerlink" title="Kernel"></a>Kernel</h2><p>Android kernel基于上游 Linux LTS (Linux Long Term Supported，长期支持) 内核。在 Google，LTS 内核会与 Android 专用补丁结合，形成所谓的“Android 通用内核 (ACK，Android Common Kernel)”。较新的 ACK（版本 5.4 及更高版本）也称为 GKI (Generic Kernel Image，通用内核镜像 )内核。GKI项目通过统一核心内核并将 SoC 和板级支持从核心内核移至可加载模块中，解决了内核碎片化问题。GKI 内核为内核模块提供了稳定的内核模块接口 (KMI)，因此模块和内核可以独立进行更新。GKI 具有以下特点：</p>
+<blockquote>
+<ul>
+<li>基于 ACK 来源构建而成。</li>
+<li>是每个架构和每个 LTS 版本的单内核二进制文件以及关联的可加载模块（目前只有适用于 android11-5.4 和 android12-5.4 的 arm64）。</li>
+<li>已经过关联 ACK 支持的所有 Android 平台版本的测试。在 GKI 内核版本的生命周期内不会发生功能弃用。</li>
+<li>为给定 LTS 中的驱动程序提供了稳定版 KMI。</li>
+<li>不包含 SoC 专用代码或板卡专用代码。下图显示了 GKI 内核和供应商模块架构：</li>
+</ul>
+</blockquote>
+<p><img src="/images/android_aosp_power_up06.png" alt="img"></p>
+<p>由于Android的kernel实际上就是Linux kernel，只是针对移动设备做了一些优化，所以与其它Linux kernel的启动方式大同小异，都是对start_kernel函数的调用和执行。Kernel主要工作内容为设置缓存、被保护存储器、计划列表，加载驱动，启动kernel守护，挂载根目录，初始化输入输出，开启中断，初始化进程表等。当内核完成这些系统设置后，接下来在系统文件中寻找”init”文件，然后启动root进程或者系统的第一个进程。</p>
+<p>Kernel启动过程分为两个阶段：<br>1）内核引导阶段。通常使用汇编语言编写，主要检查内核与当前硬件是否匹配。这部分也与硬件体系结构相关。<br>2）内核启动阶段。引导阶段结束前，将调用start_kernel()进入内核启动阶段。内核启动阶段相关的代码主要位于kernel/init/main.c。</p>
+<p><img src="/images/android_aosp_power_up07.png" alt="img"></p>
+<blockquote>
+<ul>
+<li><p><strong>A.</strong> 内存管理单元和高速缓存初始化完成之后，系统便可以使用虚拟内存和启动用户空间进程</p>
+</li>
+<li><p><strong>B.</strong> 内核在根目录寻找初始化程序（/system/core/init），执行该程序以启动init进程<br>Kernel启动的核心函数是start_kernel函数，它完成了内核的大部分初始化工作。这个函数在最后调用了reset_init函数进行后续的初始化。reset_init函数最主要的任务就是启动内核线程kernel_init。kernel_init函数将完成设备驱动程序的初始化，并调用init_post函数启动用户空间的init进程。到init_post函数为止，内核的初始化已经基本完成。</p>
+</li>
+</ul>
+</blockquote>
+<p><img src="/images/android_aosp_power_up08.png" alt="img"></p>
+<h2 id="init进程"><a href="#init进程" class="headerlink" title="init进程"></a>init进程</h2><p>用户空间的第一个进程便是init进程，进程号为1。</p>
+<p><img src="/images/android_aosp_power_up09.png" alt="img"></p>
+<p>当系统启动完成之后，init进程会作为守护进程监视其它进程。在Linux中所有的进程都是由init进程直接或间接fork出来的。在init进程启动的过程中，会相继启动servicemanager(binder服务管理者)、Zygote进程。而Zygote又会创建system_server进程以及app进程。</p>
+<p><img src="/images/android_aosp_power_up10.png" alt="img"></p>
+<p>对于init进程的功能分为4部分：</p>
+<blockquote>
+<ul>
+<li>解析并运行所有的init.rc相关文件</li>
+<li>根据rc文件，生成相应的设备驱动节点</li>
+<li>处理子进程的终止(signal方式)</li>
+<li>提供属性服务的功能<br>init进程涉及的主要代码文件有</li>
+</ul>
+</blockquote>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">system/core/init/</span><br><span class="line">  -main.cpp</span><br><span class="line">  -init.cpp</span><br><span class="line">  -parser.cpp</span><br><span class="line">/system/core/rootdir/</span><br><span class="line">  -init.rc</span><br></pre></td></tr></table></figure>
+
+<p>init进程的入口为main.cpp类的main方法。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// system/core/init/main.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> __has_feature(address_sanitizer)</span></span><br><span class="line">     __asan_set_error_report_callback(AsanReportCallback);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    <span class="comment">// 创建设备节点、权限设定等</span></span><br><span class="line">    <span class="keyword">if</span>(!<span class="built_in">strcmp</span>(<span class="built_in">basename</span>(argv[<span class="number">0</span>]), <span class="string">&quot;ueventd&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">ueventd_main</span>(argc, argv);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(argc &gt; <span class="number">1</span>)&#123;</span><br><span class="line">        <span class="comment">// 初始化日志系统</span></span><br><span class="line">        <span class="keyword">if</span>(!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;subcontext&quot;</span>))&#123;</span><br><span class="line">            android::base::<span class="built_in">InitLogging</span>(argv, &amp;android::base::KernelLogger);</span><br><span class="line">            <span class="keyword">const</span> BuiltinFunctionMap function_map;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">SubcontextMain</span>(argc, argv, &amp;function_map);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 2.创建安全增强型Linux（SELinux）</span></span><br><span class="line">        <span class="keyword">if</span>(!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;selinux_setup&quot;</span>))&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">SetupSelinux</span>(argv);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 3.解析init.rc文件、提供服务、创建epoll与处理子进程的终止等</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;second_stage&quot;</span>))&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">SecondStageMain</span>(argc, argv);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 1.挂载相关文件系统</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">FirstStageMain</span>(argc, argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要执行了三步</p>
+<blockquote>
+<ul>
+<li>FirstStageMain</li>
+<li>SetupSelinux</li>
+<li>SecondStageMain</li>
+</ul>
+</blockquote>
+<h3 id="FirstStageMain"><a href="#FirstStageMain" class="headerlink" title="FirstStageMain"></a>FirstStageMain</h3><p>init进程启动的第一步，主要是挂载相关的文件系统</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// system/core/init/first_stage_init.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">FirstStageMain</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(REBOOT_BOOTLOADER_ON_PANIC)&#123;</span><br><span class="line">        <span class="built_in">InstallRebootSignalHandlers</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    boot_clock::time_point start_time = boot_clock::<span class="built_in">now</span>();</span><br><span class="line">    std::vector&lt;std::pair&lt;std::string, <span class="keyword">int</span>&gt;&gt; errors;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CHECKCALL(x) \</span></span><br><span class="line"><span class="meta">    <span class="meta-keyword">if</span> (x != 0) errors.emplace_back(#x <span class="meta-string">&quot; failed&quot;</span>, errno);</span></span><br><span class="line">    <span class="built_in">umask</span>(<span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 创建于挂载相关文件系统</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">clearenv</span>());</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">setenv</span>(<span class="string">&quot;PATH&quot;</span>, _PATH_DEFPATH, <span class="number">1</span>));</span><br><span class="line">    <span class="comment">// Get the basic filesystem setup we need put together in the initramdisk</span></span><br><span class="line">    <span class="comment">// on / and then we&#x27;ll let the rc file figure out the rest.</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;tmpfs&quot;</span>, <span class="string">&quot;/dev&quot;</span>, <span class="string">&quot;tmpfs&quot;</span>, MS_NOSUID, <span class="string">&quot;mode=0755&quot;</span>));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mkdir</span>(<span class="string">&quot;/dev/pts&quot;</span>, <span class="number">0755</span>));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mkdir</span>(<span class="string">&quot;/dev/socket&quot;</span>, <span class="number">0755</span>));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;devpts&quot;</span>, <span class="string">&quot;/dev/pts&quot;</span>, <span class="string">&quot;devpts&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>));</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAKE_STR(x) __STRING(x)</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;proc&quot;</span>, <span class="string">&quot;/proc&quot;</span>, <span class="string">&quot;proc&quot;</span>, <span class="number">0</span>, <span class="string">&quot;hidepid=2,gid=&quot;</span> <span class="built_in">MAKE_STR</span>(AID_READPROC)));</span><br><span class="line"><span class="meta">#<span class="meta-keyword">undef</span> MAKE_STR</span></span><br><span class="line">    <span class="comment">// 原始命令不可暴露给没有特权的进程</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">chmod</span>(<span class="string">&quot;/proc/cmdline&quot;</span>, <span class="number">0440</span>));</span><br><span class="line">    <span class="keyword">gid_t</span> groups[] = &#123;AID_READPROC&#125;;</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">setgroups</span>(<span class="built_in">arraysize</span>(groups), groups));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;sysfs&quot;</span>, <span class="string">&quot;/sys&quot;</span>, <span class="string">&quot;sysfs&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;selinuxfs&quot;</span>, <span class="string">&quot;/sys/fs/selinux&quot;</span>, <span class="string">&quot;selinuxfs&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>));</span><br><span class="line">    <span class="comment">// tmpfs已经挂载在/dev下，并且已生成/dev/kmsg，故可以与外界通信</span></span><br><span class="line">    <span class="comment">// 初始化日志系统</span></span><br><span class="line">    <span class="built_in">InitKernelLogging</span>(argv);</span><br><span class="line">    <span class="comment">// 进入下一步</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* path = <span class="string">&quot;/system/bin/init&quot;</span>;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* args[] = &#123;path, <span class="string">&quot;selinux_setup&quot;</span>, <span class="literal">nullptr</span>&#125;;</span><br><span class="line">    <span class="built_in">execv</span>(path, <span class="keyword">const_cast</span>&lt;<span class="keyword">char</span>**&gt;(args));</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 只有在错误发生的情况下execv()函数才会返回</span></span><br><span class="line">    <span class="built_in">PLOG</span>(FATAL) &lt;&lt; <span class="string">&quot;execv(\&quot;&quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot;\&quot;) failed&quot;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要通过mount挂载对应的文件系统，mkdir创建对应的文件目录，并配置相应的访问权限。<br>需要注意的是，这些文件只是在应用运行的时候存在，一旦应用运行结束就会随着应用一起消失。<br>挂载的<strong>文件系统</strong>主要有四类：</p>
+<ul>
+<li>tmpfs: 一种虚拟内存文件系统，它会将所有的文件存储在虚拟内存中。由于tmpfs是驻留在RAM的，因此它的内容是不持久的。断电后，tmpfs 的内容就消失了，这也是被称作tmpfs的根本原因。</li>
+<li>devpts: 为伪终端提供了一个标准接口，它的标准挂接点是/dev/pts。只要pty(pseudo-tty, 虚拟终端)的主复合设备/dev/ptmx被打开，就会在/dev/pts下动态的创建一个新的pty设备文件。</li>
+<li>proc: 也是一个虚拟文件系统，它可以看作是内核内部数据结构的接口，通过它我们可以获得系统的信息，同时也能够在运行时修改特定的内核参数。</li>
+<li>sysfs: 与proc文件系统类似，也是一个不占有任何磁盘空间的虚拟文件系统。它通常被挂接在/sys目录下。</li>
+</ul>
+<p>在FirstStageMain还会通过InitKernelLogging(argv)来初始化log日志系统。此时Android还没有自己的系统日志，采用kernel的log系统，打开的设备节点/dev/kmsg， 那么可通过cat /dev/kmsg来获取内核log。</p>
+<p>最后会通过execv方法传递对应的path与下一阶段的参数selinux_setup。</p>
+<h3 id="SetupSelinux"><a href="#SetupSelinux" class="headerlink" title="SetupSelinux"></a>SetupSelinux</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// system/core/init/selinux.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">SetupSelinux</span><span class="params">(<span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line">     <span class="comment">//初始化本阶段内核日志</span></span><br><span class="line">    <span class="built_in">InitKernelLogging</span>(argv);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (REBOOT_BOOTLOADER_ON_PANIC) &#123;</span><br><span class="line">        <span class="built_in">InstallRebootSignalHandlers</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">     <span class="comment">//  初始化 SELinux，加载 SELinux 策略</span></span><br><span class="line">    <span class="built_in">SelinuxSetupKernelLogging</span>();</span><br><span class="line">    <span class="built_in">SelinuxInitialize</span>();</span><br><span class="line">    <span class="comment">//  再次调用 main 函数，并传入 second_stage 进入第二阶段</span></span><br><span class="line">    <span class="comment">//  而且此次启动就已经在 SELinux 上下文中运行</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">selinux_android_restorecon</span>(<span class="string">&quot;/system/bin/init&quot;</span>, <span class="number">0</span>) == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="built_in">PLOG</span>(FATAL) &lt;&lt; <span class="string">&quot;restorecon failed of /system/bin/init failed&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 进入下一步</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* path = <span class="string">&quot;/system/bin/init&quot;</span>;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* args[] = &#123;path, <span class="string">&quot;second_stage&quot;</span>, <span class="literal">nullptr</span>&#125;;</span><br><span class="line">    <span class="built_in">execv</span>(path, <span class="keyword">const_cast</span>&lt;<span class="keyword">char</span>**&gt;(args));</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// execv() only returns if an error happened, in which case we</span></span><br><span class="line">    <span class="comment">// panic and never return from this function.</span></span><br><span class="line">    <span class="built_in">PLOG</span>(FATAL) &lt;&lt; <span class="string">&quot;execv(\&quot;&quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot;\&quot;) failed&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这阶段主要是初始化 SELinux。SELinux 是安全加强型 Linux，能够很好的对全部进程强制执行访问控制，从而让 Android 更好的保护和限制系统服务、控制对应用数据和系统日志的访问，提高系统安全性。<br>接下来调用execv进入到最后阶段SecondStageMain。</p>
+<h3 id="SecondStageMain"><a href="#SecondStageMain" class="headerlink" title="SecondStageMain"></a>SecondStageMain</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  system/core/init/init.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">SecondStageMain</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">SetStdioToDevNull</span>(argv);</span><br><span class="line">    <span class="comment">// 初始化本阶段内核日志</span></span><br><span class="line">    <span class="built_in">InitKernelLogging</span>(argv);</span><br><span class="line">    <span class="comment">//  系统属性初始化</span></span><br><span class="line">    <span class="built_in">property_init</span>();</span><br><span class="line">    <span class="comment">//  建立 Epoll</span></span><br><span class="line">    Epoll epoll;</span><br><span class="line">    <span class="comment">//  注册信号处理</span></span><br><span class="line">    <span class="built_in">InstallSignalFdHandler</span>(&amp;epoll);</span><br><span class="line">    <span class="comment">//  加载默认的系统属性</span></span><br><span class="line">    <span class="built_in">property_load_boot_defaults</span>(load_debug_prop);</span><br><span class="line">    <span class="comment">//  启动属性服务</span></span><br><span class="line">    <span class="built_in">StartPropertyService</span>(&amp;epoll);</span><br><span class="line">       subcontexts = <span class="built_in">InitializeSubcontexts</span>();</span><br><span class="line">    <span class="comment">//加载系统启动脚本&quot;/init.rc&quot;</span></span><br><span class="line">       ActionManager&amp; am = ActionManager::<span class="built_in">GetInstance</span>();</span><br><span class="line">    ServiceList&amp; sm = ServiceList::<span class="built_in">GetInstance</span>();</span><br><span class="line">    <span class="built_in">LoadBootScripts</span>(am, sm);</span><br><span class="line">    </span><br><span class="line">       <span class="comment">// 触发early-init，，init，late-init流程</span></span><br><span class="line">    am.<span class="built_in">QueueEventTrigger</span>(<span class="string">&quot;early-init&quot;</span>);</span><br><span class="line">    am.<span class="built_in">QueueEventTrigger</span>(<span class="string">&quot;init&quot;</span>);</span><br><span class="line">    am.<span class="built_in">QueueBuiltinAction</span>(InitBinder, <span class="string">&quot;InitBinder&quot;</span>);</span><br><span class="line">    am.<span class="built_in">QueueEventTrigger</span>(<span class="string">&quot;late-init&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//解析启动脚本</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">//  执行 Action</span></span><br><span class="line">        am.<span class="built_in">ExecuteOneCommand</span>();</span><br><span class="line">        <span class="comment">//  还有就是重启死掉的子进程</span></span><br><span class="line">        <span class="keyword">auto</span> next_process_action_time = <span class="built_in">HandleProcessActions</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>SecondStageMain的主要工作总结</p>
+<ul>
+<li>使用epoll对init子进程的信号进行监听</li>
+<li>初始化系统属性，使用mmap共享内存</li>
+<li>开启属性服务，并注册到epoll中</li>
+<li>加载系统启动脚本”init.rc”</li>
+<li>解析启动脚本，启动相关服务</li>
+</ul>
+<p>重点介绍下init.rc文件的解析</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//system/core/init/init.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">LoadBootScripts</span><span class="params">(ActionManager&amp; action_manager, ServiceList&amp; service_list)</span> </span>&#123;</span><br><span class="line">    Parser parser = <span class="built_in">CreateParser</span>(action_manager, service_list);</span><br><span class="line">    std::string bootscript = <span class="built_in">GetProperty</span>(<span class="string">&quot;ro.boot.init_rc&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (bootscript.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/init.rc&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/system/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/system/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/product/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/product/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/product_services/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/product_services/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/odm/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/odm/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/vendor/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/vendor/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        parser.<span class="built_in">ParseConfig</span>(bootscript);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过ParseConfig来解析init.rc配置文件。.rc文件以行为单位，以空格为间隔，以#开始代表注释行。.rc文件主要包含Action、Service、Command、Options、Import，其中对于Action和Service的名称都是唯一的，对于重复的命名视为无效。init.rc中的Action、Service语句都有相应的类来解析，即ActionParser、ServiceParser。以下为init.rc配置文件的部分内容。</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">// system/core/rootdir/init.rc</span><br><span class="line">import /init.environ.rc</span><br><span class="line">import /init.usb.rc</span><br><span class="line">import /init.<span class="built_in">$</span>&#123;ro.hardware&#125;.rc</span><br><span class="line">import /init.<span class="built_in">$</span>&#123;ro.zygote&#125;.rc</span><br><span class="line">import /init.trace.rc</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">on early-init</span><br><span class="line">    start ueventd</span><br><span class="line">    mkdir /mnt 0775 root system</span><br><span class="line">on init</span><br><span class="line">    mount tmpfs none /sys/fs/cgroup mode=0750,uid=0,gid=1000</span><br><span class="line">    mkdir /sys/fs/cgroup/memory 0750 root system</span><br><span class="line">    mount cgroup none /sys/fs/cgroup/memory memory</span><br><span class="line">on property:sys.boot<span class="built_in">_</span>from<span class="built_in">_</span>charger<span class="built_in">_</span>mode=1</span><br><span class="line">    class<span class="built_in">_</span>stop charger</span><br><span class="line">    trigger late-init</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">service ueventd /sbin/ueventd</span><br><span class="line">    class core</span><br><span class="line">    critical</span><br><span class="line">    seclabel u:r:ueventd:s0</span><br><span class="line">    </span><br><span class="line">service logd /system/bin/logd</span><br><span class="line">    class core</span><br><span class="line">    socket logd stream 0666 logd logd</span><br><span class="line">    socket logdr seqpacket 0666 logd logd</span><br><span class="line">    socket logdw dgram 0222 logd logd</span><br><span class="line">    seclabel u:r:logd:s0</span><br><span class="line">    </span><br><span class="line">service console /system/bin/sh</span><br><span class="line">    class core</span><br><span class="line">    console</span><br><span class="line">    disabled</span><br><span class="line">    user shell</span><br><span class="line">    seclabel u:r:shell:s0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">service adbd /sbin/adbd --root<span class="built_in">_</span>seclabel=u:r:su:s0</span><br><span class="line">    class core</span><br><span class="line">    socket adbd stream 660 system system</span><br><span class="line">    disabled</span><br><span class="line">    seclabel u:r:adbd:s0</span><br><span class="line">    </span><br><span class="line">service servicemanager /system/bin/servicemanager</span><br><span class="line">    class core</span><br><span class="line">    user system</span><br><span class="line">    group system</span><br><span class="line">    critical</span><br><span class="line">    onrestart restart healthd</span><br><span class="line">    onrestart restart zygote</span><br><span class="line">    onrestart restart media</span><br><span class="line">    onrestart restart surfaceflinger</span><br><span class="line">    onrestart restart drm</span><br><span class="line">    </span><br><span class="line">on late-init</span><br><span class="line">     trigger early-fs</span><br><span class="line">    trigger fs</span><br><span class="line">    trigger post-fs</span><br><span class="line">    trigger late-fs</span><br><span class="line">    trigger post-fs-data</span><br><span class="line">    trigger load<span class="built_in">_</span>persist<span class="built_in">_</span>props<span class="built_in">_</span>action</span><br><span class="line">    // 这里启动zygote-start</span><br><span class="line">    trigger zygote-start</span><br><span class="line">    trigger firmware<span class="built_in">_</span>mounts<span class="built_in">_</span>complete</span><br><span class="line">    trigger early-boot</span><br><span class="line">    trigger boot</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，在解析init.rc的配置中，在late-init阶段启动了Zygote进程。</p>
+<h2 id="Zygote"><a href="#Zygote" class="headerlink" title="Zygote"></a>Zygote</h2><p><img src="/images/android_aosp_power_up11.png" alt="img"></p>
+<p>Zygote进程是Android中所有Java进程的父进程。Zygote进程在Init进程启动过程中被以service服务的形式启动。Zygote进程相关的.rc配置文件为init.zygote64.rc或者init.zygote32.rc。以init.zygote64.rc为例，其内容如下</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// system/core/rootdir/init.zygote64.rc</span><br><span class="line">service zygote /system/bin/app<span class="built_in">_</span>process64 -Xzygote /system/bin --zygote --start-system-server</span><br><span class="line"> class main</span><br><span class="line">   priority -20</span><br><span class="line">   user root</span><br><span class="line">   group root readproc reserved<span class="built_in">_</span>disk</span><br><span class="line">   socket zygote stream 660 root system</span><br><span class="line">   socket usap<span class="built_in">_</span>pool<span class="built_in">_</span>primary stream 660 root system</span><br><span class="line">   onrestart exec<span class="built_in">_</span>background - system system -- /ssystem/bin/vdc volume abort<span class="built_in">_</span>fuse</span><br><span class="line">   onrestart write /sys/power/state on</span><br><span class="line">   onrestart restart audioserver</span><br><span class="line">   onrestart restart cmeraserver</span><br><span class="line">   onrestart restart media</span><br><span class="line">   onrestart restart netd</span><br><span class="line">   onrestart setprop sys.android.reboot 1</span><br><span class="line">   writepid /dev/cpuset/foreground/tasks</span><br><span class="line">   critical window=<span class="built_in">$</span>&#123;zygote.critical<span class="built_in">_</span>window.minute:-off&#125; target=zygote-fatal</span><br></pre></td></tr></table></figure>
+
+<p>init进程解析init.zygote64.rc配置文件之后，会调用app_process</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/cmds/app_process/app_main.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* <span class="keyword">const</span> argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">   <span class="keyword">if</span>(zygote)&#123;</span><br><span class="line">     runtime.<span class="built_in">start</span>(<span class="string">&quot;com.android.internal.os.ZygoteInit&quot;</span>, args, zygote);</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行到frameworks/base/core/jni/AndroidRuntime.cpp的start()方法</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/core/jni/AndroidRuntime.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AndroidRuntime::start</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* className, <span class="keyword">const</span> Vector&lt;String8&gt;&amp; options, <span class="keyword">bool</span> zygote)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">ALOGD</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt; START %s uid %d &lt;&lt;&lt;&lt;&lt;&lt;\n&quot;</span>,class Name！= <span class="literal">NULL</span>？class Name：<span class="string">&quot;(unknown)&quot;</span>, <span class="built_in">getuid</span>() );</span><br><span class="line">    <span class="comment">// 打印LOG_BOOT_PROGRESS_START日志</span></span><br><span class="line">    <span class="built_in">LOG_EVENT_LONG</span>(LOG_BOOT_PROGRESS_START, <span class="built_in">ns2ms</span>(<span class="built_in">systemTime</span>(SYSTEM_TIME_MONOTONIC)));</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">startVm</span>(&amp;mJavaVM, &amp;env, zygote, primaryZygote) != <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">onVmCreated</span>(env);</span><br><span class="line">    <span class="comment">// 调用ZygoteInit类的main()方法</span></span><br><span class="line">    env.<span class="built_in">CallStaticVoidMethod</span>(startClass, startMeth, strArray)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AndroidRuntime.cpp的start方法主要做了以下工作：</p>
+<ul>
+<li>加载libart.so</li>
+<li>启动虚拟机</li>
+<li>加载注册JNI方法</li>
+<li>启动Zygote</li>
+</ul>
+<p>执行ZygoteInit.java的main()方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</span></span><br><span class="line"><span class="meta">@UnsupportedAppUsage</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String argv[])</span> </span>&#123;</span><br><span class="line">    <span class="comment">//zygote进程会fork出system_server进程</span></span><br><span class="line">    <span class="keyword">if</span> (startSystemServer) &#123;</span><br><span class="line">        Runnable r = forkSystemServer(abiList, socketName, zygoteServer);</span><br><span class="line">        <span class="comment">// zygote进程中，r == null；zygote子进程（如system_server进程）中， r != null</span></span><br><span class="line">        <span class="keyword">if</span> (r != <span class="keyword">null</span>) &#123;</span><br><span class="line">          r.run();</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    Log.i(TAG, <span class="string">&quot;Accepting command socket connections&quot;</span>);</span><br><span class="line">    <span class="comment">// zygote进程会在select loop死循环；而非zygote进程中之前已return。</span></span><br><span class="line">    <span class="comment">// loops forever in the zygote.</span></span><br><span class="line">    caller = zygoteServer.runSelectLoop(abiList);</span><br><span class="line">    <span class="keyword">if</span> (caller != <span class="keyword">null</span>) &#123;</span><br><span class="line">        caller.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Zygote进程主要做了以下工作</p>
+<ul>
+<li>加载虚拟机，并为JVM注册JNI方法</li>
+<li>提前加载类PreloadClasses</li>
+<li>提前加载资源PreLoadResouces</li>
+<li>fork system_server</li>
+<li>提前加载类PreloadClasses, 调用runSelectLoop方法，等待进程孵化请求</li>
+</ul>
+<p>zygote进程在fork子进程的时候可以共享虚拟机和资源，从而加快进程的启动速度，节省内存。</p>
+<h2 id="SystemServer"><a href="#SystemServer" class="headerlink" title="SystemServer"></a>SystemServer</h2><p><img src="/images/android_aosp_power_up12.png" alt="img"></p>
+<p>SystemServer进程由Zygote进程fork而来，是Zygote孵化出的第一个进程。SystemServer和Zygote进程是Android Framework层的两大重要进程。SystemServer负责启动和管理整个Java frameWork。SystemServer进程在开启的时候，会初始化AMS、WMS、PMS等关键服务。同时会加载本地系统的服务库，调用createSystemContext()创建系统上下文，创建ActivityThread及开启各种服务等等。</p>
+<p>SystemServer的启动相关代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/java/com/android/server/SystemServer.java</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">new</span> SystemServer().run();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Looper.prepareMainLooper();</span><br><span class="line">        <span class="comment">// 初始化本地服务</span></span><br><span class="line">        System.loadLibrary(<span class="string">&quot;android_servers&quot;</span>);</span><br><span class="line">         <span class="comment">// 初始化系统上下文</span></span><br><span class="line">        createSystemContext();</span><br><span class="line">        <span class="comment">// 创建SystemServiceManager</span></span><br><span class="line">        mSystemServiceManager = <span class="keyword">new</span> SystemServiceManager(mSystemContext);</span><br><span class="line">        mSystemServiceManager.setStartInfo(mRuntimeRestart,</span><br><span class="line">                mRuntimeStartElapsedTime, mRuntimeStartUptime);</span><br><span class="line">        LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);</span><br><span class="line">        <span class="comment">// 构建线程池，以便并行执行一些初始化任务</span></span><br><span class="line">        SystemServerInitThreadPool.get();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        traceEnd();  <span class="comment">// InitBeforeStartServices</span></span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 开启服务</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        traceBeginAndSlog(<span class="string">&quot;StartServices&quot;</span>);</span><br><span class="line">        startBootstrapServices();<span class="comment">// 启动引导服务</span></span><br><span class="line">        startCoreServices();<span class="comment">// 启动核心服务</span></span><br><span class="line">        startOtherServices();<span class="comment">// 启动其他服务</span></span><br><span class="line">        SystemServerInitThreadPool.shutdown();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">        Slog.e(<span class="string">&quot;System&quot;</span>, <span class="string">&quot;******************************************&quot;</span>);</span><br><span class="line">        Slog.e(<span class="string">&quot;System&quot;</span>, <span class="string">&quot;************ Failure starting system services&quot;</span>, ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        traceEnd();</span><br><span class="line">    &#125;</span><br><span class="line">    Looper.loop();</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Main thread loop unexpectedly exited&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，SystemServer最重要的工作就是通过执行三个方法来启动所有服务</p>
+<ul>
+<li>startBootstrapServices();</li>
+<li>startCoreServices();</li>
+<li>startOtherServices();</li>
+</ul>
+<p>分别对应引导服务、核心服务和其他服务：</p>
+<ul>
+<li>引导服务(Bootstrap services)：这类服务包括 Installer，ActivityManagerService<br>PowerManagerService, DisplayManagerService, PackageManagerService, UserManagerService等</li>
+<li>核心服务(Core services )：这类服务包括 LightsService, BatteryService, UsageStatsServtce,<br>WebViewUpdateService等</li>
+<li>其他服务：所有其它服务</li>
+</ul>
+<p>在startOtherServices()方法中会启动SystemUI，之后SystemServer通知AMS系统已准备好，此时AMS启动桌面并且发送BOOT_COMPLETED广播。至此，系统层面启动流程结束。</p>
+<p>通过下图再回顾下整个开机流程</p>
+<p><img src="/images/android_aosp_power_up13.png" alt="img"></p>
+<h1 id="分析开机时间"><a href="#分析开机时间" class="headerlink" title="分析开机时间"></a>分析开机时间</h1><p>要想进行开机速度的优化，我们需要分析开机时间的分布，从而找出异常耗时的地方，从而进行实际的优化工作。下面介绍如何分析开机时间。</p>
+<h2 id="分析开机日志"><a href="#分析开机日志" class="headerlink" title="分析开机日志"></a>分析开机日志</h2><p>Android的log系统是独立于Linux内核log系统的. Android系统把Log分为了四类，不同的类别记录不同的Log信息，默认通过logcat抓取的是main信息：</p>
+<ul>
+<li>main - 主要的Log信息，大部分应用级别的Log信息都在这里</li>
+<li>events - 系统事件相关的Log信息</li>
+<li>radio - 无线/电话相关的Log信息</li>
+<li>system - 低级别的系统调试Log信息<br>通过查看events.txt中搜索”<strong>boot_progress</strong>“关键字或者通过以下命令过滤日志输出</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb logcat -d -v time -b &quot;events&quot; | grep &quot;boot_progress&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/android_aosp_power_up14.png" alt="image"></p>
+<p>行末数字即为此刻距开机时刻的时间间隔。每行代表开机的各个关键阶段。</p>
+<table>
+<thead>
+<tr>
+<th align="left">阶段</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">boot_progress_start</td>
+<td align="left">系统进入用户空间，标志着kernel启动完成</td>
+</tr>
+<tr>
+<td align="left">boot_progress_preload_start</td>
+<td align="left">Zygote启动</td>
+</tr>
+<tr>
+<td align="left">boot_progress_preload_end</td>
+<td align="left">Zygote结束</td>
+</tr>
+<tr>
+<td align="left">boot_progress_system_run</td>
+<td align="left">SystemServer ready,开始启动Android系统服务</td>
+</tr>
+<tr>
+<td align="left">boot_progress_pms_start</td>
+<td align="left">PMS开始扫描安装的应用</td>
+</tr>
+<tr>
+<td align="left">boot_progress_pms_system_scan_start</td>
+<td align="left">PMS先行扫描/system目录下的安装包</td>
+</tr>
+<tr>
+<td align="left">boot_progress_pms_data_scan_start</td>
+<td align="left">PMS扫描/data目录下的安装包</td>
+</tr>
+<tr>
+<td align="left">boot_progress_pms_scan_end</td>
+<td align="left">PMS扫描结束</td>
+</tr>
+<tr>
+<td align="left">boot_progress_pms_ready</td>
+<td align="left">PMS就绪</td>
+</tr>
+<tr>
+<td align="left">boot_progress_ams_ready</td>
+<td align="left">AMS就绪</td>
+</tr>
+<tr>
+<td align="left">boot_progress_enable_screen</td>
+<td align="left">AMS启动完成后开始激活屏幕，从此以后屏幕才能响应用户的触摸，它在WindowManagerService发出退出开机动画的时间节点之前</td>
+</tr>
+<tr>
+<td align="left">sf_stop_bootanim</td>
+<td align="left">SF设置service.bootanim.exit属性值为1，标志系统要结束开机动画了</td>
+</tr>
+<tr>
+<td align="left">wm_boot_animation_done</td>
+<td align="left">开机动画结束，这一步用户能直观感受到开机结束</td>
+</tr>
+</tbody></table>
+<p>各行log对应的打印代码为</p>
+<h2 id="boot-progress-start"><a href="#boot-progress-start" class="headerlink" title="boot_progress_start"></a>boot_progress_start</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/core/jni/AndroidRuntime.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AndroidRuntime::start</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* className, <span class="keyword">const</span> Vector&lt;String8&gt;&amp; options, <span class="keyword">bool</span> zygote)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; options.<span class="built_in">size</span>(); ++i) &#123;</span><br><span class="line">        <span class="keyword">if</span> (options[i] == startSystemServer) &#123;</span><br><span class="line">            primary_zygote = <span class="literal">true</span>;</span><br><span class="line">           <span class="comment">/* track our progress through the boot sequence */</span></span><br><span class="line">           <span class="keyword">const</span> <span class="keyword">int</span> LOG_BOOT_PROGRESS_START = <span class="number">3000</span>;</span><br><span class="line">           <span class="built_in">LOG_EVENT_LONG</span>(LOG_BOOT_PROGRESS_START,  <span class="built_in">ns2ms</span>(<span class="built_in">systemTime</span>(SYSTEM_TIME_MONOTONIC)));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-preload-start"><a href="#boot-progress-preload-start" class="headerlink" title="boot_progress_preload_start"></a>boot_progress_preload_start</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!enableLazyPreload)&#123;</span><br><span class="line">        bootTimingsTraceLog.traceBegin(<span class="string">&quot;ZygotePreload&quot;</span>);</span><br><span class="line">        EventLog.writeEvent(BOOT_PROGRESS_PRELOAD_START, SystemClock.uptimeMillis());</span><br><span class="line">        preload(bootTimingsTraceLog);</span><br><span class="line">        EventLog.writeEvent(BOOT_PROGRESS_PRELOAD_END, SystemClock.uptimeMillis());</span><br><span class="line">        bootTimingsTraceLog.traceEnd();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-system-run"><a href="#boot-progress-system-run" class="headerlink" title="boot_progress_system_run"></a>boot_progress_system_run</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/java/com/android/server/SystemServer.java</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   Slog.i(TAG, <span class="string">&quot;Entered the Android system server!&quot;</span>);</span><br><span class="line">   <span class="keyword">final</span> <span class="keyword">long</span> uptimeMillis = SystemClock.elapsedRealtime();</span><br><span class="line">   EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);</span><br><span class="line">   <span class="keyword">if</span> (!mRuntimeRestart)&#123;</span><br><span class="line">            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,</span><br><span class="line">FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SYSTEM_SERVER_INIT_START,uptimeMillis);</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-pms-start"><a href="#boot-progress-pms-start" class="headerlink" title="boot_progress_pms_start"></a>boot_progress_pms_start</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PackageManagerService</span><span class="params">(Injector injector, <span class="keyword">boolean</span> onlyCore, <span class="keyword">boolean</span> factoryTest)</span> </span>&#123;</span><br><span class="line">    LockGuard.installLock(mLock, LockGuard.INDEX_PACKAGES);</span><br><span class="line">    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,SystemClock.uptimeMillis()</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-pms-system-scan-start"><a href="#boot-progress-pms-system-scan-start" class="headerlink" title="boot_progress_pms_system_scan_start"></a>boot_progress_pms_system_scan_start</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PackageManagerService</span><span class="params">(Injector injector, <span class="keyword">boolean</span> onlyCore, <span class="keyword">boolean</span> factoryTest)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">long</span> startTime = SystemClock.uptimeMillis();</span><br><span class="line">   EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START, startTime);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-pms-data-scan-start"><a href="#boot-progress-pms-data-scan-start" class="headerlink" title="boot_progress_pms_data_scan_start"></a>boot_progress_pms_data_scan_start</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PackageManagerService</span><span class="params">(Injector injector, <span class="keyword">boolean</span> onlyCore, <span class="keyword">boolean</span> factoryTest)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">long</span> systemScanTime = SystemClock.uptimeMillis() - startTime;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> systemPackagesCount = mPackages.size();</span><br><span class="line">    Slog.i(TAG, <span class="string">&quot;Finished scanning system apps. Time: &quot;</span> + systemScanTime</span><br><span class="line">                + <span class="string">&quot; ms, packageCount: &quot;</span> + systemPackagesCount</span><br><span class="line">                + <span class="string">&quot; , timePerPackage: &quot;</span></span><br><span class="line">                + (systemPackagesCount == <span class="number">0</span> ? <span class="number">0</span> : systemScanTime / systemPackagesCount)</span><br><span class="line">                + <span class="string">&quot; , cached: &quot;</span> + cachedSystemApps);</span><br><span class="line">    <span class="keyword">if</span> (mIsUpgrade &amp;&amp; systemPackagesCount &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,                </span><br><span class="line">BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME,</span><br><span class="line"> systemScanTime / systemPackagesCount);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!mOnlyCore) &#123;</span><br><span class="line">        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,</span><br><span class="line">        SystemClock.uptimeMillis());</span><br><span class="line">        scanDirTracedLI(sAppInstallDir, <span class="number">0</span>, scanFlags | SCAN_REQUIRE_KNOWN, <span class="number">0</span>,</span><br><span class="line">                    packageParser, executorService);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-pms-scan-end"><a href="#boot-progress-pms-scan-end" class="headerlink" title="boot_progress_pms_scan_end"></a>boot_progress_pms_scan_end</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="title">PackageManagerService</span><span class="params">(Injector injector, <span class="keyword">boolean</span> onlyCore, <span class="keyword">boolean</span> factoryTest)</span> </span>&#123;</span><br><span class="line">    mPackageUsage.read(mSettings.mPackages);</span><br><span class="line">    mCompilerStats.read();</span><br><span class="line">    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,</span><br><span class="line">                SystemClock.uptimeMillis());</span><br><span class="line">        Slog.i(TAG, <span class="string">&quot;Time to scan packages: &quot;</span></span><br><span class="line">                + ((SystemClock.uptimeMillis()-startTime)/<span class="number">1000f</span>)</span><br><span class="line">                + <span class="string">&quot; seconds&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-pms-ready"><a href="#boot-progress-pms-ready" class="headerlink" title="boot_progress_pms_ready"></a>boot_progress_pms_ready</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="title">PackageManagerService</span><span class="params">(Injector injector, <span class="keyword">boolean</span> onlyCore, <span class="keyword">boolean</span> factoryTest)</span> </span>&#123;</span><br><span class="line">    t.traceBegin(<span class="string">&quot;write settings&quot;</span>);</span><br><span class="line">    mSettings.writeLPr();</span><br><span class="line">    t.traceEnd();</span><br><span class="line">    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY, SystemClock.uptimeMillis());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-ams-ready"><a href="#boot-progress-ams-ready" class="headerlink" title="boot_progress_ams_ready"></a>boot_progress_ams_ready</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">systemReady</span><span class="params">(<span class="keyword">final</span> Runnable goingCallback, <span class="meta">@NonNull</span> TimingsTraceAndSlog t)</span> </span>&#123;</span><br><span class="line">    t.traceEnd();</span><br><span class="line">    EventLog.writeBootProgressAmsReady(SystemClock.uptimeMillis());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="boot-progress-enable-screen"><a href="#boot-progress-enable-screen" class="headerlink" title="boot_progress_enable_screen"></a>boot_progress_enable_screen</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/wm/ActivityTaskManagerService.java</span></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">enableScreenAfterBoot</span><span class="params">(<span class="keyword">boolean</span> booted)</span> </span>&#123;</span><br><span class="line">    writeBootProgressEnableScreen(SystemClock.uptimeMillis());</span><br><span class="line">    mWindowManager.enableScreenAfterBoot();</span><br><span class="line">    <span class="keyword">synchronized</span> (mGlobalLock) &#123;</span><br><span class="line">        updateEventDispatchingLocked(booted);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="sf-stop-bootanim"><a href="#sf-stop-bootanim" class="headerlink" title="sf_stop_bootanim"></a>sf_stop_bootanim</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp</span></span><br><span class="line"><span class="keyword">void</span> SurfaceFlinger::bootFinished()</span><br><span class="line">&#123;</span><br><span class="line">         property_set(<span class="string">&quot;service.bootanim.exit&quot;</span>, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">         LOG_EVENT_LONG(LOGTAG_SF_STOP_BOOTANIM, ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="wm-boot-animation-done"><a href="#wm-boot-animation-done" class="headerlink" title="wm_boot_animation_done"></a>wm_boot_animation_done</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">performEnableScreen</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        EventLogTags.writeWmBootAnimationDone(SystemClock.uptimeMillis());</span><br><span class="line">        Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER,   <span class="string">&quot;Stop bootanim&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以将测试机与对比机抓取的此log数据制作成表格，制作成折线图，可以更加直观的观察到耗时异常的流程。</p>
+<p><img src="/images/android_aosp_power_up15.png" alt="img"></p>
+<p>通过”boot_progress_”关键字分析日志，粒度较大，只能定位出大概的耗时流程，之后还需分析流程内部具体的耗时情况。开机各流程内部也有相应的日志，可以进行更加细致的分析。例如在SystemServiceManager.java类中启动服务时，会打印启动某项服务的日志。通过查看某个服务A与下一个服务的日志时间，可以计算出启动服务A的耗时。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/SystemServiceManager.java</span></span><br><span class="line"><span class="keyword">public</span> &lt;T extends SystemService&gt; <span class="function">T <span class="title">startService</span><span class="params">(Class&lt;T&gt; serviceClass)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> String name = serviceClass.getName();</span><br><span class="line">        Slog.i(TAG, <span class="string">&quot;Starting &quot;</span> + name);</span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, <span class="string">&quot;StartService &quot;</span> + name);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Constructor&lt;T&gt; constructor = serviceClass . getConstructor (Context.class);</span><br><span class="line">            service = constructor.newInstance(mContext);</span><br><span class="line">        &#125; <span class="keyword">catch</span> ...</span><br><span class="line">            startService(service);</span><br><span class="line">        <span class="keyword">return</span> service;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用bootchart工具"><a href="#使用bootchart工具" class="headerlink" title="使用bootchart工具"></a>使用bootchart工具</h2><p>bootchart是一个能对GNU/Linux boot过程进行性能分析并把结果直观化的开源工具，在系统启动过程中自动收集 CPU 占用率、磁盘吞吐率、进程等信息，并以图形方式显示分析结果，可用作指导优化系统启动过程。BootChart包含数据收集工具和图像产生工具，数据收集工具在原始的BootChart中是独立的shell程序，但在Android中，数据收集工具被集成到了init程序中。<br>以下涉及到的命令，请自行应该参数的path。</p>
+<h3 id="抓取bootchart数据"><a href="#抓取bootchart数据" class="headerlink" title="抓取bootchart数据"></a>抓取bootchart数据</h3><p>bootchart开始生成数据的源码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// system/core/init/bootchart.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">do_bootchart_start</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> <span class="comment">// 只要存在/data/bootchart/enabled文件，即抓取bootchart数据</span></span><br><span class="line">   std::string start;</span><br><span class="line">   <span class="keyword">if</span> (!android::base::<span class="built_in">ReadFileToString</span>(<span class="string">&quot;/data/bootchart/enabled&quot;</span>, &amp;start)) &#123;</span><br><span class="line">       <span class="built_in">LOG</span>(VERBOSE) &lt;&lt; <span class="string">&quot;Not bootcharting&quot;</span>;</span><br><span class="line">       <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> &#125;</span><br><span class="line">   g_bootcharting_thread = <span class="keyword">new</span> std::<span class="built_in">thread</span>(bootchart_thread_main);</span><br><span class="line">   <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以只要生成/data/bootchart/enabled文件即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">adb shell touch /data/bootchart/enabled</span><br><span class="line">adb reboot</span><br></pre></td></tr></table></figure>
+
+<p>在设备启动后，提取启动图表：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb  pull /data/bootchart</span><br></pre></td></tr></table></figure>
+
+<p>获取到bootchart数据之后进行打包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -czf bootchart.tgz *</span><br></pre></td></tr></table></figure>
+
+<h3 id="分析数据"><a href="#分析数据" class="headerlink" title="分析数据"></a>分析数据</h3><p>下载Boot Chart包并解压，使用bootchart.jar解析生成的文件输出图片</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar bootchart.jar bootchart.tgz</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/android_aosp_power_up16.png" alt="img"></p>
+<p>从生成的图片可以更加直观详细的看到开机耗时以及硬件使用情况。个人认为，bootchart的分析应该是以PIXEL或者开机速度正常机子的bootchart为参考来对照分析。使用完之后，记得删除enabled文件以防每次开机都收集启动数据。</p>
+<h2 id="抓取boottrace"><a href="#抓取boottrace" class="headerlink" title="抓取boottrace"></a>抓取boottrace</h2><p>抓取开机阶段的trace，也就是boottrace，是一种重要的分析开机的手段。抓取方式如下：</p>
+<ol>
+<li><p>将手机中的atrace.rc拉取下来，并备份；</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb pull /system/etc/init/atrace.rc</span><br></pre></td></tr></table></figure></li>
+<li><p>在文件atrace.rc末尾添加</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">on property:persist.debug.atrace.boottrace=1</span><br><span class="line">   start boottrace</span><br><span class="line">   service boottrace /system/bin/atrace --async<span class="built_in">_</span>start -b 30720 gfx input view webview wm am sm audio video binder<span class="built_in">_</span>lock binder<span class="built_in">_</span>driver camera hal res dalvik rs bionic power pm ss database network adb vibrator aidl sched  </span><br><span class="line">   disabled</span><br><span class="line">   oneshot</span><br></pre></td></tr></table></figure></li>
+<li><p>将修改后的atrace.rc文件push到手机里面</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb push atrace.rc /system/etc/init/</span><br></pre></td></tr></table></figure></li>
+<li><p>打开抓取boottrace的属性开关</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb  shell setprop persist.debug.atrace.boottrace 1</span><br></pre></td></tr></table></figure></li>
+<li><p>重启手机，手机启动完成之后等待几秒，关闭boottrace属性开关</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb  shell setprop persist.debug.atrace.boottrace 0</span><br></pre></td></tr></table></figure></li>
+<li><p>生成boottrace文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell atrace --async_stop -z -c -o /data/local/tmp/boot_trace</span><br></pre></td></tr></table></figure></li>
+<li><p>拉取boottrace日志文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb  pull /data/local/tmp/boot_trace</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>之后就可以通过分析boot_trace文件来分析了。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AOSP/" rel="tag"># AOSP</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/17/android_aosp_car_launcher_introduction/" rel="prev" title="AOSP-CarLauncher介绍">
+                  <i class="fa fa-chevron-left"></i> AOSP-CarLauncher介绍
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/06/android_aosp_android_safe/" rel="next" title="AOSP-Android安全机制SEAndroid/SELinux">
+                  AOSP-Android安全机制SEAndroid/SELinux <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

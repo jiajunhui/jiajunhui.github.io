@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="Widget，小部件是放置在主屏幕（Launcher）上的Android应用程序的小工具或控件。通过小部件可以将自己喜欢的应用程序放在主屏幕上，以便快速访问它们或是显示一些重点信息。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android车载-小组件Widget">
+<meta property="og:url" content="http://example.com/2021/12/17/android_aosp_car_widget/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="Widget，小部件是放置在主屏幕（Launcher）上的Android应用程序的小工具或控件。通过小部件可以将自己喜欢的应用程序放在主屏幕上，以便快速访问它们或是显示一些重点信息。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_widget01.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_widget02.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_widget03.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_car_widget04.png">
+<meta property="article:published_time" content="2021-12-17T14:13:00.000Z">
+<meta property="article:modified_time" content="2023-03-24T13:08:03.004Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="AOSP">
+<meta property="article:tag" content="车载多媒体">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_aosp_car_widget01.png">
+
+
+<link rel="canonical" href="http://example.com/2021/12/17/android_aosp_car_widget/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2021&#x2F;12&#x2F;17&#x2F;android_aosp_car_widget&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;12&#x2F;17&#x2F;android_aosp_car_widget&#x2F;&quot;,&quot;title&quot;:&quot;Android车载-小组件Widget&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android车载-小组件Widget | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AAWidget"><span class="nav-number">1.</span> <span class="nav-text">创建一个Widget</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAWidget%E7%9A%84%E5%B8%83%E5%B1%80"><span class="nav-number">1.1.</span> <span class="nav-text">创建Widget的布局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89Widget%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">定义Widget的属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0AppWidgetProvider"><span class="nav-number">1.3.</span> <span class="nav-text">实现AppWidgetProvider</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A3%B0%E6%98%8EAppWidgetProvider"><span class="nav-number">1.4.</span> <span class="nav-text">声明AppWidgetProvider</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AppWidgetProviderInfo"><span class="nav-number">2.</span> <span class="nav-text">AppWidgetProviderInfo</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%B1%9E%E6%80%A7%E4%B8%8E%E8%AF%B4%E6%98%8E"><span class="nav-number">2.1.</span> <span class="nav-text">常用属性与说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">使用方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AppWidgetProvider"><span class="nav-number">3.</span> <span class="nav-text">AppWidgetProvider</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%B1%9E%E6%80%A7%E4%B8%8E%E8%AF%B4%E6%98%8E"><span class="nav-number">3.1.</span> <span class="nav-text">基本属性与说明</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RemoteViews"><span class="nav-number">4.</span> <span class="nav-text">RemoteViews</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95%E4%B8%8E%E8%AF%B4%E6%98%8E"><span class="nav-number">4.1.</span> <span class="nav-text">常用方法与说明</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Widget%E8%BF%9B%E9%98%B6%E7%94%A8%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">Widget进阶用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%9B%B4%E6%96%B0%E6%96%B9%E6%B3%95"><span class="nav-number">5.1.</span> <span class="nav-text">优化更新方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E6%9B%B4%E6%96%B0"><span class="nav-number">5.1.1.</span> <span class="nav-text">完整更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E5%88%86%E6%9B%B4%E6%96%B0"><span class="nav-number">5.1.2.</span> <span class="nav-text">部分更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E5%90%88%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9B%B4%E6%96%B0"><span class="nav-number">5.1.3.</span> <span class="nav-text">集合数据的更新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%9B%B4%E6%96%B0%E9%A2%91%E7%8E%87"><span class="nav-number">5.2.</span> <span class="nav-text">优化更新频率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E6%9C%9F%E6%9B%B4%E6%96%B0"><span class="nav-number">5.2.1.</span> <span class="nav-text">定期更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%9D%E6%8D%AE%E5%B9%BF%E6%92%AD%E7%9A%84%E6%9B%B4%E6%96%B0"><span class="nav-number">5.2.2.</span> <span class="nav-text">依据广播的更新</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/17/android_aosp_car_widget/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android车载-小组件Widget
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-12-17 22:13:00" itemprop="dateCreated datePublished" datetime="2021-12-17T22:13:00+08:00">2021-12-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android系统开发</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/%E8%BD%A6%E8%81%94%E7%BD%91/" itemprop="url" rel="index"><span itemprop="name">车联网</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Widget，小部件是放置在主屏幕（Launcher）上的Android应用程序的小工具或控件。通过小部件可以将自己喜欢的应用程序放在主屏幕上，以便快速访问它们或是显示一些重点信息。</p>
+<span id="more"></span>
+
+<p>小部件可以是多种类型，例如信息小部件、集合小部件、控件小部件和混合小部件。Android为我们提供了一个完整的框架来开发我们自己的小部件。在手机上我们已经看过一些常见的小部件，例如音乐小部件，天气小部件，时钟小部件等。</p>
+<p>官方对widget的描述：<a target="_blank" rel="noopener" href="https://developer.android.google.cn/guide/topics/appwidgets/overview?hl=zh-cn">https://developer.android.google.cn/guide/topics/appwidgets/overview?hl=zh-cn</a></p>
+<p><img src="/images/android_aosp_car_widget01.png" alt="image"></p>
+<p>由于车载系统需要我们额外开发天气、音乐、时钟等应用，所以Widget在车载应用开发中，也算是必修课了。不仅如此，开发车载Launcher时还需要做额外开发，使Launcher具有摆放Widget的能力。</p>
+<h1 id="创建一个Widget"><a href="#创建一个Widget" class="headerlink" title="创建一个Widget"></a>创建一个Widget</h1><h2 id="创建Widget的布局"><a href="#创建Widget的布局" class="headerlink" title="创建Widget的布局"></a>创建Widget的布局</h2><p><code>simple_widget.xml</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">style</span>=<span class="string">&quot;@style/Widget.CarWidget.AppWidget.Container&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.CarWidget.AppWidgetContainer&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/appwidget_text&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">style</span>=<span class="string">&quot;@style/Widget.CarWidget.AppWidget.InnerView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerHorizontal</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerVertical</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">&quot;8dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:contentDescription</span>=<span class="string">&quot;@string/appwidget_text&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;@string/appwidget_text&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textSize</span>=<span class="string">&quot;24sp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textStyle</span>=<span class="string">&quot;bold|italic&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="定义Widget的属性"><a href="#定义Widget的属性" class="headerlink" title="定义Widget的属性"></a>定义Widget的属性</h2><p>在<code>res/xml</code>下创建一个新的XML，XML文件的资源类型应设置为<code>appwidget-provider</code>用于定义Widget的基本属性。在XML文件中，定义一些属性，如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;? xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;</span><br><span class="line"><span class="tag">&lt;<span class="name">appwidget-provider</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:initialLayout</span>=<span class="string">&quot;@layout/simple_widget&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:minWidth</span>=<span class="string">&quot;100dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:minHeight</span>=<span class="string">&quot;100dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:updatePeriodMillis</span>=<span class="string">&quot;0&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实现AppWidgetProvider"><a href="#实现AppWidgetProvider" class="headerlink" title="实现AppWidgetProvider"></a>实现AppWidgetProvider</h2><p>重写<code>AppWidgetProvider</code>的<code>Updae</code>方法，并在其中调用<code>AppWidgetManager.updateAppWidget()</code>将数据更新到布局<code>RemoteViews</code>中，完整的代码如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleWidget</span> : <span class="type">AppWidgetProvider</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onUpdate</span><span class="params">(context: <span class="type">Context</span>, appWidgetManager: <span class="type">AppWidgetManager</span>, appWidgetIds: <span class="type">IntArray</span></span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (appWidgetId <span class="keyword">in</span> appWidgetIds) &#123;</span><br><span class="line">            updateAppWidget(context, appWidgetManager, appWidgetId)</span><br><span class="line">        &#125;</span><br><span class="line">        Log.e(TAG, <span class="string">&quot;onUpdate: <span class="variable">$appWidgetIds</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">internal</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateAppWidget</span><span class="params">(context: <span class="type">Context</span>,appWidgetManager: <span class="type">AppWidgetManager</span>, appWidgetId: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> widgetText = <span class="string">&quot;TEST&quot;</span></span><br><span class="line">    <span class="keyword">val</span> views = RemoteViews(context.packageName, R.layout.simple_widget)</span><br><span class="line">    views.setTextViewText(R.id.appwidget_text, widgetText)</span><br><span class="line">    <span class="comment">// 更新整个widget</span></span><br><span class="line">    appWidgetManager.updateAppWidget(appWidgetId, views)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="声明AppWidgetProvider"><a href="#声明AppWidgetProvider" class="headerlink" title="声明AppWidgetProvider"></a>声明AppWidgetProvider</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">receiver</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;.SimpleWidget&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.appwidget.action.APPWIDGET_UPDATE&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;android.appwidget.provider&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:resource</span>=<span class="string">&quot;@xml/simple_widget_info&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>运行这个程序，并在Launcher上添加这个Widget，就可以看到一个最简单的Widget了。</p>
+<p>到这一步，我们就完成了Widget的helloworld。总体来说Widget的架构组成如下所示，接下来我们逐个介绍每个组件的作用。</p>
+<p><img src="/images/android_aosp_car_widget02.png" alt="img"></p>
+<h1 id="AppWidgetProviderInfo"><a href="#AppWidgetProviderInfo" class="headerlink" title="AppWidgetProviderInfo"></a>AppWidgetProviderInfo</h1><p><code>AppWidgetProviderInfo</code>用于描述这个Widget的各种基本信息，包括layout布局，刷新频率以及<code>AppWidgetProvider</code>。这些信息都会定义在xml中，tag标记是<code>&lt;appwidget-provider&gt;</code></p>
+<h2 id="常用属性与说明"><a href="#常用属性与说明" class="headerlink" title="常用属性与说明"></a>常用属性与说明</h2><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>updatePeriodMillis</td>
+<td>定义小部件通过调用onUpdate()回调方法从AppWidgetProvider请求更新的频率。实际更新不能保证使用此值准时进行，尽可能不频繁地更新。<strong>updatePeriodMillis不支持小于30分钟的值。如果要禁用定期更新，可以指定为0</strong>小部件的其他更新方式，请参考后面的 《小部件进阶用法 - 优化更新频率》</td>
+</tr>
+<tr>
+<td>initialLayout</td>
+<td>指向定义小部件布局的布局资源。</td>
+</tr>
+<tr>
+<td>initialKeyguardLayout</td>
+<td>指向定义小部件布局的布局资源。</td>
+</tr>
+<tr>
+<td>configure</td>
+<td>定义用户添加小部件时启动的Activity，允许他们配置小部件属性。</td>
+</tr>
+<tr>
+<td>description</td>
+<td>指定要为小部件显示的小部件选择器的描述。 Android 12中引入。</td>
+</tr>
+<tr>
+<td>previewLayout (Android 12)previewImage (Android 11 and lower)</td>
+<td>从Android 12开始，previewLayout属性指定了一个可扩展的预览，您将提供一个设置为小部件默认大小的XML布局。理想情况下，指定为该属性的布局XML应该与具有实际默认值的实际小部件相同。 在Android 11或更低版本中，previewImage属性指定了小部件配置后的预览，用户在选择应用程序小部件时会看到该预览。如果未提供，则用户会看到应用程序的启动器图标。该字段对应于AndroidManifest中<receiver>元素中的android:previewImage属性。 注意：建议同时指定previewImage和previewLayout属性，以便在用户的设备不支持previewLayout的情况下，应用程序可以使用previewImage。</td>
+</tr>
+<tr>
+<td>autoAdvanceViewId</td>
+<td>指定小部件主机应自动推进的小部件子视图的视图ID。 Android 3.0中引入。</td>
+</tr>
+<tr>
+<td>widgetCategory</td>
+<td>声明小部件是否可以显示在主屏幕（home_screen）、锁屏（keyguard）或两者上。只有低于5.0的Android版本支持锁屏小部件。对于Android 5.0及更高版本，只有home_screen有效。</td>
+</tr>
+<tr>
+<td>widgetFeatures</td>
+<td>声明小部件支持的功能。例如，如果您希望小部件在用户添加时使用其默认配置，请指定configuration_optional和reconfigurable 。这绕过了在用户添加小部件后启动配置活动。（之后用户仍然可以重新配置小部件。）</td>
+</tr>
+<tr>
+<td>targetCellWidth、targetCellHeight (Android 12)minWidth、minHeight</td>
+<td>从Android 12开始，targetCellWidth和targetCellHeight属性指定小部件的默认大小（以网格单元为单位）。 在Android 11及更低版本中，这些属性将被忽略，如果主屏幕不支持基于网格的布局，则这些属性可能会被忽略。minWidth和minHeight属性指定dp中小部件的默认大小。如果小部件的最小宽度或高度的值与单元格的尺寸不匹配，则将这些值四舍五入到最接近的单元格大小。 注意：建议同时指定targetCellWidth/targetCellHeight和minWidth/minHeight属性集，以便在用户的设备不支持targetCellWidth和targetCellHeight的情况下，应用程序可以使用minWidth和minHeight。如果支持，targetCellWidth和targetCellHeight属性优先于minWidth和minHeight属性。</td>
+</tr>
+<tr>
+<td>minResizeWidthminResizeHeight</td>
+<td>指定小部件的绝对最小大小。这些值应指定小部件无法辨认或无法使用的大小。使用这些属性，用户可以将小部件的大小调整为可能小于默认小部件大小的大小。如果minResizeWidth属性大于minWidth或未启用水平调整大小，则忽略该属性（请参见resizeMode）。 同样，如果minResizeHeight属性大于minHeight或未启用垂直调整大小，则忽略该属性。 Android 4.0中引入。</td>
+</tr>
+<tr>
+<td>maxResizeWidthmaxResizeHeight</td>
+<td>指定小部件的建议最大大小。如果值不是网格单元尺寸的倍数，则会将其四舍五入到最近的单元尺寸。如果maxResizeWidth属性小于minWidth或未启用水平调整大小，则忽略该属性（请参见resizeMode）。 同样，如果maxResizeHeight属性大于minHeight或未启用垂直调整大小，则忽略该属性。 Android 12中引入。</td>
+</tr>
+<tr>
+<td>resizeMode</td>
+<td>指定可以调整小部件大小的规则。可以使用此属性使主屏幕小部件可以水平、垂直或在两个轴上调整大小。用户长按小部件以显示其大小调整手柄，然后拖动水平和/或垂直手柄以更改其在布局网格上的大小。resizeMode属性的值包括horizontal、vertical和none。 要将小部件声明为可水平和垂直调整大小，请使用horizontal  vertical。 在Android 3.1中引入。</td>
+</tr>
+</tbody></table>
+<p>关于小部件尺寸的计算问题请参考 ： <a target="_blank" rel="noopener" href="https://developer.android.google.cn/develop/ui/views/appwidgets/layouts">Provide flexible widget layouts</a></p>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p><code>AppWidgetProviderInfo</code>需要在res/xml中使用<code>&lt;appwidget-provider/&gt;</code>标记将需要的属性定义出来即可。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;? xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;</span><br><span class="line"><span class="tag">&lt;<span class="name">appwidget-provider</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:configure</span>=<span class="string">&quot;com.android.car.carwidget.SimpleWidgetConfigureActivity&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:description</span>=<span class="string">&quot;@string/app_widget_description&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:initialKeyguardLayout</span>=<span class="string">&quot;@layout/simple_widget&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:initialLayout</span>=<span class="string">&quot;@layout/simple_widget&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:minWidth</span>=<span class="string">&quot;50dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:minHeight</span>=<span class="string">&quot;50dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:previewImage</span>=<span class="string">&quot;@drawable/example_appwidget_preview&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:previewLayout</span>=<span class="string">&quot;@layout/simple_widget&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:resizeMode</span>=<span class="string">&quot;horizontal|vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:targetCellWidth</span>=<span class="string">&quot;2&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:targetCellHeight</span>=<span class="string">&quot;2&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:updatePeriodMillis</span>=<span class="string">&quot;86400000&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:widgetCategory</span>=<span class="string">&quot;home_screen|keyguard&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="AppWidgetProvider"><a href="#AppWidgetProvider" class="headerlink" title="AppWidgetProvider"></a>AppWidgetProvider</h1><p>AppWidgetProvider是Widget的功能提供者，继承自BroadcastReceiver，本质上就是一个广播接收器，AppWidgetProvider也只是在onReceive中解析接收到的intent，并使用接收到的数据调用其他扩展方法。</p>
+<p><img src="/images/android_aosp_car_widget03.png" alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span><span class="params">(Context context, Intent intent)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//防止恶意更新广播（不是真正的安全问题，只是过滤出坏的Broacast，这样子类就不太可能崩溃）。</span></span><br><span class="line">String action = intent.getAction();</span><br><span class="line">    <span class="keyword">if</span> (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) &#123;</span><br><span class="line">        Bundle extras = intent.getExtras();</span><br><span class="line">        <span class="keyword">if</span> (extras != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span>[] appWidgetIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);</span><br><span class="line">            <span class="keyword">if</span> (appWidgetIds != <span class="keyword">null</span> &amp;&amp; appWidgetIds.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">this</span>.onUpdate(context, AppWidgetManager.getInstance(context), appWidgetIds);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) &#123;</span><br><span class="line">        Bundle extras = intent.getExtras();</span><br><span class="line">        <span class="keyword">if</span> (extras != <span class="keyword">null</span> &amp;&amp; extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);</span><br><span class="line">            <span class="keyword">this</span>.onDeleted(context, <span class="keyword">new</span> <span class="keyword">int</span>[] &#123; appWidgetId &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED.equals(action)) &#123;</span><br><span class="line">        Bundle extras = intent.getExtras();</span><br><span class="line">        <span class="keyword">if</span> (extras != <span class="keyword">null</span> &amp;&amp; extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)</span><br><span class="line">                &amp;&amp; extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS)) &#123;</span><br><span class="line">            <span class="keyword">int</span> appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);</span><br><span class="line">            Bundle widgetExtras = extras.getBundle(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS);</span><br><span class="line">            <span class="keyword">this</span>.onAppWidgetOptionsChanged(context, AppWidgetManager.getInstance(context),</span><br><span class="line">                    appWidgetId, widgetExtras);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (AppWidgetManager.ACTION_APPWIDGET_ENABLED.equals(action)) &#123;</span><br><span class="line">        <span class="keyword">this</span>.onEnabled(context);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (AppWidgetManager.ACTION_APPWIDGET_DISABLED.equals(action)) &#123;</span><br><span class="line">        <span class="keyword">this</span>.onDisabled(context);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (AppWidgetManager.ACTION_APPWIDGET_RESTORED.equals(action)) &#123;</span><br><span class="line">        Bundle extras = intent.getExtras();</span><br><span class="line">        <span class="keyword">if</span> (extras != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span>[] oldIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_OLD_IDS);</span><br><span class="line">            <span class="keyword">int</span>[] newIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);</span><br><span class="line">            <span class="keyword">if</span> (oldIds != <span class="keyword">null</span> &amp;&amp; oldIds.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">this</span>.onRestored(context, oldIds, newIds);</span><br><span class="line">                <span class="keyword">this</span>.onUpdate(context, AppWidgetManager.getInstance(context), newIds);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>源码不复杂主要就是完成以下事件的分发逻辑</p>
+<blockquote>
+<p><strong>ACTION_APPWIDGET_UPDATE -&gt; onUpdate</strong></p>
+<p><strong>ACTION_APPWIDGET_DELETED -&gt; onDeleted</strong></p>
+<p><strong>ACTION_APPWIDGET_OPTIONS_CHANGED -&gt; onAppWidgetOptionsChanged</strong></p>
+<p><strong>ACTION_APPWIDGET_ENABLED -&gt; onEnabled</strong></p>
+<p><strong>ACTION_APPWIDGET_DISABLED -&gt; onDisabled</strong></p>
+<p><strong>ACTION_APPWIDGET_RESTORED -&gt; onRestored</strong></p>
+</blockquote>
+<h2 id="基本属性与说明"><a href="#基本属性与说明" class="headerlink" title="基本属性与说明"></a>基本属性与说明</h2><p>该类将BroadcastReceiver扩展为一个方便的类来处理小部件广播。它只接收与小部件相关的事件广播，例如当小部件被更新、删除、启用和禁用时。当这些广播事件发生时，将调用以下方法：</p>
+<ul>
+<li>onUpdate</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onUpdate</span><span class="params">(Context context, AppWidgetManager appWidgetManager, <span class="keyword">int</span>[] appWidgetIds)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果在前面的<code>AppWidgetProviderInfo</code>中定义了<code>updatePeriodMillis</code>，系统会根据这个时间周期性的产生<em>ACTION_APPWIDGET_UPDATE</em>事件。当用户添加widget时也会产生这一事件。</p>
+<p>此方法在用户添加小部件时也会调用，因此它应执行基本设置，例如为 <code>View</code> 对象定义事件处理程序或启动作业以加载要在小部件中显示的数据。但是，如果您声明了一个没有标志的配置活动，则在用户添加小部件时<strong>不会调用此方法</strong>，而是为后续更新调用此方法。配置活动负责在配置完成后执行第一次更新。</p>
+<ul>
+<li>onAppWidgetOptionsChanged</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAppWidgetOptionsChanged</span><span class="params">(Context context, AppWidgetManager appWidgetManager,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">int</span> appWidgetId, Bundle newOptions)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在第一次放置小部件或调整小部件的大小时产生这一事件。使用此回调可以根据小部件的大小范围显示或隐藏内容或者获取大小范围。</p>
+<p>通过<code>AppWidgetManager.getAppWidgetOptions(appWidgetId)</code>可以获取对应WidgetId的Bundle，其中包括以下内容：</p>
+<blockquote>
+<p><strong>OPTION_APPWIDGET_MIN_WIDTH</strong>：包含小部件实例的宽度下限（单位dp）。</p>
+<p><strong>OPTION_APPWIDGET_MIN_HEIGHT</strong>：包含小部件实例高度的下限（单位:dp）。</p>
+<p><strong>OPTION_APPWIDGET_MAX_WIDTH</strong>：包含小部件实例的宽度上限（单位:dp）。</p>
+<p><strong>OPTION_APPWIDGET_MAX_HEIGHT</strong>：包含小部件实例高度的上限（单位:dp）。</p>
+</blockquote>
+<ul>
+<li>onDeleted</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDeleted</span><span class="params">(Context context, <span class="keyword">int</span>[] appWidgetIds)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每次从窗口小部件主机中删除窗口小部件时，都会调用该函数。</p>
+<ul>
+<li>onEnabled</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEnabled</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这在第一次创建小部件的实例时调用。</p>
+<p>例如，如果用户添加了两个小部件实例，则这只是第一次调用。如果您需要打开一个新的数据库或执行另一个只需要对所有小部件实例执行一次的设置，那么这是一个很好的地方。</p>
+<ul>
+<li>onDisabled</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDisabled</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当创建的小部件的最后一个实例从AppWidgetHost中删除时，将调用此函数。</p>
+<ul>
+<li>onRestored</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onRestored</span><span class="params">(Context context, <span class="keyword">int</span>[] oldWidgetIds, <span class="keyword">int</span>[] newWidgetIds)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当AppWidget提供的实例从备份中恢复使调用。此方法调用后，会立即调用onUpdate。</p>
+<p>当需要从持久化数据中恢复Widget时，需要重写此方法将旧的AppWidgetID重新映射到新值，并更新任何其他可能相关的状态。</p>
+<ul>
+<li>onReceive</li>
+</ul>
+<p>这是为每个广播调用的，通常不需要实现此方法。</p>
+<h1 id="RemoteViews"><a href="#RemoteViews" class="headerlink" title="RemoteViews"></a>RemoteViews</h1><p><strong><code>RemoteViews</code>是一个用于描述可在另一个进程中显示的视图层次结构的类。主要用于通知栏和Widget上。</strong></p>
+<p>在定义AppWidgetProviderInfo时需要把Widget的布局文件引入，Widget的布局与传统的Android布局文件一样，保存在项目的<code>res/layout/</code>下。</p>
+<p>但是需要注意的是，Widget的布局基于RemoteViews，与传统的布局方式不同，并不是每种布局或视图Widget都支持。RemoteViews 仅支持以下布局类型：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FrameLayout</span><br><span class="line">LinearLayout</span><br><span class="line">RelativeLayout</span><br><span class="line">GridLayout</span><br></pre></td></tr></table></figure>
+
+<p>以及以下控件类：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">AnalogClock</span><br><span class="line">Button</span><br><span class="line">Chronometer</span><br><span class="line">ImageButton</span><br><span class="line">ImageView</span><br><span class="line">ProgressBar</span><br><span class="line">TextView</span><br><span class="line">ViewFlipper</span><br><span class="line">ListView</span><br><span class="line">GridView</span><br><span class="line">StackView</span><br><span class="line">AdapterViewFlipper</span><br></pre></td></tr></table></figure>
+
+<p>Android 12 之后，支持的控件类增加了三个</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CheckBox</span><br><span class="line">Switch</span><br><span class="line">RadioButton</span><br><span class="line">RadioGroup</span><br></pre></td></tr></table></figure>
+
+<p>RemoteViews 也支持 <code>ViewStub</code>，它是一个大小为零的不可见视图，我们在使用传统布局，进行性能优化时也会经常使用。</p>
+<h2 id="常用方法与说明"><a href="#常用方法与说明" class="headerlink" title="常用方法与说明"></a>常用方法与说明</h2><ul>
+<li>创建 <code>RemoteViews</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RemoteViews(String packageName, int layoutId)创建一个新的 RemoteViews 对象，该对象将显示指定布局文件中包含的视图。</td>
+</tr>
+<tr>
+<td>RemoteViews(String packageName, int layoutId, int viewId)创建一个新的 RemoteViews 对象，该对象将显示指定布局文件中包含的视图，并将根视图的 ID 更改为指定的 id。</td>
+</tr>
+<tr>
+<td>RemoteViews(RemoteViews landscape, RemoteViews portrait)创建一个新的 RemoteViews 对象，该对象将填充为指定的横向或纵向 RemoteViews，具体取决于当前配置。</td>
+</tr>
+<tr>
+<td>RemoteViews(Map&lt;SizeF, RemoteViews&gt; remoteViews)创建一个新的 RemoteViews 对象，该对象将使用最接近的大小规范来膨胀布局。</td>
+</tr>
+<tr>
+<td>RemoteViews(RemoteViews src)基于RemoteViews创建一个副本。</td>
+</tr>
+</tbody></table>
+<ul>
+<li>设定文字</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setTextViewText</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, CharSequence text)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>相当于<code>TextVIew.setText()</code>,<code>setTextViewText</code>内部使用了<code>setCharSequence</code>，所以其实也可以调用<code>setCharSequence</code>来完成设定文字的操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTextViewText</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, CharSequence text)</span> </span>&#123;</span><br><span class="line">    setCharSequence(viewId, <span class="string">&quot;setText&quot;</span>, text);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>设定字体颜色</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setTextColor</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="meta">@ColorInt</span> <span class="keyword">int</span> color)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setInt</span><span class="params">(viewId, <span class="string">&quot;setTextColor&quot;</span>, color)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>设定字体大小</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setTextViewTextSize</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="keyword">int</span> units, <span class="keyword">float</span> size)</span></span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>设定图片</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setImageViewResource</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="meta">@DrawableRes</span> <span class="keyword">int</span> srcId)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setInt</span><span class="params">(viewId, <span class="string">&quot;setImageResource&quot;</span>, srcId)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setImageViewUri</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, Uri uri)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setUri</span><span class="params">(viewId, <span class="string">&quot;setImageURI&quot;</span>, uri)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setImageViewBitmap</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, Bitmap bitmap)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setBitmap</span><span class="params">(viewId, <span class="string">&quot;setImageBitmap&quot;</span>, bitmap)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setImageViewIcon</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, Icon icon)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setIcon</span><span class="params">(viewId, <span class="string">&quot;setImageIcon&quot;</span>, icon)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>设定单个控件的点击事件</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setOnClickPendingIntent</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, PendingIntent pendingIntent)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setOnClickResponse</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="meta">@NonNull</span> RemoteResponse response)</span> </span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> url = <span class="string">&quot;http://www.baidu.com&quot;</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_VIEW)</span><br><span class="line">intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)</span><br><span class="line">intent.<span class="keyword">data</span> = Uri.parse(url)</span><br><span class="line"><span class="keyword">val</span> pending = PendingIntent.getActivity(context, <span class="number">0</span>, intent, PendingIntent.FLAG_MUTABLE)</span><br><span class="line">views.setOnClickPendingIntent(R.id.appwidget_text, pending)</span><br><span class="line"></span><br><span class="line">appWidgetManager.updateAppWidget(appWidgetId, views)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>设定ProgressBar</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setProgressBar</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="keyword">int</span> max, <span class="keyword">int</span> progress,</span></span></span><br><span class="line"><span class="params"><span class="function">       <span class="keyword">boolean</span> indeterminate)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>或者使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">setBoolean(viewId, <span class="string">&quot;setIndeterminate&quot;</span>, indeterminate);</span><br><span class="line"><span class="keyword">if</span> (!indeterminate) &#123;</span><br><span class="line">    setInt(viewId, <span class="string">&quot;setMax&quot;</span>, max);</span><br><span class="line">    setInt(viewId, <span class="string">&quot;setProgress&quot;</span>, progress);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>调整RemoteViews的布局属性</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setViewLayoutMargin</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="meta">@MarginType</span> <span class="keyword">int</span> type, <span class="keyword">float</span> value, <span class="meta">@ComplexDimensionUnit</span> <span class="keyword">int</span> units)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setViewLayoutHeight</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="keyword">float</span> height, <span class="meta">@ComplexDimensionUnit</span> <span class="keyword">int</span> units)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setViewLayoutWidth</span><span class="params">(<span class="meta">@IdRes</span> <span class="keyword">int</span> viewId, <span class="keyword">float</span> width, <span class="meta">@ComplexDimensionUnit</span> <span class="keyword">int</span> units)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>以上就是常用的一些方法，更多API，请参考官方文档：<a target="_blank" rel="noopener" href="https://developer.android.google.cn/reference/android/widget/RemoteViews">RemoteViews  |  Android Developers</a></p>
+<h1 id="Widget进阶用法"><a href="#Widget进阶用法" class="headerlink" title="Widget进阶用法"></a>Widget进阶用法</h1><h2 id="优化更新方法"><a href="#优化更新方法" class="headerlink" title="优化更新方法"></a>优化更新方法</h2><p>在<code>AppWidgetProvider</code>中更新RemoteViews有以下三种不同方式可供选择：</p>
+<h3 id="完整更新"><a href="#完整更新" class="headerlink" title="完整更新"></a>完整更新</h3><p>调用<code>AppWidgetManager.updateAppWidget</code>可以完整更新整个 widget。性能成本最大。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> appWidgetManager = AppWidgetManager.getInstance(context)</span><br><span class="line"><span class="keyword">val</span> views = RemoteViews(context.packageName, R.layout.simple_widget)</span><br><span class="line">views.setTextViewText(R.id.appwidget_text, widgetText)</span><br><span class="line"></span><br><span class="line">appWidgetManager.updateAppWidget(appWidgetId, views)</span><br></pre></td></tr></table></figure>
+
+<h3 id="部分更新"><a href="#部分更新" class="headerlink" title="部分更新"></a>部分更新</h3><p>调用<code>AppWidgetManager.partialupdateAppWidget</code>可以只更新小部件指定的部分。此更新与<code>updateAppWidget</code>的不同之处在于，传递的RemoteViews对象被理解为小部件的不完整表示，因此AppWidgetService不会缓存它。</p>
+<blockquote>
+<p>注意，由于这些更新没有缓存，因此在使用AppWidgetService中的缓存版本还原Widget的情况下，它们修改的任何未由restoreInstanceState还原的状态都不会持久。</p>
+</blockquote>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> appWidgetManager = AppWidgetManager.getInstance(context)</span><br><span class="line"><span class="keyword">val</span> views = RemoteViews(context.packageName, R.layout.simple_widget)</span><br><span class="line">views.setTextViewText(R.id.appwidget_text, widgetText)</span><br><span class="line"></span><br><span class="line">appWidgetManager.partiallyUpdateAppWidget(appWidgetId, views)</span><br></pre></td></tr></table></figure>
+
+<h3 id="集合数据的更新"><a href="#集合数据的更新" class="headerlink" title="集合数据的更新"></a>集合数据的更新</h3><p>在RemoteViews中使用StackView、ListView、GridView时，需要使用<br> <code>AppWidgetManager.notifyAppWidgetViewDataChanged</code>来更新视图的集合数据，这将触发<code>RemoteViewsFactory.onDataSetChanged</code>。在此期间，旧数据将显示在Widget中。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> appWidgetManager = AppWidgetManager.getInstance(context)</span><br><span class="line">appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_listview)</span><br></pre></td></tr></table></figure>
+
+<p>集合Widget专门用于显示许多相同类型的元素，例如来自图库应用程序的图片集合、来自新闻应用程序的文章集合或来自通信应用程序的消息集合。</p>
+<h2 id="优化更新频率"><a href="#优化更新频率" class="headerlink" title="优化更新频率"></a>优化更新频率</h2><h3 id="定期更新"><a href="#定期更新" class="headerlink" title="定期更新"></a>定期更新</h3><p>定期更新Widget很常见，但是<code>updatePeriodMillis</code>不能设定小于30分钟的数值，如果需要小于30分钟定时更新事件，建议搭配<code>WorkManger</code>使用，同时要把<code>updatePeriodMillis</code>设为0，禁用Widget的定期更新。</p>
+<h3 id="依据广播的更新"><a href="#依据广播的更新" class="headerlink" title="依据广播的更新"></a>依据广播的更新</h3><p>在车载HMI的开发中，有时候需要依据广播更新Widget，比较常见的是地图Widget，可选的做法是根据Location广播更新Widget。</p>
+<p>根据广播更新Widget有以下注意事项：</p>
+<p><strong>更新持续时间</strong></p>
+<p>通常，系统允许广播接收器（通常在应用程序的主线程中运行）运行10 秒，然后再将其视为无响应并触发ANR错误。如果更新小组件需要更多时间，需要考虑以下替代方法：</p>
+<ul>
+<li>使用 WorkManager</li>
+<li>使用<code>BroadcastReceiver.``goAsync</code>方法为接收方提供更多时间。这允许接收器执行 30 秒。但是，在此处执行的任何工作都会阻止进一步的广播，直到它完成为止，因此过度利用这一点可能会适得其反，并导致以后的事件接收速度更慢</li>
+</ul>
+<p><strong>更新优先级</strong></p>
+<p>默认情况下，广播作为后台进程运行，这意味着当系统资源紧张时可能会导致广播接收器调用延迟。可以通过将广播设定为前台广播<code>Intent.FLAG_RECEIVER_FOREGROUND</code>，提高广播的优先级。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="/images/android_aosp_car_widget04.png" alt="img"></p>
+<p>最后我们再总结一下Widget的使用方法，<code>&lt;appwidget-provider&gt;</code>用于定义widget的基本属性和初始布局。<code>AppWidgetProvider</code>本质上就是一个广播接收器，我们在<code>AppWidgetProvider</code>中使用<code>RemoteViews</code>显示UI并填充数据，最后使用<code>AppWidgetManger</code>刷新UI。</p>
+<p>在车载Android系统中，虽然Widget的宿主也是Launcher，但是由于Launcher一般是我们自己重新开发的，所以，如何容纳Widget也是需要Launcher的开发者额外开发的，这块的内容比较复杂，建议阅读<a target="_blank" rel="noopener" href="https://developer.android.google.cn/guide/topics/appwidgets/host?hl=zh-cn#java">构建应用Widget宿主</a>，并参考AOSP-Launcher3的源码实现。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AOSP/" rel="tag"># AOSP</a>
+              <a href="/tags/%E8%BD%A6%E8%BD%BD%E5%A4%9A%E5%AA%92%E4%BD%93/" rel="tag"># 车载多媒体</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/10/10/android_aosp_local_media/" rel="prev" title="Android车载多媒体应用LocalMedia">
+                  <i class="fa fa-chevron-left"></i> Android车载多媒体应用LocalMedia
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/02/23/android_aosp_car_service/" rel="next" title="Android车载核心服务-CarService">
+                  Android车载核心服务-CarService <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

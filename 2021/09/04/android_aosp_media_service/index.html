@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="音频和视频多媒体的处理是每个操作系统中必不可少的一部分，多媒体架构的作用是规范了媒体服务和界面的通信接口，达到了完全解耦，可以自由、高效进行不同的媒体的切换。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android车载多媒体架构">
+<meta property="og:url" content="http://example.com/2021/09/04/android_aosp_media_service/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="音频和视频多媒体的处理是每个操作系统中必不可少的一部分，多媒体架构的作用是规范了媒体服务和界面的通信接口，达到了完全解耦，可以自由、高效进行不同的媒体的切换。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_aosp_media_service01.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_media_service02.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_media_service03.png">
+<meta property="article:published_time" content="2021-09-04T14:13:00.000Z">
+<meta property="article:modified_time" content="2023-03-24T08:15:23.762Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="AOSP">
+<meta property="article:tag" content="车载多媒体">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_aosp_media_service01.png">
+
+
+<link rel="canonical" href="http://example.com/2021/09/04/android_aosp_media_service/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2021&#x2F;09&#x2F;04&#x2F;android_aosp_media_service&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;09&#x2F;04&#x2F;android_aosp_media_service&#x2F;&quot;,&quot;title&quot;:&quot;Android车载多媒体架构&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>Android车载多媒体架构 | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MediaSession%E6%A1%86%E6%9E%B6"><span class="nav-number">1.</span> <span class="nav-text">MediaSession框架</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MediaSession"><span class="nav-number">1.1.</span> <span class="nav-text">MediaSession</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AA%92%E4%BD%93%E6%B5%8F%E8%A7%88%E5%99%A8-MediaBrowser"><span class="nav-number">1.1.1.</span> <span class="nav-text">客户端媒体浏览器-MediaBrowser</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MediaBrowser-ConnectionCallback"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">MediaBrowser.ConnectionCallback</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MediaBrowser-ItemCallback"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">MediaBrowser.ItemCallback</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MediaBrowser-MediaItem"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">MediaBrowser.MediaItem</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MediaBrowser-SubscriptionCallback"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">MediaBrowser.SubscriptionCallback</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MediaController"><span class="nav-number">1.2.</span> <span class="nav-text">MediaController</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaController-Callback"><span class="nav-number">1.2.1.</span> <span class="nav-text">MediaController.Callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaController-PlaybackInfo"><span class="nav-number">1.2.2.</span> <span class="nav-text">MediaController.PlaybackInfo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaController-TransportControls"><span class="nav-number">1.2.3.</span> <span class="nav-text">MediaController.TransportControls</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AA%92%E4%BD%93%E6%B5%8F%E8%A7%88%E6%9C%8D%E5%8A%A1-MediaBrowserService"><span class="nav-number">1.3.</span> <span class="nav-text">服务端媒体浏览服务-MediaBrowserService</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowserService-BrowserRoot"><span class="nav-number">1.3.1.</span> <span class="nav-text">MediaBrowserService.BrowserRoot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowserService-Result"><span class="nav-number">1.3.2.</span> <span class="nav-text">MediaBrowserService.Result</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowserService-Result-API-%E5%88%97%E8%A1%A8"><span class="nav-number">1.3.3.</span> <span class="nav-text">MediaBrowserService.Result API 列表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AA%92%E4%BD%93%E4%BC%9A%E8%AF%9D-MediaSession"><span class="nav-number">1.4.</span> <span class="nav-text">服务端媒体会话-MediaSession</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaSession-Callback"><span class="nav-number">1.4.1.</span> <span class="nav-text">MediaSession.Callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaSession-QueueItem"><span class="nav-number">1.4.2.</span> <span class="nav-text">MediaSession.QueueItem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaSession-Token"><span class="nav-number">1.4.3.</span> <span class="nav-text">MediaSession.Token</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%92%AD%E6%94%BE%E5%99%A8%E7%8A%B6%E6%80%81-PlaybackState"><span class="nav-number">1.5.</span> <span class="nav-text">播放器状态-PlaybackState</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PlaybackState-Builder"><span class="nav-number">1.5.1.</span> <span class="nav-text">PlaybackState.Builder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PlaybackState-CustomAction"><span class="nav-number">1.5.2.</span> <span class="nav-text">PlaybackState.CustomAction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PlaybackState-CustomAction-API-%E8%AF%B4%E6%98%8E"><span class="nav-number">1.5.3.</span> <span class="nav-text">PlaybackState.CustomAction API 说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E7%B1%BB-MediaMetadata"><span class="nav-number">1.6.</span> <span class="nav-text">元数据类 - MediaMetadata</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaMetadata-API-%E8%AF%B4%E6%98%8E"><span class="nav-number">1.6.1.</span> <span class="nav-text">MediaMetadata API 说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaMetadata-%E5%B8%B8%E7%94%A8Key"><span class="nav-number">1.6.2.</span> <span class="nav-text">MediaMetadata 常用Key</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MediaSession%E7%AE%80%E5%8D%95%E5%AE%9E%E8%B7%B5"><span class="nav-number">2.</span> <span class="nav-text">MediaSession简单实践</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MediaSession%E7%9B%B8%E5%85%B3API%E5%88%97%E8%A1%A8"><span class="nav-number">3.</span> <span class="nav-text">MediaSession相关API列表</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MediaBrowser-%E7%9B%B8%E5%85%B3%E7%BB%84%E4%BB%B6-API-%E5%88%97%E8%A1%A8"><span class="nav-number">3.1.</span> <span class="nav-text">MediaBrowser 相关组件 API 列表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowser"><span class="nav-number">3.1.1.</span> <span class="nav-text">MediaBrowser</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowser-ConnectionCallback-1"><span class="nav-number">3.1.2.</span> <span class="nav-text">MediaBrowser.ConnectionCallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowser-ItemCallback-1"><span class="nav-number">3.1.3.</span> <span class="nav-text">MediaBrowser. ItemCallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowser-MediaItem-1"><span class="nav-number">3.1.4.</span> <span class="nav-text">MediaBrowser. MediaItem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowser-SubscriptionCallback-1"><span class="nav-number">3.1.5.</span> <span class="nav-text">MediaBrowser.SubscriptionCallback</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MediaController-%E7%9B%B8%E5%85%B3%E7%BB%84%E4%BB%B6-API-%E5%88%97%E8%A1%A8"><span class="nav-number">3.2.</span> <span class="nav-text">MediaController 相关组件 API 列表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaController-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">MediaController</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaController-Callback-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">MediaController.Callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaController-PlaybackInfo-1"><span class="nav-number">3.2.3.</span> <span class="nav-text">MediaController. PlaybackInfo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaController-TransportControls-1"><span class="nav-number">3.2.4.</span> <span class="nav-text">MediaController. TransportControls</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MediaBrowserService-%E7%9B%B8%E5%85%B3%E7%BB%84%E4%BB%B6-API-%E5%88%97%E8%A1%A8"><span class="nav-number">3.3.</span> <span class="nav-text">MediaBrowserService 相关组件 API 列表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowserService"><span class="nav-number">3.3.1.</span> <span class="nav-text">MediaBrowserService</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowserService-BrowserRoot-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">MediaBrowserService.BrowserRoot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaBrowserService-Result-1"><span class="nav-number">3.3.3.</span> <span class="nav-text">MediaBrowserService.Result</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MediaSession-%E7%9B%B8%E5%85%B3%E7%BB%84%E4%BB%B6-API-%E5%88%97%E8%A1%A8"><span class="nav-number">3.4.</span> <span class="nav-text">MediaSession 相关组件 API 列表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaSession-1"><span class="nav-number">3.4.1.</span> <span class="nav-text">MediaSession</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaSession-Callback-1"><span class="nav-number">3.4.2.</span> <span class="nav-text">MediaSession.Callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaSession-QueueItem-1"><span class="nav-number">3.4.3.</span> <span class="nav-text">MediaSession.QueueItem</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PlaybackState-%E7%9B%B8%E5%85%B3%E7%BB%84%E4%BB%B6-API-%E5%88%97%E8%A1%A8"><span class="nav-number">3.5.</span> <span class="nav-text">PlaybackState 相关组件 API 列表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PlaybackState"><span class="nav-number">3.5.1.</span> <span class="nav-text">PlaybackState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PlaybackState-Builder-1"><span class="nav-number">3.5.2.</span> <span class="nav-text">PlaybackState.Builder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PlaybackState-CustomAction-1"><span class="nav-number">3.5.3.</span> <span class="nav-text">PlaybackState.CustomAction</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/04/android_aosp_media_service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android车载多媒体架构
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-04 22:13:00" itemprop="dateCreated datePublished" datetime="2021-09-04T22:13:00+08:00">2021-09-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android系统开发</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/%E8%BD%A6%E8%81%94%E7%BD%91/" itemprop="url" rel="index"><span itemprop="name">车联网</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>音频和视频多媒体的处理是每个操作系统中必不可少的一部分，多媒体架构的作用是规范了媒体服务和界面的通信接口，达到了完全解耦，可以自由、高效进行不同的媒体的切换。</p>
+<span id="more"></span>
+
+<p>播放音频或视频的多媒体应用通常由两部分组成：</p>
+<ul>
+<li>播放器，用于吸收数字媒体并将其呈现为视频和/或音频</li>
+<li>界面，带有用于运行播放器并显示播放器状态（可选）的传输控件</li>
+</ul>
+<p><img src="/images/android_aosp_media_service01.png" alt="ui-and-player"></p>
+<p>在 Android 中，您可以从零开始构建自己的播放器，也可以从以下选项中进行选择：</p>
+<ul>
+<li>MediaPlayer 类提供准系统播放器的基本功能，支持最常见的音频/视频格式和数据源。</li>
+<li>ExoPlayer 是一个提供低层级 Android 音频 API 的开放源代码库。ExoPlayer 支持 DASH 和 HLS 流等高性能功能，这些功能在 <code>MediaPlayer</code> 中未提供。您可以自定义 ExoPlayer 代码，从而轻松添加新组件。ExoPlayer 只能用于 Android 4.1 及更高版本。</li>
+</ul>
+<p>众所周知，如果需要在应用的后台继续播放音频，我们就需要把Player放置在Service中，那么<strong>界面</strong>与<strong>播放器</strong>之间通信就非常值得研究了。很长一段时间里，都是由Service提供一个Binder来实现与<strong>播放器</strong>之间的通信。但是往往<strong>下拉的状态栏</strong>和<strong>桌面的Widget</strong>都需要与Service之间进行通信，这时候Service就不得不通过实现一系列AIDL接口/广播/ContentProvider完成与其它应用之间的通信，而这些通信手段既增加了应用开发者之间的沟通成本，也增加了应用之间的耦合度。</p>
+<p>为了解决上面的问题，Android官方从Android5.0开始提供了<strong>MediaSession</strong>框架。</p>
+<h1 id="MediaSession框架"><a href="#MediaSession框架" class="headerlink" title="MediaSession框架"></a>MediaSession框架</h1><p>虽然界面和播放器采用的 API 可能各不相同，但是对所有媒体播放器应用来说，这两部分之间的交互的性质都基本相同。Android 框架定义了两个类（媒体会话和媒体控制器），它们为构建媒体播放器应用提供了一个完善的结构。</p>
+<p>媒体会话和媒体控制器通过以下方式相互通信：使用与标准播放器操作（播放、暂停、停止等）相对应的预定义回调，以及用于定义应用独有的特殊行为的可扩展自定义调用。</p>
+<p><img src="/images/android_aosp_media_service02.png" alt="controller-and-session"></p>
+<h2 id="MediaSession"><a href="#MediaSession" class="headerlink" title="MediaSession"></a>MediaSession</h2><p>媒体会话负责与播放器的所有通信。它会对应用的其他部分隐藏播放器的 API。系统只能从控制播放器的媒体会话中调用播放器。</p>
+<p>会话会维护播放器状态（播放/暂停）的表示形式以及播放内容的相关信息。会话可以接收来自一个或多个媒体控制器的回调。响应回调的逻辑必须保持一致。无论哪个客户端应用发起了回调，对 <code>MediaSession</code> 回调的响应都应该相同。<strong>MediaSession</strong>框架属于典型的<strong>C/S</strong>架构，有四个常用的成员类，是整个MediaSession框架流程控制的核心。</p>
+<h3 id="客户端媒体浏览器-MediaBrowser"><a href="#客户端媒体浏览器-MediaBrowser" class="headerlink" title="客户端媒体浏览器-MediaBrowser"></a>客户端媒体浏览器-MediaBrowser</h3><p><strong>媒体浏览器</strong>，用来<strong>连接</strong><code>MediaBrowserService</code>和<strong>订阅数据</strong>，通过它的回调接口我们可以获取与<strong>Service</strong>的连接状态以及获取在<strong>Service</strong>中的音乐库数据。在<strong>客户端</strong>（也就是上文我们提到的<strong>界面</strong>，或者说是<strong>控制端</strong>）中创建。<br> <strong>媒体浏览器</strong>不是线程安全的。所有调用都应在构造<code>MediaBrowser</code>的线程上进行。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequiresApi(Build.VERSION_CODES.M)</span></span><br><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">    setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> component = ComponentName(<span class="keyword">this</span>, MediaService::<span class="keyword">class</span>.java)</span><br><span class="line">    mMediaBrowser = MediaBrowser(<span class="keyword">this</span>, component, connectionCallback, <span class="literal">null</span>);</span><br><span class="line">    mMediaBrowser.connect()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="MediaBrowser-ConnectionCallback"><a href="#MediaBrowser-ConnectionCallback" class="headerlink" title="MediaBrowser.ConnectionCallback"></a>MediaBrowser.ConnectionCallback</h4><p>用于接收与<strong>MediaBrowserService</strong>连接事件的回调，在创建<code>MediaBrowser</code>时传入。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequiresApi(Build.VERSION_CODES.M)</span></span><br><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">    setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> component = ComponentName(<span class="keyword">this</span>, MediaService::<span class="keyword">class</span>.java)</span><br><span class="line">    mMediaBrowser = MediaBrowser(<span class="keyword">this</span>, component, connectionCallback, <span class="literal">null</span>);</span><br><span class="line">    mMediaBrowser.connect()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> connectionCallback = <span class="keyword">object</span> : MediaBrowser.ConnectionCallback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnected</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnected()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnectionFailed</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnectionFailed()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnectionSuspended</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnectionSuspended()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="MediaBrowser-ItemCallback"><a href="#MediaBrowser-ItemCallback" class="headerlink" title="MediaBrowser.ItemCallback"></a>MediaBrowser.ItemCallback</h4><p>用于返回MediaBrowser.getItem()的结果。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> connectionCallback = <span class="keyword">object</span> : MediaBrowser.ConnectionCallback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnected</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnected()</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">if</span>(mMediaBrowser.isConnected) &#123;</span><br><span class="line">            <span class="keyword">val</span> mediaId = mMediaBrowser.root</span><br><span class="line">            mMediaBrowser.getItem(mediaId, itemCallback)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RequiresApi(Build.VERSION_CODES.M)</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> itemCallback = <span class="keyword">object</span> : MediaBrowser.ItemCallback()&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onItemLoaded</span><span class="params">(item: <span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onItemLoaded(item)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onError</span><span class="params">(mediaId: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onError(mediaId)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="MediaBrowser-MediaItem"><a href="#MediaBrowser-MediaItem" class="headerlink" title="MediaBrowser.MediaItem"></a>MediaBrowser.MediaItem</h4><p>包含有关单个媒体项的信息，用于浏览/搜索媒体。<code>MediaItem</code>依赖于<strong>服务端</strong>提供，因此框架本身无法保证它包含的值都是正确的。</p>
+<h4 id="MediaBrowser-SubscriptionCallback"><a href="#MediaBrowser-SubscriptionCallback" class="headerlink" title="MediaBrowser.SubscriptionCallback"></a>MediaBrowser.SubscriptionCallback</h4><p>用于订与<strong>MediaBrowserService</strong>中<strong>MediaBrowser.MediaItem</strong>列表变化的回调。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> connectionCallback = <span class="keyword">object</span> : MediaBrowser.ConnectionCallback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnected</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnected()</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">if</span>(mMediaBrowser.isConnected) &#123;</span><br><span class="line">            <span class="keyword">val</span> mediaId = mMediaBrowser.root</span><br><span class="line">            <span class="comment">// 需要先取消订阅</span></span><br><span class="line">            mMediaBrowser.unsubscribe(mediaId)</span><br><span class="line">            <span class="comment">// 服务端会调用onLoadChildren</span></span><br><span class="line">            mMediaBrowser.subscribe(mediaId, subscribeCallback)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> subscribeCallback = <span class="keyword">object</span> : MediaBrowser.SubscriptionCallback()&#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChildrenLoaded</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        parentId: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        children: <span class="type">MutableList</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onChildrenLoaded(parentId, children)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChildrenLoaded</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        parentId: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        children: <span class="type">MutableList</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;,</span></span></span><br><span class="line"><span class="params"><span class="function">        options: <span class="type">Bundle</span></span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onChildrenLoaded(parentId, children, options)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onError</span><span class="params">(parentId: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onError(parentId)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onError</span><span class="params">(parentId: <span class="type">String</span>, options: <span class="type">Bundle</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onError(parentId, options)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="MediaController"><a href="#MediaController" class="headerlink" title="MediaController"></a>MediaController</h2><p>官方解释：</p>
+<blockquote>
+<p>媒体控制器会隔离您的界面。您的界面代码只与媒体控制器（而非播放器本身）通信。媒体控制器会将传输控制操作转换为对媒体会话的回调。每当会话状态发生变化时，它也会接收来自媒体会话的回调。这提供了一种自动更新关联界面的机制。媒体控制器一次只能连接到一个媒体会话。</p>
+<p>当您使用媒体控制器和媒体会话时，您可以在运行时部署不同的接口和/或播放器。您可以根据运行应用的设备的功能单独更改该应用的外观和/或性能。</p>
+</blockquote>
+<p><strong>媒体控制器</strong>，用来向服务端发送控制指令，例如：播放、暂停等等，在客户端中创建。媒体控制器是线程安全的。MediaController还有一个关联的权限***android.permission.MEDIA_CONTENT_CONTROL***（不是必须加的权限）必须是系统级应用才可以获取，幸运的是车载应用一般都是系统级应用。<br> <code>MediaController</code>必须在MediaBrowser连接成功后才可以创建。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> connectionCallback = <span class="keyword">object</span> : MediaBrowser.ConnectionCallback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnected</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnected()</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">if</span>(mMediaBrowser.isConnected) &#123;</span><br><span class="line">            <span class="keyword">val</span> sessionToken = mMediaBrowser.sessionToken</span><br><span class="line">            mMediaController = MediaController(applicationContext,sessionToken)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MediaController-Callback"><a href="#MediaController-Callback" class="headerlink" title="MediaController.Callback"></a>MediaController.Callback</h3><p>用于从MediaSession接收回调。使用方式如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> connectionCallback = <span class="keyword">object</span> : MediaBrowser.ConnectionCallback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnected</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnected()</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">if</span>(mMediaBrowser.isConnected) &#123;</span><br><span class="line">            <span class="keyword">val</span> sessionToken = mMediaBrowser.sessionToken</span><br><span class="line">            mMediaController = MediaController(applicationContext,sessionToken)</span><br><span class="line">            mMediaController.registerCallback(controllerCallback)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> controllerCallback = <span class="keyword">object</span> : MediaController.Callback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onAudioInfoChanged</span><span class="params">(info: <span class="type">MediaController</span>.<span class="type">PlaybackInfo</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onAudioInfoChanged(info)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onExtrasChanged</span><span class="params">(extras: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onExtrasChanged(extras)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MediaController-PlaybackInfo"><a href="#MediaController-PlaybackInfo" class="headerlink" title="MediaController.PlaybackInfo"></a>MediaController.PlaybackInfo</h3><p>保存有关当前播放以及如何处理此会话的音频的信息。使用方式如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取当前回话播放的音频信息</span></span><br><span class="line"><span class="keyword">val</span> playbackInfo = mMediaController.playbackInfo</span><br></pre></td></tr></table></figure>
+
+<h3 id="MediaController-TransportControls"><a href="#MediaController-TransportControls" class="headerlink" title="MediaController.TransportControls"></a>MediaController.TransportControls</h3><p>用于控制会话中媒体播放的接口。这允许客户端向Session发送媒体控制命令。使用方式如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> connectionCallback = <span class="keyword">object</span> : MediaBrowser.ConnectionCallback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnected</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onConnected()</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">if</span>(mMediaBrowser.isConnected) &#123;</span><br><span class="line">            <span class="keyword">val</span> sessionToken = mMediaBrowser.sessionToken</span><br><span class="line">            mMediaController = MediaController(applicationContext,sessionToken)</span><br><span class="line">            <span class="comment">// 播放媒体</span></span><br><span class="line">            mMediaController.transportControls.play()</span><br><span class="line">            <span class="comment">// 暂停媒体</span></span><br><span class="line">            mMediaController.transportControls.pause()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="服务端媒体浏览服务-MediaBrowserService"><a href="#服务端媒体浏览服务-MediaBrowserService" class="headerlink" title="服务端媒体浏览服务-MediaBrowserService"></a>服务端媒体浏览服务-MediaBrowserService</h2><p><strong>媒体浏览器服务</strong>，继承自<code>Service</code>，<code>MediaBrowserService</code>属于<strong>服务端</strong>，也是承载<strong>播放器</strong>（如MediaPlayer、ExoPlayer等）和<code>MediaSession</code>的容器。<br> 实现<code>MediaBrowserService</code>时会要求复写<code>onGetRoot</code>和<code>onLoadChildren</code>两个方法。<br> <code>onGetRoot</code>通过的返回值决定是否允许客户端的<code>MediaBrowser</code>连接到<code>MediaBrowserService</code>。<br> 当客户端调用<code>MediaBrowser.subscribe</code>时会触发<code>onLoadChildren</code>方法。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> FOLDERS_ID = <span class="string">&quot;__FOLDERS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ARTISTS_ID = <span class="string">&quot;__ARTISTS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ALBUMS_ID = <span class="string">&quot;__ALBUMS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> GENRES_ID = <span class="string">&quot;__GENRES__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ROOT_ID = <span class="string">&quot;__ROOT__&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MediaService</span> : <span class="type">MediaBrowserService</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onGetRoot</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        clientPackageName: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        clientUid: <span class="type">Int</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        rootHints: <span class="type">Bundle</span>?</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>: BrowserRoot? &#123;</span><br><span class="line">        <span class="comment">// 由MediaBrowser.connect触发，可以通过返回null拒绝客户端的连接。</span></span><br><span class="line">        <span class="keyword">return</span> BrowserRoot(ROOT_ID, <span class="literal">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onLoadChildren</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        parentId: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        result: <span class="type">Result</span>&lt;<span class="type">MutableList</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;&gt;</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span> &#123;</span><br><span class="line">    <span class="comment">// 由MediaBrowser.subscribe触发</span></span><br><span class="line">        <span class="keyword">when</span> (parentId) &#123;</span><br><span class="line">            ROOT_ID -&gt; &#123;</span><br><span class="line">                <span class="comment">// 查询本地媒体库</span></span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">                <span class="comment">// 将此消息与当前线程分离，并允许稍后进行sendResult调用</span></span><br><span class="line">                result.detach()</span><br><span class="line">                <span class="comment">// 设定到 result 中</span></span><br><span class="line">                result.sendResult()</span><br><span class="line">            &#125;</span><br><span class="line">            FOLDERS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            ALBUMS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            ARTISTS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            GENRES_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后还需要在manifest中注册这个Service。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">service</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;.MediaService&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:label</span>=<span class="string">&quot;@string/service_name&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.media.browse.MediaBrowserService&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="MediaBrowserService-BrowserRoot"><a href="#MediaBrowserService-BrowserRoot" class="headerlink" title="MediaBrowserService.BrowserRoot"></a>MediaBrowserService.BrowserRoot</h3><p>包含<strong>浏览器服务</strong>首次连接时需要返回给<strong>客户端</strong>的信息。</p>
+<p><strong>MediaBrowserService.BrowserRoot API 列表</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bundle getExtras()</td>
+<td>获取有关浏览器服务的附加信息。</td>
+</tr>
+<tr>
+<td>String getRootId()</td>
+<td>获取用于浏览的根 ID。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaBrowserService-Result"><a href="#MediaBrowserService-Result" class="headerlink" title="MediaBrowserService.Result"></a>MediaBrowserService.Result<T></h3><p>包含<strong>浏览器服务</strong>返回给<strong>客户端</strong>的结果集。通过调用<code>sendResult()</code>将结果返回给调用方，但是在此之前需要调用<code>detach()</code>。</p>
+<h3 id="MediaBrowserService-Result-API-列表"><a href="#MediaBrowserService-Result-API-列表" class="headerlink" title="MediaBrowserService.Result API 列表"></a>MediaBrowserService.Result API 列表</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>void detach()</td>
+<td>将此消息与当前线程分离，并允许稍后进行调用sendResult(T)</td>
+</tr>
+<tr>
+<td>void sendResult(T result)</td>
+<td>将结果发送回调用方。</td>
+</tr>
+</tbody></table>
+<h2 id="服务端媒体会话-MediaSession"><a href="#服务端媒体会话-MediaSession" class="headerlink" title="服务端媒体会话-MediaSession"></a>服务端媒体会话-MediaSession</h2><p><strong>媒体会话</strong>，即<strong>受控端。</strong>通过设定<code>MediaSession.Callback</code>回调来接收媒体控制器<code>MediaController</code>发送的指令。<br> 创建<code>MediaSession</code>后还需要调用<code>setSessionToken()</code>方法设置用于和**控制器配对的令牌。使用方式如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> FOLDERS_ID = <span class="string">&quot;__FOLDERS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ARTISTS_ID = <span class="string">&quot;__ARTISTS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ALBUMS_ID = <span class="string">&quot;__ALBUMS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> GENRES_ID = <span class="string">&quot;__GENRES__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ROOT_ID = <span class="string">&quot;__ROOT__&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MediaService</span> : <span class="type">MediaBrowserService</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mediaSession: MediaSession;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        mediaSession = MediaSession(<span class="keyword">this</span>, <span class="string">&quot;TAG&quot;</span>)</span><br><span class="line">        mediaSession.setCallback(callback)</span><br><span class="line">        sessionToken = mediaSession.sessionToken</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 与MediaController.transportControls中的大部分方法都是一一对应的</span></span><br><span class="line">    <span class="comment">// 在该方法中实现对 播放器 的控制，</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> callback = <span class="keyword">object</span> : MediaSession.Callback() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPlay</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onPlay()</span><br><span class="line">            <span class="comment">// 处理 播放器 的播放逻辑。</span></span><br><span class="line">            <span class="comment">// 车载应用的话，别忘了处理音频焦点</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPause</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onPause()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onGetRoot</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        clientPackageName: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        clientUid: <span class="type">Int</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        rootHints: <span class="type">Bundle</span>?</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>: BrowserRoot? &#123;</span><br><span class="line">        Log.e(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onGetRoot: <span class="variable">$rootHints</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> BrowserRoot(ROOT_ID, <span class="literal">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onLoadChildren</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        parentId: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        result: <span class="type">Result</span>&lt;<span class="type">MutableList</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;&gt;</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span> &#123;</span><br><span class="line">        Log.e(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onLoadChildren: <span class="variable">$parentId</span>&quot;</span>)</span><br><span class="line">        result.detach()</span><br><span class="line">        <span class="keyword">when</span> (parentId) &#123;</span><br><span class="line">            ROOT_ID -&gt; &#123;</span><br><span class="line">                result.sendResult(<span class="literal">null</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            FOLDERS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            ALBUMS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            ARTISTS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            GENRES_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onLoadItem</span><span class="params">(itemId: <span class="type">String</span>?, result: <span class="type">Result</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onLoadItem(itemId, result)</span><br><span class="line">        Log.e(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onLoadItem: <span class="variable">$itemId</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MediaSession-Callback"><a href="#MediaSession-Callback" class="headerlink" title="MediaSession.Callback"></a>MediaSession.Callback</h3><p>接收来自控制器和系统的媒体按钮、传输控件和命令。与MediaController.transportControls中的大部分方法都是一一对应的。使用方式如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate()</span><br><span class="line">    mediaSession = MediaSession(<span class="keyword">this</span>, <span class="string">&quot;TAG&quot;</span>)</span><br><span class="line">    mediaSession.setCallback(callback)</span><br><span class="line">    sessionToken = mediaSession.sessionToken</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 与MediaController.transportControls中的方法是一一对应的。</span></span><br><span class="line"><span class="comment">// 在该方法中实现对 播放器 的控制，</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> callback = <span class="keyword">object</span> : MediaSession.Callback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPlay</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onPlay()</span><br><span class="line">        <span class="comment">// 处理 播放器 的播放逻辑。</span></span><br><span class="line">        <span class="comment">// 车载应用的话，别忘了处理音频焦点</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">if</span> (!mediaSession.isActive) &#123;</span><br><span class="line">            mediaSession.isActive = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 更新播放状态.</span></span><br><span class="line">        <span class="keyword">val</span> state = PlaybackState.Builder()</span><br><span class="line">            .setState(</span><br><span class="line">                PlaybackState.STATE_PLAYING,<span class="number">1</span>,<span class="number">1f</span></span><br><span class="line">            )</span><br><span class="line">            .build()</span><br><span class="line">        <span class="comment">// 此时MediaController.Callback.onPlaybackStateChanged会回调</span></span><br><span class="line">        mediaSession.setPlaybackState(state)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPause</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onPause()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onStop</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onStop()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MediaSession-QueueItem"><a href="#MediaSession-QueueItem" class="headerlink" title="MediaSession.QueueItem"></a>MediaSession.QueueItem</h3><p>作为播放队列一部分的单个项目。它包含队列中项目及其 ID 的说明。<br> <strong>MediaSession.QueueItem API 列表</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/guide/topics/media-apps/working-with-a-media-session?hl=zh_cn">MediaDescription</a> getDescription()</td>
+<td>返回介质的说明。包含媒体的基础信息如：标题、封面等等。</td>
+</tr>
+<tr>
+<td>long getQueueId()</td>
+<td>获取此项目的队列 ID。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaSession-Token"><a href="#MediaSession-Token" class="headerlink" title="MediaSession.Token"></a>MediaSession.Token</h3><p>表示正在进行的会话。这可以通过会话所有者传递给<strong>客户端</strong>，以允许客户端与服务端之间建立通信。</p>
+<h2 id="播放器状态-PlaybackState"><a href="#播放器状态-PlaybackState" class="headerlink" title="播放器状态-PlaybackState"></a>播放器状态-PlaybackState</h2><p>用于承载播放状态的类。如当前播放位置和当前控制功能。<br> 在<code>MediaSession.Callback</code>更改状态后需要调用<code>MediaSession.setPlaybackState</code>把状态同步给<strong>客户端</strong>。使用方式如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> callback = <span class="keyword">object</span> : MediaSession.Callback() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPlay</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onPlay()</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="comment">// 更新状态</span></span><br><span class="line">        <span class="keyword">val</span> state = PlaybackState.Builder()</span><br><span class="line">            .setState(</span><br><span class="line">                PlaybackState.STATE_PLAYING,<span class="number">1</span>,<span class="number">1f</span></span><br><span class="line">            )</span><br><span class="line">            .build()</span><br><span class="line">        mediaSession.setPlaybackState(state)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="PlaybackState-Builder"><a href="#PlaybackState-Builder" class="headerlink" title="PlaybackState.Builder"></a>PlaybackState.Builder</h3><p>基于建造者模式来生成PlaybackState对象。使用方式如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PlaybackState state = new PlaybackState.Builder()</span><br><span class="line">        .setState(PlaybackState.STATE_PLAYING,</span><br><span class="line">                mMediaPlayer.getCurrentPosition(), PLAYBACK_SPEED)</span><br><span class="line">        .setActions(PLAYING_ACTIONS)</span><br><span class="line">        .addCustomAction(mShuffle)</span><br><span class="line">        .setActiveQueueItemId(mQueue.<span class="keyword">get</span>(mCurrentQueueIdx).getQueueId())</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+
+<h3 id="PlaybackState-CustomAction"><a href="#PlaybackState-CustomAction" class="headerlink" title="PlaybackState.CustomAction"></a>PlaybackState.CustomAction</h3><p><code>CustomActions</code>可用于通过将特定于应用程序的操作发送给<code>MediaControllers</code>，这样就可以扩展标准传输控件的功能。使用方式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CustomAction action = <span class="keyword">new</span> CustomAction</span><br><span class="line">        .Builder(<span class="string">&quot;android.car.media.localmediaplayer.shuffle&quot;</span>,</span><br><span class="line">        mContext.getString(R.string.shuffle),</span><br><span class="line">        R.drawable.shuffle)</span><br><span class="line">        .build();</span><br><span class="line"></span><br><span class="line">PlaybackState state = <span class="keyword">new</span> PlaybackState.Builder()</span><br><span class="line">        .setState(PlaybackState.STATE_PLAYING,</span><br><span class="line">                mMediaPlayer.getCurrentPosition(), PLAYBACK_SPEED)</span><br><span class="line">        .setActions(PLAYING_ACTIONS)</span><br><span class="line">        .addCustomAction(action)</span><br><span class="line">        .setActiveQueueItemId(mQueue.get(mCurrentQueueIdx).getQueueId())</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+
+<h3 id="PlaybackState-CustomAction-API-说明"><a href="#PlaybackState-CustomAction-API-说明" class="headerlink" title="PlaybackState.CustomAction API 说明"></a>PlaybackState.CustomAction API 说明</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>String getAction()</td>
+<td>返回CustomAction的action。</td>
+</tr>
+<tr>
+<td>Bundle getExtras()</td>
+<td>返回附加项，这些附加项提供有关操作的其他特定于应用程序的信息，如果没有，则返回 null。</td>
+</tr>
+<tr>
+<td>int getIcon()</td>
+<td>返回package中图标的资源 ID。</td>
+</tr>
+<tr>
+<td>CharSequence getName()</td>
+<td>返回此操作的显示名称。</td>
+</tr>
+</tbody></table>
+<h2 id="元数据类-MediaMetadata"><a href="#元数据类-MediaMetadata" class="headerlink" title="元数据类 - MediaMetadata"></a>元数据类 - MediaMetadata</h2><p>包含有关项目的基础数据，例如标题、艺术家等。一般需要<strong>服务端</strong>从本地数据库或远端查询出原始数据在封装成MediaMetadata再通过<code>MediaSession.setMetadata(metadata)</code>返回到<strong>客户端</strong>的<code>MediaController.Callback.onMetadataChanged</code>中。</p>
+<h3 id="MediaMetadata-API-说明"><a href="#MediaMetadata-API-说明" class="headerlink" title="MediaMetadata API 说明"></a>MediaMetadata API 说明</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>boolean containsKey(String key)</td>
+<td>如果给定的key包含在元数据中，则返回 true</td>
+</tr>
+<tr>
+<td>int describeContents()</td>
+<td>描述此可打包实例的封送处理表示中包含的特殊对象的种类。</td>
+</tr>
+<tr>
+<td>Bitmap getBitmap(String key)</td>
+<td>返回给定的key的Bitmap;如果给定key不存在位图，则返回 null。</td>
+</tr>
+<tr>
+<td>int getBitmapDimensionLimit()</td>
+<td>获取创建此元数据时位图的宽度/高度限制（以像素为单位）。</td>
+</tr>
+<tr>
+<td>MediaDescription getDescription()</td>
+<td>获取此元数据的简单说明以进行显示。</td>
+</tr>
+<tr>
+<td>long getLong(String key)</td>
+<td>返回与给定key关联的值，如果给定key不再存在，则返回 0L。</td>
+</tr>
+<tr>
+<td>Rating getRating(String key)</td>
+<td>对于给定的key返回Rating;如果给定key不存在Rating，则返回 null。</td>
+</tr>
+<tr>
+<td>String getString(String key)</td>
+<td>以 String 格式返回与给定key关联的文本值，如果给定key不存在所需类型的映射，或者null值显式与该key关联，则返回 null。</td>
+</tr>
+<tr>
+<td>CharSequence  getText(String key)</td>
+<td>返回与给定键关联的值，如果给定键不存在所需类型的映射，或者与该键显式关联 null 值，则返回 null。</td>
+</tr>
+<tr>
+<td>Set<String> keySet()</td>
+<td>返回一个 Set，其中包含在此元数据中用作key的字符串。</td>
+</tr>
+<tr>
+<td>int size()</td>
+<td>返回此元数据中的字段数。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaMetadata-常用Key"><a href="#MediaMetadata-常用Key" class="headerlink" title="MediaMetadata 常用Key"></a>MediaMetadata 常用Key</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>METADATA_KEY_ALBUM</td>
+<td>媒体的唱片集标题。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_ALBUM_ART</td>
+<td>媒体原始来源的相册的插图，Bitmap格式</td>
+</tr>
+<tr>
+<td>METADATA_KEY_ALBUM_ARTIST</td>
+<td>媒体原始来源的专辑的艺术家。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_ALBUM_ART_URI</td>
+<td>媒体原始源的相册的图稿，Uri格式（推荐使用）</td>
+</tr>
+<tr>
+<td>METADATA_KEY_ART</td>
+<td>媒体封面，Bitmap格式</td>
+</tr>
+<tr>
+<td>METADATA_KEY_ART_URI</td>
+<td>媒体的封面，Uri格式。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_ARTIST</td>
+<td>媒体的艺术家。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_AUTHOR</td>
+<td>媒体的作者。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_BT_FOLDER_TYPE</td>
+<td>蓝牙 AVRCP 1.5 的 6.10.2.2 节中指定的媒体的蓝牙文件夹类型。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_COMPILATION</td>
+<td>媒体的编译状态。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_COMPOSER</td>
+<td>媒体的作曲家。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DATE</td>
+<td>媒体的创建或发布日期。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DISC_NUMBER</td>
+<td>介质原始来源的光盘编号。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DISPLAY_DESCRIPTION</td>
+<td>适合向用户显示的说明。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DISPLAY_ICON</td>
+<td>适合向用户显示的图标或缩略图。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DISPLAY_ICON_URI</td>
+<td>适合向用户显示的图标或缩略图， Uri格式。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DISPLAY_SUBTITLE</td>
+<td>适合向用户显示的副标题。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DISPLAY_TITLE</td>
+<td>适合向用户显示的标题。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_DURATION</td>
+<td>媒体的持续时间（以毫秒为单位）。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_GENRE</td>
+<td>媒体的流派。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_MEDIA_ID</td>
+<td>用于标识内容的字符串Key。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_MEDIA_URI</td>
+<td>媒体内容，Uri格式。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_NUM_TRACKS</td>
+<td>媒体原始源中的曲目数。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_RATING</td>
+<td>媒体的总体评分。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_TITLE</td>
+<td>媒体的标题。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_TRACK_NUMBER</td>
+<td>媒体的磁道编号。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_USER_RATING</td>
+<td>用户对媒体的分级。</td>
+</tr>
+<tr>
+<td>METADATA_KEY_WRITER</td>
+<td>媒体作家。</td>
+</tr>
+<tr>
+<td>String METADATA_KEY_YEAR</td>
+<td>媒体创建或发布为长的年份。</td>
+</tr>
+</tbody></table>
+<h1 id="MediaSession简单实践"><a href="#MediaSession简单实践" class="headerlink" title="MediaSession简单实践"></a>MediaSession简单实践</h1><p>MediaSession 框架核心类通信过程如下图所示。</p>
+<p><img src="/images/android_aosp_media_service03.png" alt="img"></p>
+<p>客户端源码如下所示：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMediaBrowser: MediaBrowser</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMediaController: MediaController</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequiresApi(Build.VERSION_CODES.M)</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> component = ComponentName(<span class="keyword">this</span>, MediaService::<span class="keyword">class</span>.java)</span><br><span class="line">        mMediaBrowser = MediaBrowser(<span class="keyword">this</span>, component, connectionCallback, <span class="literal">null</span>);</span><br><span class="line">        <span class="comment">// 连接到MediaBrowserService，会触发MediaBrowserService的onGetRoot方法。</span></span><br><span class="line">        mMediaBrowser.connect()</span><br><span class="line"></span><br><span class="line">        findViewById&lt;Button&gt;(R.id.btn_play).setOnClickListener &#123;</span><br><span class="line">            mMediaController.transportControls.play()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> connectionCallback = <span class="keyword">object</span> : MediaBrowser.ConnectionCallback() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onConnected</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onConnected()</span><br><span class="line">            <span class="keyword">if</span> (mMediaBrowser.isConnected) &#123;</span><br><span class="line">                <span class="keyword">val</span> sessionToken = mMediaBrowser.sessionToken</span><br><span class="line">                mMediaController = MediaController(applicationContext, sessionToken)</span><br><span class="line">                mMediaController.registerCallback(controllerCallback)</span><br><span class="line">                <span class="comment">// 获取根mediaId</span></span><br><span class="line">                <span class="keyword">val</span> rootMediaId = mMediaBrowser.root</span><br><span class="line">                <span class="comment">// 获取根mediaId的item列表，会触发MediaBrowserService.onLoadItem方法</span></span><br><span class="line">                mMediaBrowser.getItem(rootMediaId,itemCallback)</span><br><span class="line">                mMediaBrowser.unsubscribe(rootMediaId)</span><br><span class="line">                <span class="comment">// 订阅服务端 media item的改变，会触发MediaBrowserService.onLoadChildren方法</span></span><br><span class="line">                mMediaBrowser.subscribe(rootMediaId, subscribeCallback)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> controllerCallback = <span class="keyword">object</span> : MediaController.Callback() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPlaybackStateChanged</span><span class="params">(state: <span class="type">PlaybackState</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onPlaybackStateChanged(state)</span><br><span class="line">            Log.d(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onPlaybackStateChanged: <span class="variable">$state</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">when</span>(state?.state)&#123;</span><br><span class="line">                PlaybackState.STATE_PLAYING -&gt;&#123;</span><br><span class="line">                    <span class="comment">// 处理UI</span></span><br><span class="line">                &#125;</span><br><span class="line">                PlaybackState.STATE_PAUSED -&gt;&#123;</span><br><span class="line">                    <span class="comment">// 处理UI</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 还有其它状态需要处理</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 音频信息，音量</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onAudioInfoChanged</span><span class="params">(info: <span class="type">MediaController</span>.<span class="type">PlaybackInfo</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onAudioInfoChanged(info)</span><br><span class="line">            <span class="keyword">val</span> currentVolume = info?.currentVolume</span><br><span class="line">            <span class="comment">// 显示在UI上</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMetadataChanged</span><span class="params">(metadata: <span class="type">MediaMetadata</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onMetadataChanged(metadata)</span><br><span class="line">            <span class="keyword">val</span> artUri = metadata?.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI)</span><br><span class="line">            <span class="comment">// 显示UI上</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onSessionEvent</span><span class="params">(event: <span class="type">String</span>, extras: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onSessionEvent(event, extras)</span><br><span class="line">            Log.d(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onSessionEvent: <span class="variable">$event</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> subscribeCallback = <span class="keyword">object</span> : MediaBrowser.SubscriptionCallback() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChildrenLoaded</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">            parentId: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">            children: <span class="type">MutableList</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;</span></span></span><br><span class="line"><span class="params"><span class="function">        )</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onChildrenLoaded(parentId, children)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChildrenLoaded</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">            parentId: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">            children: <span class="type">MutableList</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;,</span></span></span><br><span class="line"><span class="params"><span class="function">            options: <span class="type">Bundle</span></span></span></span><br><span class="line"><span class="params"><span class="function">        )</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onChildrenLoaded(parentId, children, options)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onError</span><span class="params">(parentId: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onError(parentId)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> itemCallback = <span class="keyword">object</span> : MediaBrowser.ItemCallback() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onItemLoaded</span><span class="params">(item: <span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onItemLoaded(item)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onError</span><span class="params">(mediaId: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onError(mediaId)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>服务端源码如下所示：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> FOLDERS_ID = <span class="string">&quot;__FOLDERS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ARTISTS_ID = <span class="string">&quot;__ARTISTS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ALBUMS_ID = <span class="string">&quot;__ALBUMS__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> GENRES_ID = <span class="string">&quot;__GENRES__&quot;</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> ROOT_ID = <span class="string">&quot;__ROOT__&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MediaService</span> : <span class="type">MediaBrowserService</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 控制是否允许客户端连接，并返回root media id给客户端</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onGetRoot</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        clientPackageName: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        clientUid: <span class="type">Int</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        rootHints: <span class="type">Bundle</span>?</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>: BrowserRoot? &#123;</span><br><span class="line">        Log.e(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onGetRoot: <span class="variable">$rootHints</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> BrowserRoot(ROOT_ID, <span class="literal">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理客户端的订阅信息</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onLoadChildren</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        parentId: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        result: <span class="type">Result</span>&lt;<span class="type">MutableList</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;&gt;</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span> &#123;</span><br><span class="line">        Log.e(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onLoadChildren: <span class="variable">$parentId</span>&quot;</span>)</span><br><span class="line">        result.detach()</span><br><span class="line">        <span class="keyword">when</span> (parentId) &#123;</span><br><span class="line">            ROOT_ID -&gt; &#123;</span><br><span class="line">                result.sendResult(<span class="literal">null</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            FOLDERS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            ALBUMS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            ARTISTS_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            GENRES_ID -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onLoadItem</span><span class="params">(itemId: <span class="type">String</span>?, result: <span class="type">Result</span>&lt;<span class="type">MediaBrowser</span>.<span class="type">MediaItem</span>&gt;?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onLoadItem(itemId, result)</span><br><span class="line">        Log.e(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onLoadItem: <span class="variable">$itemId</span>&quot;</span>)</span><br><span class="line">        <span class="comment">// 根据itemId，返回对用MediaItem</span></span><br><span class="line">        result?.detach()</span><br><span class="line">        result?.sendResult(<span class="literal">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mediaSession: MediaSession;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        mediaSession = MediaSession(<span class="keyword">this</span>, <span class="string">&quot;TAG&quot;</span>)</span><br><span class="line">        mediaSession.setCallback(callback)</span><br><span class="line">        <span class="comment">// 设置token</span></span><br><span class="line">        sessionToken = mediaSession.sessionToken</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 与MediaController.transportControls中的方法是一一对应的。</span></span><br><span class="line">    <span class="comment">// 在该方法中实现对 播放器 的控制，</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> callback = <span class="keyword">object</span> : MediaSession.Callback() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPlay</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onPlay()</span><br><span class="line">            <span class="comment">// 处理 播放器 的播放逻辑。</span></span><br><span class="line">            <span class="comment">// 车载应用的话，别忘了处理音频焦点</span></span><br><span class="line">            Log.e(<span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;onPlay:&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> (!mediaSession.isActive) &#123;</span><br><span class="line">                mediaSession.isActive = <span class="literal">true</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 更新状态</span></span><br><span class="line">            <span class="keyword">val</span> state = PlaybackState.Builder()</span><br><span class="line">                .setState(</span><br><span class="line">                    PlaybackState.STATE_PLAYING, <span class="number">1</span>, <span class="number">1f</span></span><br><span class="line">                )</span><br><span class="line">                .build()</span><br><span class="line">            mediaSession.setPlaybackState(state)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onPause</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onPause()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onStop</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.onStop()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 还有其它方法需要复写</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述的代码只是帮助理解MediaSession框架的通信过程，本身的功能非常的简陋。</p>
+<h1 id="MediaSession相关API列表"><a href="#MediaSession相关API列表" class="headerlink" title="MediaSession相关API列表"></a>MediaSession相关API列表</h1><h2 id="MediaBrowser-相关组件-API-列表"><a href="#MediaBrowser-相关组件-API-列表" class="headerlink" title="MediaBrowser 相关组件 API 列表"></a>MediaBrowser 相关组件 API 列表</h2><h3 id="MediaBrowser"><a href="#MediaBrowser" class="headerlink" title="MediaBrowser"></a>MediaBrowser</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>void connect()</td>
+<td>连接到媒体浏览器服务。</td>
+</tr>
+<tr>
+<td>void disconnect()</td>
+<td>断开与媒体浏览器服务的连接。</td>
+</tr>
+<tr>
+<td>Bundle getExtras()</td>
+<td>获取介质服务的任何附加信息。</td>
+</tr>
+<tr>
+<td>void getItem(String mediaId, MediaBrowser.ItemCallback cb)</td>
+<td>从连接的服务中检索特定的MediaItem</td>
+</tr>
+<tr>
+<td>String getRoot()</td>
+<td>获取根ID。</td>
+</tr>
+<tr>
+<td>ComponentName getServiceComponent()</td>
+<td>获取媒体浏览器连接到的服务组件。</td>
+</tr>
+<tr>
+<td>MediaSession.Token getSessionToken()</td>
+<td>获取与媒体浏览器关联的媒体会话Token。</td>
+</tr>
+<tr>
+<td>boolean isConnected()</td>
+<td>返回浏览器是否连接到服务。</td>
+</tr>
+<tr>
+<td>void subscribe(String parentId,Bundle options, MediaBrowser.SubscriptionCallback callback)</td>
+<td>使用特定于服务的参数进行查询，以获取有关指定 ID 中包含的媒体项的信息，并订阅以在更新更改时接收更新。</td>
+</tr>
+<tr>
+<td>void subscribe(String parentId, MediaBrowser.SubscriptionCallback callback)</td>
+<td>询有关包含在指定 ID 中的媒体项的信息，并订阅以在更改时接收更新。</td>
+</tr>
+<tr>
+<td>void unsubscribe(String parentId)</td>
+<td>取消订阅指定媒体 ID 。</td>
+</tr>
+<tr>
+<td>void unsubscribe(String parentId, MediaBrowser.SubscriptionCallback callback)</td>
+<td>通过回调取消订阅对指定媒体 ID。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaBrowser-ConnectionCallback-1"><a href="#MediaBrowser-ConnectionCallback-1" class="headerlink" title="MediaBrowser.ConnectionCallback"></a>MediaBrowser.ConnectionCallback</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>onConnected()</td>
+<td>与MediaBrowserService连接成功。在调用<code>MediaBrowser.connect()</code>后才会有回调。</td>
+</tr>
+<tr>
+<td>onConnectionFailed()</td>
+<td>与MediaBrowserService连接失败。</td>
+</tr>
+<tr>
+<td>onConnectionSuspended()</td>
+<td>与MediaBrowserService连接断开。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaBrowser-ItemCallback-1"><a href="#MediaBrowser-ItemCallback-1" class="headerlink" title="MediaBrowser. ItemCallback"></a>MediaBrowser. ItemCallback</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>onError(String mediaId)</td>
+<td>检索时出错，或者连接的服务不支持时回调。</td>
+</tr>
+<tr>
+<td>onItemLoaded(MediaBrowser.MediaItem item)</td>
+<td>返回Item时调用。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaBrowser-MediaItem-1"><a href="#MediaBrowser-MediaItem-1" class="headerlink" title="MediaBrowser. MediaItem"></a>MediaBrowser. MediaItem</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>int describeContents()</td>
+<td>描述此可打包实例的封送处理表示中包含的特殊对象的种类。</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/reference/android/media/MediaDescription">MediaDescription</a> getDescription()</td>
+<td>获取介质的说明。包含媒体的基础信息如：标题、封面等等。</td>
+</tr>
+<tr>
+<td>int getFlags()</td>
+<td>获取项的标志。<code>FLAG_BROWSABLE</code>：表示Item具有自己的子项。<code>FLAG_PLAYABLE</code>：表示Item可播放</td>
+</tr>
+<tr>
+<td>String getMediaId()</td>
+<td>返回此项的媒体 ID。</td>
+</tr>
+<tr>
+<td>boolean isBrowsable()</td>
+<td>返回此项目是否可浏览。</td>
+</tr>
+<tr>
+<td>boolean isPlayable()</td>
+<td>返回此项是否可播放。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaBrowser-SubscriptionCallback-1"><a href="#MediaBrowser-SubscriptionCallback-1" class="headerlink" title="MediaBrowser.SubscriptionCallback"></a>MediaBrowser.SubscriptionCallback</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>onChildrenLoaded(String parentId, List&lt;MediaBrowser.MediaItem&gt; children)</td>
+<td>在加载或更新子项列表时回调。</td>
+</tr>
+<tr>
+<td>onChildrenLoaded(String parentId, List&lt;MediaBrowser.MediaItem&gt; children,Bundle options)</td>
+<td>在加载或更新子项列表时回调。</td>
+</tr>
+<tr>
+<td>onError(String parentId)</td>
+<td>当 ID 不存在或订阅时出现其他错误时回调。</td>
+</tr>
+<tr>
+<td>onError(String parentId, Bundle options)</td>
+<td>当 ID 不存在或订阅时出现其他错误时回调。</td>
+</tr>
+</tbody></table>
+<h2 id="MediaController-相关组件-API-列表"><a href="#MediaController-相关组件-API-列表" class="headerlink" title="MediaController 相关组件 API 列表"></a>MediaController 相关组件 API 列表</h2><h3 id="MediaController-1"><a href="#MediaController-1" class="headerlink" title="MediaController"></a>MediaController</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>void adjustVolume (int direction, int flags)</td>
+<td>调整此会话正在播放的输出的音量。</td>
+</tr>
+<tr>
+<td>boolean dispatchMediaButtonEvent (KeyEvent keyEvent)</td>
+<td>将指定的媒体按钮事件发送到会话。</td>
+</tr>
+<tr>
+<td>Bundle getExtras()</td>
+<td>获取此会话的附加内容。</td>
+</tr>
+<tr>
+<td>long getFlags()</td>
+<td>获取此会话的标志。</td>
+</tr>
+<tr>
+<td>MediaMetadata getMetadata()</td>
+<td>获取此会话的当前Metadata。</td>
+</tr>
+<tr>
+<td>String getPackageName()</td>
+<td>获取会话所有者的程序包名称。</td>
+</tr>
+<tr>
+<td>MediaController.PlaybackInfo getPlaybackInfo()</td>
+<td>获取此会话的当前播放信息。</td>
+</tr>
+<tr>
+<td>PlaybackState getPlaybackState()</td>
+<td>获取此会话的当前播放状态。</td>
+</tr>
+<tr>
+<td>List&lt;MediaSession.QueueItem&gt; getQueue()</td>
+<td>获取此会话的当前播放队列（如果已设置）。</td>
+</tr>
+<tr>
+<td>CharSequence getQueueTitle()</td>
+<td>获取此会话的队列标题。</td>
+</tr>
+<tr>
+<td>int getRatingType()</td>
+<td>获取会话支持的评级类型。</td>
+</tr>
+<tr>
+<td>PendingIntent getSessionActivity()</td>
+<td>获取启动与此会话关联的 UI 的意图（如果存在）。</td>
+</tr>
+<tr>
+<td>Bundle getSessionInfo()</td>
+<td>获取创建会话时设置的其他会话信息。</td>
+</tr>
+<tr>
+<td>MediaSession.Token getSessionToken()</td>
+<td>获取连接到的会话的令牌。</td>
+</tr>
+<tr>
+<td>String getTag()</td>
+<td>获取会话的标记以进行调试。</td>
+</tr>
+<tr>
+<td>MediaController.TransportControls getTransportControls()</td>
+<td>获取TransportControls实例以将控制操作发送到关联的会话。</td>
+</tr>
+<tr>
+<td>void registerCallback (MediaController.Callback callback, Handler handler)</td>
+<td>注册回调以从会话接收更新。</td>
+</tr>
+<tr>
+<td>void registerCallback (MediaController.Callback callback)</td>
+<td>注册回调以从会话接收更新。</td>
+</tr>
+<tr>
+<td>void sendCommand (String command, Bundle args, ResultReceiver cb)</td>
+<td>向会话发送通用命令。</td>
+</tr>
+<tr>
+<td>void setVolumeTo (int value, int flags)</td>
+<td>设置此会话正在播放的输出的音量。</td>
+</tr>
+<tr>
+<td>void unregisterCallback (MediaController.Callback callback)</td>
+<td>注销指定的回调。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaController-Callback-1"><a href="#MediaController-Callback-1" class="headerlink" title="MediaController.Callback"></a>MediaController.Callback</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>void onAudioInfoChanged (MediaController.PlaybackInfo info)</td>
+<td>当前音频信息发生改变。</td>
+</tr>
+<tr>
+<td>void onExtrasChanged (Bundle extras)</td>
+<td>当前附加内容发生改变。</td>
+</tr>
+<tr>
+<td>void onMetadataChanged (MediaMetadata metadata)</td>
+<td>当前Metadata发生改变。</td>
+</tr>
+<tr>
+<td>void onPlaybackStateChanged(PlaybackState state)</td>
+<td>当前播放状态发生改变。客户端通过该回调来显示界面上音视频的播放状态。</td>
+</tr>
+<tr>
+<td>void onQueueChanged (List&lt;MediaSession.QueueItem&gt; queue)</td>
+<td>当前队列中项目发生改变。</td>
+</tr>
+<tr>
+<td>void onQueueTitleChanged (CharSequence title)</td>
+<td>当前队列标题发生改变。</td>
+</tr>
+<tr>
+<td>void onSessionDestroyed()</td>
+<td>会话销毁。</td>
+</tr>
+<tr>
+<td>void onSessionEvent (String event, Bundle extras)</td>
+<td>MediaSession所有者发送的自定义事件。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaController-PlaybackInfo-1"><a href="#MediaController-PlaybackInfo-1" class="headerlink" title="MediaController. PlaybackInfo"></a>MediaController. PlaybackInfo</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AudioAttributes getAudioAttributes()</td>
+<td>获取此会话的音频属性。</td>
+</tr>
+<tr>
+<td>int getCurrentVolume()</td>
+<td>获取此会话的当前音量。</td>
+</tr>
+<tr>
+<td>int getMaxVolume()</td>
+<td>获取可为此会话设置的最大音量。</td>
+</tr>
+<tr>
+<td>int getPlaybackType()</td>
+<td>获取影响音量处理的播放类型。</td>
+</tr>
+<tr>
+<td>int getVolumeControl()</td>
+<td>获取可以使用的音量控件的类型。</td>
+</tr>
+<tr>
+<td>String getVolumeControlId()</td>
+<td>获取此会话的音量控制 ID。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaController-TransportControls-1"><a href="#MediaController-TransportControls-1" class="headerlink" title="MediaController. TransportControls"></a>MediaController. TransportControls</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>void fastForward()</td>
+<td>开始快进。</td>
+</tr>
+<tr>
+<td>void pause()</td>
+<td>请求播放器暂停播放并保持在当前位置。</td>
+</tr>
+<tr>
+<td>void play()</td>
+<td>请求播放器在其当前位置开始播放。</td>
+</tr>
+<tr>
+<td>void playFromMediaId (String mediaId, Bundle extras)</td>
+<td>请求播放器开始播放特定媒体 ID。</td>
+</tr>
+<tr>
+<td>void playFromSearch (String query, Bundle extras)</td>
+<td>请求播放器开始播放特定的搜索查询。</td>
+</tr>
+<tr>
+<td>void playFromUri (Uri uri, Bundle extras)</td>
+<td>请求播放器开始播放特定Uri。</td>
+</tr>
+<tr>
+<td>void prepare()</td>
+<td>请求播放器准备播放。</td>
+</tr>
+<tr>
+<td>void prepareFromMediaId (String mediaId, Bundle extras)</td>
+<td>请求播放器为特定媒体 ID 准备播放。</td>
+</tr>
+<tr>
+<td>void prepareFromSearch (String query, Bundle extras)</td>
+<td>请求播放器为特定搜索查询准备播放。</td>
+</tr>
+<tr>
+<td>void prepareFromUri (Uri uri, Bundle extras)</td>
+<td>请求播放器为特定Uri。</td>
+</tr>
+<tr>
+<td>void rewind()</td>
+<td>开始倒带。</td>
+</tr>
+<tr>
+<td>void seekTo(long pos)</td>
+<td>移动到媒体流中的新位置。</td>
+</tr>
+<tr>
+<td>void sendCustomAction (PlaybackState.CustomAction customAction, Bundle args)</td>
+<td>发送自定义操作以供MediaSession执行。</td>
+</tr>
+<tr>
+<td>void sendCustomAction (String action,Bundle args)</td>
+<td>将自定义操作中的 id 和 args 发送回去，以便MediaSession执行。</td>
+</tr>
+<tr>
+<td>void setPlaybackSpeed (float speed)</td>
+<td>设置播放速度。</td>
+</tr>
+<tr>
+<td>void setRating(Rating rating)</td>
+<td>对当前内容进行评级。</td>
+</tr>
+<tr>
+<td>void skipToNext()</td>
+<td>跳到下一项。</td>
+</tr>
+<tr>
+<td>void skipToPrevious()</td>
+<td>跳到上一项。</td>
+</tr>
+<tr>
+<td>void skipToQueueItem(long id)</td>
+<td>在播放队列中播放具有特定 ID 的项目。</td>
+</tr>
+<tr>
+<td>void stop()</td>
+<td>请求播放器停止播放;它可以以任何适当的方式清除其状态。</td>
+</tr>
+</tbody></table>
+<h2 id="MediaBrowserService-相关组件-API-列表"><a href="#MediaBrowserService-相关组件-API-列表" class="headerlink" title="MediaBrowserService 相关组件 API 列表"></a>MediaBrowserService 相关组件 API 列表</h2><h3 id="MediaBrowserService"><a href="#MediaBrowserService" class="headerlink" title="MediaBrowserService"></a>MediaBrowserService</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>final Bundle getBrowserRootHints()</td>
+<td>获取从当前连接 MediaBrowser的发送的根提示。</td>
+</tr>
+<tr>
+<td>final MediaSessionManager.RemoteUserInfo getCurrentBrowserInfo()</td>
+<td>获取发送当前请求的浏览器信息。</td>
+</tr>
+<tr>
+<td>MediaSession.Token getSessionToken()</td>
+<td>获取会话令牌，如果尚未创建会话令牌或已销毁会话令牌，则获取 null。</td>
+</tr>
+<tr>
+<td>void notifyChildrenChanged(String parentId)</td>
+<td>通知所有连接的媒体浏览器指定父 ID 的子级已经更改。</td>
+</tr>
+<tr>
+<td>void notifyChildrenChanged(String parentId, Bundle options)</td>
+<td>通知所有连接的媒体浏览器指定父 ID 的子级已经更改。</td>
+</tr>
+<tr>
+<td>abstract MediaBrowserService.BrowserRoot onGetRoot(String clientPackageName,int clientUid, Bundle rootHints)</td>
+<td>获取供特定客户端浏览的根信息。由<code>MediaBrowser.connect</code>触发，可以通过返回null拒绝客户端的连接。</td>
+</tr>
+<tr>
+<td>abstract void onLoadChildren(String parentId, Result&lt;List&lt;MediaBrowser.MediaItem&gt;&gt; result)</td>
+<td>获取有关媒体项的子项的信息。由<code>MediaBrowser.subscribe</code>触发。</td>
+</tr>
+<tr>
+<td>void onLoadChildren(String parentId, Result&lt;List&lt;MediaBrowser.MediaItem&gt;&gt; result,Bundle options)</td>
+<td>获取有关媒体项的子项的信息。由<code>MediaBrowser.subscribe</code>触发。</td>
+</tr>
+<tr>
+<td>void onLoadItem(String itemId, Result&lt;MediaBrowser.MediaItem&gt; result)</td>
+<td>获取有关特定媒体项的信息。由<code>MediaBrowser.getItem</code>触发。</td>
+</tr>
+<tr>
+<td>void setSessionToken(MediaSession.Token token)</td>
+<td>设置媒体会话。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaBrowserService-BrowserRoot-1"><a href="#MediaBrowserService-BrowserRoot-1" class="headerlink" title="MediaBrowserService.BrowserRoot"></a>MediaBrowserService.BrowserRoot</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bundle getExtras()</td>
+<td>获取有关浏览器服务的附加信息。</td>
+</tr>
+<tr>
+<td>String getRootId()</td>
+<td>获取用于浏览的根 ID。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaBrowserService-Result-1"><a href="#MediaBrowserService-Result-1" class="headerlink" title="MediaBrowserService.Result"></a>MediaBrowserService.Result</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>void detach()</td>
+<td>将此消息与当前线程分离，并允许稍后进行调用sendResult(T)</td>
+</tr>
+<tr>
+<td>void sendResult(T result)</td>
+<td>将结果发送回调用方。</td>
+</tr>
+</tbody></table>
+<h2 id="MediaSession-相关组件-API-列表"><a href="#MediaSession-相关组件-API-列表" class="headerlink" title="MediaSession 相关组件 API 列表"></a>MediaSession 相关组件 API 列表</h2><h3 id="MediaSession-1"><a href="#MediaSession-1" class="headerlink" title="MediaSession"></a>MediaSession</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MediaController getController()</td>
+<td>获取此会话的控制器。</td>
+</tr>
+<tr>
+<td>MediaSessionManager.RemoteUserInfo getCurrentControllerInfo()</td>
+<td>获取发送当前请求的控制器信息。</td>
+</tr>
+<tr>
+<td>MediaSession.Token getSessionToken()</td>
+<td>获取此会话令牌对象。</td>
+</tr>
+<tr>
+<td>boolean isActive()</td>
+<td>获取此会话的当前活动状态。</td>
+</tr>
+<tr>
+<td>void release()</td>
+<td>当应用完成播放时，必须调用此项。</td>
+</tr>
+<tr>
+<td>void sendSessionEvent (String event, Bundle extras)</td>
+<td>将专有事件发送给监听此会话的所有MediaController。会触发MediaController.Callback.onSessionEvent。</td>
+</tr>
+<tr>
+<td>void setActive(boolean active)</td>
+<td>设置此会话当前是否处于活动状态并准备好接收命令。</td>
+</tr>
+<tr>
+<td>void setCallback (MediaSession.Callback callback)</td>
+<td>设置回调以接收媒体会话的更新。</td>
+</tr>
+<tr>
+<td>void setCallback (MediaSession.Callback callback,Handler handler)</td>
+<td>设置回调以接收媒体会话的更新。</td>
+</tr>
+<tr>
+<td>void setExtras(Bundle extras)</td>
+<td>设置一些可与MediaSession关联的附加功能。</td>
+</tr>
+<tr>
+<td>void setFlags(int flags)</td>
+<td>为会话设置标志。</td>
+</tr>
+<tr>
+<td>void setMediaButtonBroadcastReceiver(ComponentName broadcastReceiver)</td>
+<td>设置应接收媒体按钮的清单声明类的组件名称。</td>
+</tr>
+<tr>
+<td>void setMediaButtonReceiver(PendingIntent mbr)</td>
+<td>此方法在 API 级别 31 中已弃用。改用setMediaButtonBroadcastReceiver（android.content.ComponentName）。</td>
+</tr>
+<tr>
+<td>void setMetadata(MediaMetadata metadata)</td>
+<td>更新当前MediaMetadata。</td>
+</tr>
+<tr>
+<td>void setPlaybackState(PlaybackState state)</td>
+<td>更新当前播放状态。</td>
+</tr>
+<tr>
+<td>void setPlaybackToLocal(AudioAttributes attributes)</td>
+<td>设置此会话音频的属性。</td>
+</tr>
+<tr>
+<td>void setPlaybackToRemote(VolumeProvider volumeProvider)</td>
+<td>将此会话配置为使用远程音量处理。</td>
+</tr>
+<tr>
+<td>void setQueue(List&lt;MediaSession.QueueItem&gt; queue)</td>
+<td>更新播放队列中的项目列表。</td>
+</tr>
+<tr>
+<td>void setQueueTitle(CharSequence title)</td>
+<td>设置播放队列的标题。</td>
+</tr>
+<tr>
+<td>void setRatingType(int type)</td>
+<td>设置此会话使用的评级样式。</td>
+</tr>
+<tr>
+<td>void setSessionActivity(PendingIntent pi)</td>
+<td>设置启动此会话的Activity的Intent。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaSession-Callback-1"><a href="#MediaSession-Callback-1" class="headerlink" title="MediaSession.Callback"></a>MediaSession.Callback</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>void onCommand(String command,Bundle args,ResultReceiver cb)</td>
+<td>当控制器已向此会话发送命令时调用。</td>
+</tr>
+<tr>
+<td>void onCustomAction(String action, Bundle extras)</td>
+<td>当要执行MediaControllerPlaybackState.CustomAction时调用。</td>
+</tr>
+<tr>
+<td>void onFastForward()</td>
+<td>处理快进请求。</td>
+</tr>
+<tr>
+<td>boolean onMediaButtonEvent(Intent mediaButtonIntent)</td>
+<td>当按下媒体按钮并且此会话具有最高优先级或控制器向会话发送媒体按钮事件时调用。</td>
+</tr>
+<tr>
+<td>void onPause()</td>
+<td>处理暂停播放的请求。</td>
+</tr>
+<tr>
+<td>void onPlay()</td>
+<td>处理开始播放的请求。</td>
+</tr>
+<tr>
+<td>void onPlayFromMediaId(String mediaId, Bundle extras)</td>
+<td>处理播放应用提供的特定mediaId的播放请求。</td>
+</tr>
+<tr>
+<td>void onPlayFromSearch(String query, Bundle extras)</td>
+<td>处理从搜索查询开始播放的请求。</td>
+</tr>
+<tr>
+<td>void onPlayFromUri(Uri uri, Bundle extras)</td>
+<td>处理播放由URI表示的特定媒体项的请求。</td>
+</tr>
+<tr>
+<td>void onPrepare()</td>
+<td>处理准备播放的请求。</td>
+</tr>
+<tr>
+<td>void onPrepareFromMediaId(String mediaId, Bundle extras)</td>
+<td>处理应用提供的特定mediaId的准备播放请求</td>
+</tr>
+<tr>
+<td>void onPrepareFromSearch(String query, Bundle extras)</td>
+<td>处理准备从搜索查询播放的请求。</td>
+</tr>
+<tr>
+<td>void onPrepareFromUri(Uri uri, Bundle extras)</td>
+<td>处理由URI表示的特定媒体项的准备请求。</td>
+</tr>
+<tr>
+<td>void onRewind()</td>
+<td>处理倒带请求。</td>
+</tr>
+<tr>
+<td>void onSeekTo(long pos)</td>
+<td>处理跳转到特定位置的请求。</td>
+</tr>
+<tr>
+<td>void onSetPlaybackSpeed(float speed)</td>
+<td>处理修改播放速度的请求。</td>
+</tr>
+<tr>
+<td>void onSetRating(Rating rating)</td>
+<td>处理设定评级的请求。</td>
+</tr>
+<tr>
+<td>void onSkipToNext()</td>
+<td>处理要跳到下一个媒体项的请求。</td>
+</tr>
+<tr>
+<td>void onSkipToPrevious()</td>
+<td>处理要跳到上一个媒体项的请求。</td>
+</tr>
+<tr>
+<td>void onSkipToQueueItem(long id)</td>
+<td>处理跳转到播放队列中具有给定 ID 的项目的请求。</td>
+</tr>
+<tr>
+<td>void onStop()</td>
+<td>处理停止播放的请求。</td>
+</tr>
+</tbody></table>
+<h3 id="MediaSession-QueueItem-1"><a href="#MediaSession-QueueItem-1" class="headerlink" title="MediaSession.QueueItem"></a>MediaSession.QueueItem</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/reference/android/media/MediaDescription">MediaDescription</a> getDescription()</td>
+<td>返回介质的说明。包含媒体的基础信息如：标题、封面等等。</td>
+</tr>
+<tr>
+<td>long getQueueId()</td>
+<td>获取此项目的队列 ID。</td>
+</tr>
+</tbody></table>
+<h2 id="PlaybackState-相关组件-API-列表"><a href="#PlaybackState-相关组件-API-列表" class="headerlink" title="PlaybackState 相关组件 API 列表"></a>PlaybackState 相关组件 API 列表</h2><h3 id="PlaybackState"><a href="#PlaybackState" class="headerlink" title="PlaybackState"></a>PlaybackState</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>long getActions()</td>
+<td>获取此会话上可用的当前操作。</td>
+</tr>
+<tr>
+<td>long getActiveQueueItemId()</td>
+<td>获取队列中当前活动项的 ID。</td>
+</tr>
+<tr>
+<td>long getBufferedPosition()</td>
+<td>获取当前缓冲位置（以毫秒为单位）。</td>
+</tr>
+<tr>
+<td>List&lt;PlaybackState.CustomAction&gt; getCustomActions()</td>
+<td>获取自定义操作的列表。</td>
+</tr>
+<tr>
+<td>CharSequence getErrorMessage()</td>
+<td>获取用户可读的错误消息。</td>
+</tr>
+<tr>
+<td>Bundle getExtras()</td>
+<td>获取在此播放状态下设置的任何自定义附加内容。</td>
+</tr>
+<tr>
+<td>long getLastPositionUpdateTime()</td>
+<td>获取上次更新位置的经过的实时时间。</td>
+</tr>
+<tr>
+<td>float getPlaybackSpeed()</td>
+<td>获取当前播放速度作为正常播放的倍数。</td>
+</tr>
+<tr>
+<td>long getPosition()</td>
+<td>获取当前播放位置（以毫秒为单位）。</td>
+</tr>
+<tr>
+<td>int getState()</td>
+<td>获取当前播放状态。</td>
+</tr>
+<tr>
+<td>boolean isActive()</td>
+<td>返回是否将其视为活动播放状态。</td>
+</tr>
+</tbody></table>
+<h3 id="PlaybackState-Builder-1"><a href="#PlaybackState-Builder-1" class="headerlink" title="PlaybackState.Builder"></a>PlaybackState.Builder</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PlaybackState.Builder addCustomAction(String action, String name, int icon)</td>
+<td>将自定义操作添加到播放状态。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder addCustomAction (PlaybackState.CustomAction customAction)</td>
+<td>将自定义操作添加到播放状态。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder setActions(long actions)</td>
+<td>设置此会话上可用的当前操作。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder setActiveQueueItemId(long id)</td>
+<td>通过指定活动项目的 id 来设置播放队列中的活动项目。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder setBufferedPosition(long bufferedPosition)</td>
+<td>设置当前缓冲位置（以毫秒为单位）。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder setErrorMessage(CharSequence error)</td>
+<td>设置用户可读的错误消息。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder setExtras(Bundle extras)</td>
+<td>设置要包含在播放状态中的任何自定义附加内容。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder setState(int state, long position, float playbackSpeed)</td>
+<td>设置当前播放状态。</td>
+</tr>
+<tr>
+<td>PlaybackState.Builder setState(int state, long position, float playbackSpeed, long updateTime)</td>
+<td>设置当前播放状态。</td>
+</tr>
+<tr>
+<td>PlaybackState build()</td>
+<td>生成并返回具有这些值的PlaybackState实例。</td>
+</tr>
+</tbody></table>
+<h3 id="PlaybackState-CustomAction-1"><a href="#PlaybackState-CustomAction-1" class="headerlink" title="PlaybackState.CustomAction"></a>PlaybackState.CustomAction</h3><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>String getAction()</td>
+<td>返回CustomAction的action。</td>
+</tr>
+<tr>
+<td>Bundle getExtras()</td>
+<td>返回附加项，这些附加项提供有关操作的其他特定于应用程序的信息，如果没有，则返回 null。</td>
+</tr>
+<tr>
+<td>int getIcon()</td>
+<td>返回package中图标的资源 ID。</td>
+</tr>
+<tr>
+<td>CharSequence getName()</td>
+<td>返回此操作的显示名称。</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AOSP/" rel="tag"># AOSP</a>
+              <a href="/tags/%E8%BD%A6%E8%BD%BD%E5%A4%9A%E5%AA%92%E4%BD%93/" rel="tag"># 车载多媒体</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/07/16/android_aosp_fdbus_make_use/" rel="prev" title="AOSP-FDBUS通信中间件编译、配置、通信测试">
+                  <i class="fa fa-chevron-left"></i> AOSP-FDBUS通信中间件编译、配置、通信测试
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/10/10/android_aosp_local_media/" rel="next" title="Android车载多媒体应用LocalMedia">
+                  Android车载多媒体应用LocalMedia <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

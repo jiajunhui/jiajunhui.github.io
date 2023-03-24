@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Mist&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;always&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:true,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="智能座舱域主流采用Android+QNX组合的方式，其中QNX作为仪表信息系统，而Android作为IVI车载娱乐系统。两者不可避免需要进行通信。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AOSP-FDBUS通信中间件编译、配置、通信测试">
+<meta property="og:url" content="http://example.com/2021/07/16/android_aosp_fdbus_make_use/index.html">
+<meta property="og:site_name" content="奔跑的蜗牛">
+<meta property="og:description" content="智能座舱域主流采用Android+QNX组合的方式，其中QNX作为仪表信息系统，而Android作为IVI车载娱乐系统。两者不可避免需要进行通信。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make01.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make02.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make03.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make04.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make05.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make06.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make07.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make08.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make09.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make06.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make10.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make11.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make12.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make13.png">
+<meta property="og:image" content="http://example.com/images/android_aosp_fdbus_make14.png">
+<meta property="article:published_time" content="2021-07-15T17:47:00.000Z">
+<meta property="article:modified_time" content="2023-03-24T13:24:54.878Z">
+<meta property="article:author" content="小贾">
+<meta property="article:tag" content="AOSP">
+<meta property="article:tag" content="FDBUS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_aosp_fdbus_make01.png">
+
+
+<link rel="canonical" href="http://example.com/2021/07/16/android_aosp_fdbus_make_use/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;example.com&#x2F;2021&#x2F;07&#x2F;16&#x2F;android_aosp_fdbus_make_use&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;07&#x2F;16&#x2F;android_aosp_fdbus_make_use&#x2F;&quot;,&quot;title&quot;:&quot;AOSP-FDBUS通信中间件编译、配置、通信测试&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>AOSP-FDBUS通信中间件编译、配置、通信测试 | 奔跑的蜗牛</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">奔跑的蜗牛</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#FDBUS%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">FDBUS介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">2.</span> <span class="nav-text">编译</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEfdbus%E7%9A%84android-bp%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">配置fdbus的android.bp文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E5%90%AF%E5%8A%A8%E4%B8%8E%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">部署启动与权限配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEproduct"><span class="nav-number">3.1.</span> <span class="nav-text">配置product</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#name-server%E5%90%AF%E5%8A%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">name-server启动配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#name-server%E7%9A%84SELinux%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.</span> <span class="nav-text">name-server的SELinux权限配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FDBUS-API-Framework-SDK%E9%9B%86%E6%88%90"><span class="nav-number">4.</span> <span class="nav-text">FDBUS-API Framework-SDK集成</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E4%B8%8E%E9%9B%86%E6%88%90%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E9%94%99%E8%AF%AF%E5%8F%8A%E8%A7%A3%E5%86%B3"><span class="nav-number">5.</span> <span class="nav-text">编译与集成过程中的错误及解决</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#clang-%E7%BC%96%E8%AF%91%E9%94%99%E8%AF%AF"><span class="nav-number">5.1.</span> <span class="nav-text">clang 编译错误</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E6%BA%90%E7%A0%81"><span class="nav-number">5.1.1.</span> <span class="nav-text">修改源码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEandroid-bp"><span class="nav-number">5.1.2.</span> <span class="nav-text">配置android.bp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96clang%E9%94%99%E8%AF%AF"><span class="nav-number">5.2.</span> <span class="nav-text">其他clang错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jni-h-not-found"><span class="nav-number">5.3.</span> <span class="nav-text">jni.h not found</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#package-allowed-list-txt"><span class="nav-number">5.4.</span> <span class="nav-text">package_allowed_list.txt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#selinux-file-contexts%E9%94%99%E8%AF%AF"><span class="nav-number">5.5.</span> <span class="nav-text">selinux file_contexts错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%93%E5%8F%96%E5%BC%80%E6%9C%BA%E6%97%A5%E5%BF%97%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98"><span class="nav-number">5.6.</span> <span class="nav-text">抓取开机日志排查问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FDBUS%E9%83%A8%E7%BD%B2%E4%B8%8E%E8%B7%A8%E7%B3%BB%E7%BB%9F%E9%80%9A%E4%BF%A1%E6%B5%8B%E8%AF%95"><span class="nav-number">6.</span> <span class="nav-text">FDBUS部署与跨系统通信测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#host-server%E9%83%A8%E7%BD%B2"><span class="nav-number">6.1.</span> <span class="nav-text">host-server部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B5%8B%E8%AF%95app"><span class="nav-number">6.2.</span> <span class="nav-text">客户端测试app</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小贾"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">小贾</p>
+  <div class="site-description" itemprop="description">Just do IT</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jiajunhui" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jiajunhui" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:junhui_jia@163.com" title="E-Mail → mailto:junhui_jia@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/jiajunhui" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/16/android_aosp_fdbus_make_use/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="小贾">
+      <meta itemprop="description" content="Just do IT">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="奔跑的蜗牛">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AOSP-FDBUS通信中间件编译、配置、通信测试
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-16 01:47:00" itemprop="dateCreated datePublished" datetime="2021-07-16T01:47:00+08:00">2021-07-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android系统开发</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/%E8%BD%A6%E8%81%94%E7%BD%91/" itemprop="url" rel="index"><span itemprop="name">车联网</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>智能座舱域主流采用Android+QNX组合的方式，其中QNX作为仪表信息系统，而Android作为IVI车载娱乐系统。两者不可避免需要进行通信。</p>
+<span id="more"></span>
+
+<p>基于安全性和独立性要求，不同的系统之间数据不能直接访问。但是不同域下的不同系统之间，同一域下的不同系统之间的通信需求现实存在。现有的解决方案主要是基于TCP/IP协议栈的Socket（套接字）通讯。</p>
+<p>大众在FDBUS基础上开发通信中间件完成系统间的通信。</p>
+<h1 id="FDBUS介绍"><a href="#FDBUS介绍" class="headerlink" title="FDBUS介绍"></a>FDBUS介绍</h1><blockquote>
+<p>FDBus：<a target="_blank" rel="noopener" href="https://gitee.com/jeremyczhen/fdbus">https://gitee.com/jeremyczhen/fdbus</a><br>Fast Distributed Bus，基于Socket（Unix Domain和TCP）的快速分布式总线。<br>UDS：Unix Domain Socket，专用于IPC。Zygote中的Local Socket即为UDS。</p>
+</blockquote>
+<p>FDBUS为了更方便的进行寻址，允许不通过IP+端口或者固定UDS地址，而是采用域名的方式进行寻址。类似于在浏览器输入 <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a> ，与百度完成通信，则需要进行DNS解析，将域名转化为IP地址。<br>FDBUS同样提供了 name-server ,负责管理server名字（域名）与地址（IP）的映射，和DNS服务器一样，完成<br>server名字到IP的解析。</p>
+<p><img src="/images/android_aosp_fdbus_make01.png" alt="image"></p>
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>将FDBUS源码下载后放入Android AOSP源码 <code>/frameworks/native/services</code> 中：</p>
+<blockquote>
+<p>不是必须放入该目录，这里以此目录为例。</p>
+</blockquote>
+<p><img src="/images/android_aosp_fdbus_make02.png" alt="image"></p>
+<h2 id="配置fdbus的android-bp文件"><a href="#配置fdbus的android-bp文件" class="headerlink" title="配置fdbus的android.bp文件"></a>配置fdbus的android.bp文件</h2><p>打开Android.bp文件，将其修改为如下：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br></pre></td><td class="code"><pre><span class="line">//=====================================================================================</span><br><span class="line">//                   makefile to build fdbus in aosp source tree                      |</span><br><span class="line">//=====================================================================================</span><br><span class="line"></span><br><span class="line">//=====================================================================================</span><br><span class="line">//                           build libfdbus.so                                  |</span><br><span class="line">//=====================================================================================</span><br><span class="line"></span><br><span class="line">SRC<span class="built_in">_</span>FILES = [</span><br><span class="line">    &quot;fdbus/CBaseClient.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbBaseObject.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbMessage.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbSimpleSerializer.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CBaseEndpoint.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbCJsonMsgBuilder.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbSessionContainer.cpp&quot;,</span><br><span class="line">    &quot;log/CLogProducer.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CBaseServer.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbContext.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbBaseContext.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbSession.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbMsgDispatcher.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CEventSubscribeHandle.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbUDPSession.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CBaseSession.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbWatchdog.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CFdbEventRouter.cpp&quot;,</span><br><span class="line">    &quot;platform/CEventFd<span class="built_in">_</span>eventfd.cpp&quot;,</span><br><span class="line">    &quot;platform/linux/CBaseMutexLock.cpp&quot;,</span><br><span class="line">    &quot;platform/linux/CBasePipe.cpp&quot;,</span><br><span class="line">    &quot;platform/linux/CBaseSysDep.cpp&quot;,</span><br><span class="line">    &quot;platform/linux/CBaseThread.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CBaseSocketFactory.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/linux/CLinuxSocket.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/sckt-0.5/sckt.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CGenericClientSocket.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CGenericServerSocket.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CGenericSession.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CGenericSocket.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CGenericTcpSession.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CGenericUdpSession.cpp&quot;,</span><br><span class="line">    &quot;platform/socket/CGenericUdpSocket.cpp&quot;,</span><br><span class="line">    &quot;security/CApiSecurityConfig.cpp&quot;,</span><br><span class="line">    &quot;security/CFdbToken.cpp&quot;,</span><br><span class="line">    &quot;security/CFdbusSecurityConfig.cpp&quot;,</span><br><span class="line">    &quot;security/CHostSecurityConfig.cpp&quot;,</span><br><span class="line">    &quot;security/CServerSecurityConfig.cpp&quot;,</span><br><span class="line">    &quot;utils/fdb<span class="built_in">_</span>option<span class="built_in">_</span>parser.cpp&quot;,</span><br><span class="line">    &quot;worker/CBaseEventLoop.cpp&quot;,</span><br><span class="line">    &quot;worker/CBaseWorker.cpp&quot;,</span><br><span class="line">    &quot;worker/CFdEventLoop.cpp&quot;,</span><br><span class="line">    &quot;worker/CThreadEventLoop.cpp&quot;,</span><br><span class="line">    &quot;worker/CSysFdWatch.cpp&quot;,</span><br><span class="line">    &quot;utils/CBaseNameProxy.cpp&quot;,</span><br><span class="line">    &quot;fdbus/CIntraNameProxy.cpp&quot;,</span><br><span class="line">    &quot;server/CAddressAllocator.cpp&quot;,</span><br><span class="line">    &quot;log/CLogPrinter.cpp&quot;,</span><br><span class="line">    &quot;log/CFdbLogCache.cpp&quot;,</span><br><span class="line">    &quot;utils/cJSON/cJSON.c&quot;,</span><br><span class="line">    &quot;fdbus/CFdbAFComponent.cpp&quot;,</span><br><span class="line">    &quot;datapool/CDataPool.cpp&quot;,</span><br><span class="line">    &quot;datapool/CDpClient.cpp&quot;,</span><br><span class="line">    &quot;datapool/CDpServer.cpp&quot;,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>shared &#123;</span><br><span class="line">    name: &quot;libfdbus&quot;,</span><br><span class="line">    vendor<span class="built_in">_</span>available: true,</span><br><span class="line"></span><br><span class="line">    cppflags: [</span><br><span class="line">    	&quot;-Wno-non-virtual-dtor&quot;,</span><br><span class="line">	&quot;-Wno-format-extra-args&quot;,</span><br><span class="line">	&quot;-Wno-infinite-recursion&quot;,</span><br><span class="line">	&quot;-Wno-unused-private-field&quot;,</span><br><span class="line">	&quot;-Wno-unreachable-code-loop-increment&quot;,</span><br><span class="line">        &quot;-frtti&quot;,</span><br><span class="line">        &quot;-fexceptions&quot;,</span><br><span class="line">        &quot;-Wno-unused-parameter&quot;,</span><br><span class="line">        &quot;-D<span class="built_in">_</span><span class="built_in">_</span>LINUX<span class="built_in">_</span><span class="built_in">_</span>&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CFG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>PATH=<span class="keyword">\&quot;</span>/data/misc/fdbus<span class="keyword">\&quot;</span>&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>DEBUG<span class="built_in">_</span>LOG&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>CONNECT<span class="built_in">_</span>TIMEOUT=0&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>LOG<span class="built_in">_</span>TO<span class="built_in">_</span>STDOUT&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>FDB<span class="built_in">_</span>NO<span class="built_in">_</span>RTTI&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>FDB<span class="built_in">_</span>MESSAGE<span class="built_in">_</span>METADATA&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CONFIG<span class="built_in">_</span>UDS<span class="built_in">_</span>ABSTRACT&quot;,</span><br><span class="line">        &quot;-DCFG<span class="built_in">_</span>ALLOC<span class="built_in">_</span>PORT<span class="built_in">_</span>BY<span class="built_in">_</span>SYSTEM&quot;,</span><br><span class="line">    ],</span><br><span class="line">    cflags: [</span><br><span class="line">    	&quot;-Wno-non-virtual-dtor&quot;,</span><br><span class="line">	&quot;-Wno-format-extra-args&quot;,</span><br><span class="line">	&quot;-Wno-infinite-recursion&quot;,</span><br><span class="line">	&quot;-Wno-unused-private-field&quot;,</span><br><span class="line">	&quot;-Wno-unreachable-code-loop-increment&quot;,</span><br><span class="line">        &quot;-Wno-unused-parameter&quot;,</span><br><span class="line">        &quot;-D<span class="built_in">_</span><span class="built_in">_</span>LINUX<span class="built_in">_</span><span class="built_in">_</span>&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CFG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>PATH=<span class="keyword">\&quot;</span>/data/misc/fdbus<span class="keyword">\&quot;</span>&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>DEBUG<span class="built_in">_</span>LOG&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>CONNECT<span class="built_in">_</span>TIMEOUT=0&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>LOG<span class="built_in">_</span>TO<span class="built_in">_</span>STDOUT&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>FDB<span class="built_in">_</span>MESSAGE<span class="built_in">_</span>METADATA&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CONFIG<span class="built_in">_</span>UDS<span class="built_in">_</span>ABSTRACT&quot;,</span><br><span class="line">        &quot;-DCFG<span class="built_in">_</span>ALLOC<span class="built_in">_</span>PORT<span class="built_in">_</span>BY<span class="built_in">_</span>SYSTEM&quot;,</span><br><span class="line">    ],</span><br><span class="line"></span><br><span class="line">    shared<span class="built_in">_</span>libs: [</span><br><span class="line">        &quot;liblog&quot;,</span><br><span class="line">        &quot;libutils&quot;,</span><br><span class="line">    ],</span><br><span class="line"></span><br><span class="line">    srcs: SRC<span class="built_in">_</span>FILES,</span><br><span class="line"></span><br><span class="line">    export<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [&quot;public&quot;],</span><br><span class="line"></span><br><span class="line">    local<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [],</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//=====================================================================================</span><br><span class="line">//                             build libfdbus-jni.so                                  |</span><br><span class="line">//=====================================================================================</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>shared &#123;</span><br><span class="line">    name: &quot;libfdbus-jni&quot;,</span><br><span class="line"></span><br><span class="line">    cppflags: [</span><br><span class="line">    	&quot;-Wno-non-virtual-dtor&quot;,</span><br><span class="line">	&quot;-Wno-format-extra-args&quot;,</span><br><span class="line">	&quot;-Wno-infinite-recursion&quot;,</span><br><span class="line">	&quot;-Wno-unused-private-field&quot;,</span><br><span class="line">	&quot;-Wno-unreachable-code-loop-increment&quot;,</span><br><span class="line">        &quot;-frtti&quot;,</span><br><span class="line">        &quot;-fexceptions&quot;,</span><br><span class="line">        &quot;-Wno-unused-parameter&quot;,</span><br><span class="line">        &quot;-D<span class="built_in">_</span><span class="built_in">_</span>LINUX<span class="built_in">_</span><span class="built_in">_</span>&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CFG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>PATH=<span class="keyword">\&quot;</span>/data/misc/fdbus<span class="keyword">\&quot;</span>&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>DEBUG<span class="built_in">_</span>LOG&quot;,</span><br><span class="line">        &quot;-DCFG<span class="built_in">_</span>JNI<span class="built_in">_</span>ANDROID&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CFG<span class="built_in">_</span>KEEP<span class="built_in">_</span>ENV<span class="built_in">_</span>TYPE&quot;,</span><br><span class="line">    ],</span><br><span class="line">    cflags: [</span><br><span class="line">    &quot;-Wno-non-virtual-dtor&quot;,</span><br><span class="line">	&quot;-Wno-format-extra-args&quot;,</span><br><span class="line">	&quot;-Wno-infinite-recursion&quot;,</span><br><span class="line">	&quot;-Wno-unused-private-field&quot;,</span><br><span class="line">	&quot;-Wno-unreachable-code-loop-increment&quot;,</span><br><span class="line">        &quot;-Wno-unused-parameter&quot;,</span><br><span class="line">        &quot;-D<span class="built_in">_</span><span class="built_in">_</span>LINUX<span class="built_in">_</span><span class="built_in">_</span>&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CFG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>PATH=<span class="keyword">\&quot;</span>/data/misc/fdbus<span class="keyword">\&quot;</span>&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>DEBUG<span class="built_in">_</span>LOG&quot;,</span><br><span class="line">        &quot;-DCFG<span class="built_in">_</span>JNI<span class="built_in">_</span>ANDROID&quot;,</span><br><span class="line">    ],</span><br><span class="line">    srcs: [</span><br><span class="line">        &quot;jni/src/cpp/CJniClient.cpp&quot;,</span><br><span class="line">        &quot;jni/src/cpp/CJniMessage.cpp&quot;,</span><br><span class="line">        &quot;jni/src/cpp/CJniServer.cpp&quot;,</span><br><span class="line">        &quot;jni/src/cpp/FdbusGlobal.cpp&quot;,</span><br><span class="line">        &quot;jni/src/cpp/CJniAFComponent.cpp&quot;,</span><br><span class="line">    ],</span><br><span class="line"></span><br><span class="line">    shared<span class="built_in">_</span>libs: [&quot;libfdbus&quot;],</span><br><span class="line"></span><br><span class="line">    include<span class="built_in">_</span>dirs: [</span><br><span class="line">        &quot;frameworks/base/core/jni&quot;,</span><br><span class="line">        &quot;frameworks/base/core/jni/include&quot;,</span><br><span class="line">    ],</span><br><span class="line">    header<span class="built_in">_</span>libs: [&quot;jni<span class="built_in">_</span>headers&quot;],</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//=====================================================================================</span><br><span class="line">//                                  build name-server                                 |</span><br><span class="line">//=====================================================================================</span><br><span class="line">cc<span class="built_in">_</span>binary &#123;</span><br><span class="line">    name: &quot;name-server&quot;,</span><br><span class="line">    vendor<span class="built_in">_</span>available: true,</span><br><span class="line">    //该行注释不用，使用init.rc中进行启动配置</span><br><span class="line">    //init<span class="built_in">_</span>rc: [&quot;fdbus-name-server.rc&quot;],</span><br><span class="line">    cppflags: [</span><br><span class="line">        &quot;-Wno-non-virtual-dtor&quot;,</span><br><span class="line">	&quot;-Wno-format-extra-args&quot;,</span><br><span class="line">	&quot;-Wno-infinite-recursion&quot;,</span><br><span class="line">	&quot;-Wno-unused-private-field&quot;,</span><br><span class="line">	&quot;-Wno-unreachable-code-loop-increment&quot;,</span><br><span class="line">        &quot;-frtti&quot;,</span><br><span class="line">        &quot;-fexceptions&quot;,</span><br><span class="line">        &quot;-Wno-unused-parameter&quot;,</span><br><span class="line">        &quot;-D<span class="built_in">_</span><span class="built_in">_</span>LINUX<span class="built_in">_</span><span class="built_in">_</span>&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CFG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>PATH=<span class="keyword">\&quot;</span>/data/misc/fdbus<span class="keyword">\&quot;</span>&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>DEBUG<span class="built_in">_</span>LOG&quot;,</span><br><span class="line">    ],</span><br><span class="line">    cflags: [</span><br><span class="line">        &quot;-Wno-non-virtual-dtor&quot;,</span><br><span class="line">	&quot;-Wno-format-extra-args&quot;,</span><br><span class="line">	&quot;-Wno-infinite-recursion&quot;,</span><br><span class="line">	&quot;-Wno-unused-private-field&quot;,</span><br><span class="line">	&quot;-Wno-unreachable-code-loop-increment&quot;,</span><br><span class="line">        &quot;-Wno-unused-parameter&quot;,</span><br><span class="line">        &quot;-D<span class="built_in">_</span><span class="built_in">_</span>LINUX<span class="built_in">_</span><span class="built_in">_</span>&quot;,</span><br><span class="line">        &quot;-DFDB<span class="built_in">_</span>CFG<span class="built_in">_</span>SOCKET<span class="built_in">_</span>PATH=<span class="keyword">\&quot;</span>/data/misc/fdbus<span class="keyword">\&quot;</span>&quot;,</span><br><span class="line">        &quot;-DCONFIG<span class="built_in">_</span>DEBUG<span class="built_in">_</span>LOG&quot;,</span><br><span class="line">    ],</span><br><span class="line">    srcs: [</span><br><span class="line">        &quot;server/main<span class="built_in">_</span>ns.cpp&quot;,</span><br><span class="line">        &quot;server/CNameServer.cpp&quot;,</span><br><span class="line">        &quot;server/CInterNameProxy.cpp&quot;,</span><br><span class="line">        &quot;server/CIntraHostProxy.cpp&quot;,</span><br><span class="line">        &quot;server/CBaseHostProxy.cpp&quot;,</span><br><span class="line">        &quot;server/CSvcAddrUtils.cpp&quot;,</span><br><span class="line">        &quot;server/CNameProxyContainer.cpp&quot;,</span><br><span class="line">        &quot;security/CServerSecurityConfig.cpp&quot;,</span><br><span class="line">    ],</span><br><span class="line"></span><br><span class="line">    shared<span class="built_in">_</span>libs: [</span><br><span class="line">        &quot;libfdbus&quot;,</span><br><span class="line">        &quot;liblog&quot;,</span><br><span class="line">        &quot;libutils&quot;,</span><br><span class="line">    ],</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述脚本会编译出libfdbus.so、libfdbus-jni.so与name-server可执行文件。</p>
+<p>libfdbus.so、libfdbus-jni.so的输出目录为：</p>
+<blockquote>
+<p>/home/jia/AOSP/aosp/out/target/product/emulator_x86_64/system/lib</p>
+</blockquote>
+<p>name-server的输出目录为：</p>
+<blockquote>
+<p>/home/jia/AOSP/aosp/out/target/product/emulator_x86_64/system/bin</p>
+</blockquote>
+<h1 id="部署启动与权限配置"><a href="#部署启动与权限配置" class="headerlink" title="部署启动与权限配置"></a>部署启动与权限配置</h1><h2 id="配置product"><a href="#配置product" class="headerlink" title="配置product"></a>配置product</h2><p>在Android12中在 /build/target/product/base_system.mk 中配置：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Base modules and settings for the system partition.</span></span><br><span class="line">PRODUCT_PACKAGES += \</span><br><span class="line">    ......</span><br><span class="line">    surfaceflinger \</span><br><span class="line">    name-server \</span><br><span class="line">    libfdbus-jni \</span><br><span class="line">    libfdbus \</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
+
+<h2 id="name-server启动配置"><a href="#name-server启动配置" class="headerlink" title="name-server启动配置"></a>name-server启动配置</h2><p>为了让name-server开机启动，需要在 init.rc 中配置启动脚本。</p>
+<p>打开 /system/core/rootdir/init.rc 在文件最后加入：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="params">#1</span>、在挂载 /data 后创建/data/misc/fdbus 并设置system用户组权限</span><br><span class="line">on post-fs-data</span><br><span class="line">	mkdir /data/misc/fdbus 0755 system system</span><br><span class="line"><span class="params">#2</span>、启动name-server</span><br><span class="line">service name-server /system/bin/name-server -u tcp://139.224.136.101:60000 -n android</span><br><span class="line">	class core</span><br><span class="line">	group inet</span><br><span class="line">	writepid /dev/cpuset/system-background/tasks</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1、因为FDBUS支持uds与tcp。在当前系统中其他进程需要连接name-server会采用UDS的方式，/data/misc/fdbus 则为name-server的uds固定地址。</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/misc/fdbus 0755 system system：创建文件并设置权限。</span><br></pre></td></tr></table></figure>
+
+<p>2、-u 参数后文解释，-n 参数为当前name-server的别名可以随意传递。</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">class core：当前服务属主，系统能根据属主统一管理同属主下所有的进程，同一个class的所有服务必须同时启动或者停止。</span><br><span class="line">group inet：当前服务的用户组。 inet 组表示允许网络访问！</span><br></pre></td></tr></table></figure>
+
+<p>在<code>/framework/base/data/etc/platform.xml</code> 中可以查看权限对应的用户组：</p>
+<p><img src="/images/android_aosp_fdbus_make03.png" alt="image"></p>
+</blockquote>
+<h2 id="name-server的SELinux权限配置"><a href="#name-server的SELinux权限配置" class="headerlink" title="name-server的SELinux权限配置"></a>name-server的SELinux权限配置</h2><p>完成上述配置后，系统启动就会拉起name-server，但是此时name-server还无法正常工作。Android是建立在标准<br>的Linux Kernel基础上，通过Linux的 SELinux（SEAndroid）进行访问权限控制。比如name-server需要访问<br>tcp_socket、unix_stream_socket则必须开启SElinux的访问限制。</p>
+<p>修改 <code>system/sepolicy/prebuilts/api/31.0/private</code> 与 <code>system/sepolicy/private</code> 目录下同<br>样的：file_contexts、netd.te与untrusted_app_all.te文件，并在两个目录下都创建name-server.te文件。</p>
+<p>在file_contexts的最后一行加入：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/system/bin/name-server 	u:object<span class="built_in">_</span>r:name-server<span class="built_in">_</span>exec:s0</span><br></pre></td></tr></table></figure>
+
+<p>新建name-server.te 文件中内容为：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">type name-server, domain, coredomain, mlstrustedsubject;</span><br><span class="line">type name-server<span class="built_in">_</span>exec, system<span class="built_in">_</span>file<span class="built_in">_</span>type, exec<span class="built_in">_</span>type, file<span class="built_in">_</span>type;</span><br><span class="line"></span><br><span class="line">allow name-server self:tcp<span class="built_in">_</span>socket &#123; read write getattr getopt setopt shutdown create bind connect name<span class="built_in">_</span>connect &#125;;</span><br><span class="line">allow name-server self:netlink<span class="built_in">_</span>route<span class="built_in">_</span>socket &#123;create write read nlmsg<span class="built_in">_</span>readpriv nlmsg<span class="built_in">_</span>read&#125;;</span><br><span class="line">allow name-server fwmarkd<span class="built_in">_</span>socket:sock<span class="built_in">_</span>file &#123;write&#125;;</span><br><span class="line">allow name-server port:tcp<span class="built_in">_</span>socket &#123;name<span class="built_in">_</span>connect&#125;;</span><br><span class="line">allow name-server netd:unix<span class="built_in">_</span>stream<span class="built_in">_</span>socket &#123;connectto&#125;;</span><br><span class="line">allow name-server self:capability &#123;net<span class="built_in">_</span>raw&#125;;</span><br><span class="line">allow name-server node:tcp<span class="built_in">_</span>socket &#123;node<span class="built_in">_</span>bind&#125;;</span><br><span class="line"></span><br><span class="line">init<span class="built_in">_</span>daemon<span class="built_in">_</span>domain(name-server)</span><br></pre></td></tr></table></figure>
+
+<p>同时name-server需要与netd进程（网络管理进程）交互，还需要在netd.te 增加：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typeattribute netd coredomain;</span><br><span class="line">typeattribute netd domain<span class="built_in">_</span>deprecated;</span><br><span class="line"><span class="params">#</span>增加==============</span><br><span class="line">allow netd name-server:fd &#123;use&#125;;</span><br><span class="line">allow netd name-server:tcp<span class="built_in">_</span>socket &#123;getopt&#125;;</span><br><span class="line">allow netd name-server:tcp<span class="built_in">_</span>socket &#123;setopt&#125;;</span><br><span class="line">allow netd name-server:tcp<span class="built_in">_</span>socket &#123;read write&#125;;</span><br><span class="line"><span class="params">#</span>==============</span><br><span class="line"><span class="params">#</span>......</span><br></pre></td></tr></table></figure>
+
+<p>如果需要普通APP使用name-server， 还需要在 untrusted_app_all.te 中加入:</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">allow untrusted<span class="built_in">_</span>app<span class="built_in">_</span>all app<span class="built_in">_</span>api<span class="built_in">_</span>service:service<span class="built_in">_</span>manager find;</span><br><span class="line">allow untrusted<span class="built_in">_</span>app<span class="built_in">_</span>all vr<span class="built_in">_</span>manager<span class="built_in">_</span>service:service<span class="built_in">_</span>manager find;</span><br><span class="line">allow untrusted<span class="built_in">_</span>app<span class="built_in">_</span>all lance<span class="built_in">_</span>service:service<span class="built_in">_</span>manager find;</span><br><span class="line"><span class="params">#</span> 加入此处规则</span><br><span class="line">allow untrusted<span class="built_in">_</span>app<span class="built_in">_</span>all name-server:unix<span class="built_in">_</span>stream<span class="built_in">_</span>socket&#123;connectto&#125;;</span><br></pre></td></tr></table></figure>
+
+<h1 id="FDBUS-API-Framework-SDK集成"><a href="#FDBUS-API-Framework-SDK集成" class="headerlink" title="FDBUS-API Framework-SDK集成"></a>FDBUS-API Framework-SDK集成</h1><p>在上一步，我们不仅完成了name-server的部署，同时编译出libfdbus-jni.so，该动态库为FDBUS的Java层API的JNI封装。为了在Java中完成FDBUS的使用，可以将FDBUS集成进入Framework与SDK中。</p>
+<p>将FDBUS中的 jni\src\java 下的Java代码放入AOSP源码中的 /frameworks/base/core/java 中</p>
+<p><img src="/images/android_aosp_fdbus_make04.png" alt="image"></p>
+<p><img src="/images/android_aosp_fdbus_make05.png" alt="image"></p>
+<p>修改AOSP源码中的 build/soong/scripts/check_boot_jars/package_allowed_list.txt 。</p>
+<p><img src="/images/android_aosp_fdbus_make06.png" alt="image"></p>
+<p>修改 <code>/framework/base/Android.bp</code>中的<strong>metalava_framework_docs_args</strong>与<strong>packages_to_document</strong> 。前者表示忽略我们的Java代码中的lint检查；后者则代表将我们的Java API打包进入文档，这样才能在SDK中可见，也就是说APP能够调用新增的Java API。</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">metalava<span class="built_in">_</span>framework<span class="built_in">_</span>docs<span class="built_in">_</span>args = &quot;--manifest <span class="built_in">$</span>(location core/res/AndroidManifest.xml) &quot;+</span><br><span class="line">&quot;--api-lint-ignore-prefix ipc. &quot;</span><br><span class="line">//......</span><br><span class="line"></span><br><span class="line">packages<span class="built_in">_</span>to<span class="built_in">_</span>document = [</span><br><span class="line">    //......</span><br><span class="line">    &quot;ipc.fdbus&quot;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<h1 id="编译与集成过程中的错误及解决"><a href="#编译与集成过程中的错误及解决" class="headerlink" title="编译与集成过程中的错误及解决"></a>编译与集成过程中的错误及解决</h1><h2 id="clang-编译错误"><a href="#clang-编译错误" class="headerlink" title="clang 编译错误"></a>clang 编译错误</h2><p><img src="/images/android_aosp_fdbus_make07.png" alt="image"></p>
+<p>在CBaseClient.cpp的118行存在如下代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">LOG_E</span>(<span class="string">&quot;CClientSocket: client %s shutdown but try to request address of and connect again...\n&quot;</span>,client-&gt;<span class="built_in">name</span>().<span class="built_in">c_str</span>(), client-&gt;<span class="built_in">nsName</span>().<span class="built_in">c_str</span>());</span><br></pre></td></tr></table></figure>
+
+<p>Android Log库输出日志，但是代码中传递了两个参数 client-&gt;name().c_str() 与 client-&gt;nsName().c_str() ，<br>然而只存在一个 %s 接收，此时参数不匹配。解决该问题的方式有两种：</p>
+<h3 id="修改源码"><a href="#修改源码" class="headerlink" title="修改源码"></a>修改源码</h3><p>在第一个参数中加入一个 %s ，让参数与占位符数量匹配。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">LOG_E</span>(<span class="string">&quot;CClientSocket: client %s shutdown but try to request address of and connect %s again...\n&quot;</span>,client-&gt;<span class="built_in">name</span>().<span class="built_in">c_str</span>(), client-&gt;<span class="built_in">nsName</span>().<span class="built_in">c_str</span>());</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置android-bp"><a href="#配置android-bp" class="headerlink" title="配置android.bp"></a>配置android.bp</h3><p>在Android.bp中的name-server配置处的cflags与cppflags处加入：”-Wno-format-extra-args”，表示忽略该问题。</p>
+<h2 id="其他clang错误"><a href="#其他clang错误" class="headerlink" title="其他clang错误"></a>其他clang错误</h2><p>继续编译，会出现很多与上一个类似的问题日志，都是因为Android12在编译时cflags/cppflags设置了-Werror，将<br>原本默认为警告的类型指定为了错误。</p>
+<blockquote>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-Werror:把警告当作错误，出现任何警告就放弃编译；</span><br><span class="line">-Werror=【type】：将指定类型的警告设置为error，如-Werror=unused-variable（当存在未使用的变量时</span><br><span class="line">中断编译）；</span><br><span class="line">-Wno-error:忽略所有报错；</span><br><span class="line">-Wno-error=【type】：忽略指定类型错误；</span><br><span class="line">-Wno-【type】：忽略指定类型的警告；</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>按照日志提示，在Android.bp中所有模块的cflag与cppflags中加入：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&quot;-Wno-non-virtual-dtor&quot;,</span><br><span class="line">&quot;-Wno-format-extra-args&quot;,</span><br><span class="line">&quot;-Wno-infinite-recursion&quot;,</span><br><span class="line">&quot;-Wno-unused-private-field&quot;,</span><br><span class="line">&quot;-Wno-unreachable-code-loop-increment&quot;,</span><br></pre></td></tr></table></figure>
+
+<p>最终Android.bp中所有的cflag与cpflags为：</p>
+<p><img src="/images/android_aosp_fdbus_make08.png" alt="image"></p>
+<h2 id="jni-h-not-found"><a href="#jni-h-not-found" class="headerlink" title="jni.h not found"></a>jni.h not found</h2><p>由于libfdbus-jni中需要使用jni，此时在Android12中编译会报出：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">In file included from frameworks/base/core/jni/fdbus/CJniAFComponent.cpp:17:</span><br><span class="line">frameworks/base/core/jni/fdbus/FdbusGlobal.h:19:10: fatal error: &#x27;jni.h&#x27; file not found</span><br><span class="line"><span class="params">#</span>include &lt;jni.h&gt;</span><br><span class="line"><span class="built_in">^</span>~~~~~~</span><br><span class="line">1 error generated.</span><br><span class="line">22:15:22 ninja failed with: exit status 1</span><br></pre></td></tr></table></figure>
+
+<p>通过学习 framework/base/core/jni 下的Android.bp（编译libandroid_runtime.so）发现，其中存在如下配置：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//......</span><br><span class="line">static<span class="built_in">_</span>libs: [</span><br><span class="line">    &quot;libnativehelper<span class="built_in">_</span>lazy&quot;,</span><br><span class="line">    &quot;libziparchive<span class="built_in">_</span>for<span class="built_in">_</span>incfs&quot;,</span><br><span class="line">],</span><br><span class="line">//......</span><br><span class="line">//导出头文件：谁依赖我，就能使用我导出的头文件</span><br><span class="line">export<span class="built_in">_</span>static<span class="built_in">_</span>lib<span class="built_in">_</span>headers: [</span><br><span class="line">    // AndroidRuntime.h depends on nativehelper/jni.h</span><br><span class="line">    &quot;libnativehelper<span class="built_in">_</span>lazy&quot;,</span><br><span class="line">],</span><br><span class="line">//......</span><br></pre></td></tr></table></figure>
+
+<p>可以发现libandroid_runtime.so依赖于libnativehelper_lazy.a，同时会导出libnativehelper_lazy的头文件。在<br>源码根目录下找到libnativehelper中的Android.bp，其中部分内容如下：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">//头文件模块：jni<span class="built_in">_</span>headers，包含include<span class="built_in">_</span>jni下所有的头文件（该目录下存在一个头文件jni.h）</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>headers &#123;</span><br><span class="line">    name: &quot;jni<span class="built_in">_</span>headers&quot;,</span><br><span class="line">    export<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [&quot;include<span class="built_in">_</span>jni&quot;],</span><br><span class="line">    //......</span><br><span class="line">&#125;</span><br><span class="line">//头文件模块：libnativehelper<span class="built_in">_</span>header<span class="built_in">_</span>only，包含header<span class="built_in">_</span>only<span class="built_in">_</span>include下所有的头文件</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>headers &#123;</span><br><span class="line">    name: &quot;libnativehelper<span class="built_in">_</span>header<span class="built_in">_</span>only&quot;,</span><br><span class="line">    export<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [</span><br><span class="line">    	&quot;header<span class="built_in">_</span>only<span class="built_in">_</span>include&quot;,</span><br><span class="line">	],</span><br><span class="line">    header<span class="built_in">_</span>libs: [&quot;jni<span class="built_in">_</span>headers&quot;], //依赖jni<span class="built_in">_</span>headers模块</span><br><span class="line">    //......</span><br><span class="line">&#125;</span><br><span class="line">//头文件模块：jni<span class="built_in">_</span>platform<span class="built_in">_</span>headers，包含include<span class="built_in">_</span>platform<span class="built_in">_</span>header<span class="built_in">_</span>only下所有的头文件</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>headers &#123;</span><br><span class="line">    name: &quot;jni<span class="built_in">_</span>platform<span class="built_in">_</span>headers&quot;,</span><br><span class="line">    export<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [</span><br><span class="line">    	&quot;include<span class="built_in">_</span>platform<span class="built_in">_</span>header<span class="built_in">_</span>only&quot;,</span><br><span class="line">    ],</span><br><span class="line">    header<span class="built_in">_</span>libs: [&quot;jni<span class="built_in">_</span>headers&quot;],</span><br><span class="line">    //......</span><br><span class="line">&#125;</span><br><span class="line">//动态库模块:libnativehelper.so</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>shared &#123;</span><br><span class="line">    name: &quot;libnativehelper&quot;,</span><br><span class="line">    //导出头文件</span><br><span class="line">    export<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [</span><br><span class="line">    	&quot;header<span class="built_in">_</span>only<span class="built_in">_</span>include&quot;,</span><br><span class="line">        &quot;include&quot;,</span><br><span class="line">        &quot;include<span class="built_in">_</span>jni&quot;,</span><br><span class="line">        &quot;include<span class="built_in">_</span>platform&quot;,</span><br><span class="line">        &quot;include<span class="built_in">_</span>platform<span class="built_in">_</span>header<span class="built_in">_</span>only&quot;,</span><br><span class="line">    ],</span><br><span class="line">    //......</span><br><span class="line">&#125;</span><br><span class="line">//静态库：libnativehelper<span class="built_in">_</span>lazy.a</span><br><span class="line">cc<span class="built_in">_</span>library<span class="built_in">_</span>static &#123;</span><br><span class="line">    name: &quot;libnativehelper<span class="built_in">_</span>lazy&quot;,</span><br><span class="line">    export<span class="built_in">_</span>include<span class="built_in">_</span>dirs: [</span><br><span class="line">        &quot;header<span class="built_in">_</span>only<span class="built_in">_</span>include&quot;,</span><br><span class="line">        &quot;include&quot;,</span><br><span class="line">        &quot;include<span class="built_in">_</span>jni&quot;,</span><br><span class="line">        &quot;include<span class="built_in">_</span>platform&quot;,</span><br><span class="line">        &quot;include<span class="built_in">_</span>platform<span class="built_in">_</span>header<span class="built_in">_</span>only&quot;,</span><br><span class="line">    ],</span><br><span class="line">    //......</span><br><span class="line">&#125;</span><br><span class="line">//......</span><br></pre></td></tr></table></figure>
+
+<p>很显然， framework/base/core/jni 下的libandroid_runtime.so 依赖静态库libnativehelper_lazy。同时在libnativehelper_lazy的配置中会导出 include_jni ,因此能使用 jni.h 。而我们的libfdbus-jni.so不需要依赖nativehelper，因此可以直接在libfdbus-jni的编译配置中加入：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header<span class="built_in">_</span>libs: [&quot;jni<span class="built_in">_</span>headers&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>如果需要依赖nativehelper可以写成：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//依赖libnativehelper<span class="built_in">_</span>lazy.a</span><br><span class="line">static<span class="built_in">_</span>libs: [</span><br><span class="line">	&quot;libnativehelper<span class="built_in">_</span>lazy&quot;,</span><br><span class="line">],</span><br><span class="line">//依赖libnativehelper.so</span><br><span class="line">shared<span class="built_in">_</span>libs:[</span><br><span class="line">	&quot;libnativehelper&quot;,</span><br><span class="line">],</span><br></pre></td></tr></table></figure>
+
+<p>因为在静态库和动态库中都将 include_jni 目录导出，因此依赖这些库即可使用 jni.h 。</p>
+<h2 id="package-allowed-list-txt"><a href="#package-allowed-list-txt" class="headerlink" title="package_allowed_list.txt"></a>package_allowed_list.txt</h2><p>由于我们在Framework中增加了对应的Java API，此时编译报错如下错误： ipc.fdbus 包不允许打包进入Framework。</p>
+<p><img src="/images/android_aosp_fdbus_make09.png" alt="image"></p>
+<p>按照提示，在 build/soong/scripts/check_boot_jars/package_allowed_list.txt 中加入我们的包名：</p>
+<p><img src="/images/android_aosp_fdbus_make06.png" alt="image"></p>
+<h2 id="selinux-file-contexts错误"><a href="#selinux-file-contexts错误" class="headerlink" title="selinux file_contexts错误"></a>selinux file_contexts错误</h2><figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Error: could not load context file from out/target/product/emulator<span class="built_in">_</span>x86<span class="built_in">_</span>64/obj/ETC/plat<span class="built_in">_</span>file<span class="built_in">_</span>contexts<span class="built_in">_</span>intermediates/plat<span class="built_in">_</span>file<span class="built_in">_</span>contexts</span><br><span class="line">16:31:55 ninja failed with: exit status 1</span><br></pre></td></tr></table></figure>
+
+<p>这个错误最终定位到原因，挺扯淡的。是因为在file_contexts最后一行增加name_server上下文后没有增加空行引起的……</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="params">#</span> ......</span><br><span class="line">/system/bin/name-server 	u:object<span class="built_in">_</span>r:name-server<span class="built_in">_</span>exec:s0</span><br><span class="line"><span class="params">#</span> 最后一行配置之后必须预留一行，要不然编译时会报找不到最后一个file<span class="built_in">_</span>contexts错误</span><br></pre></td></tr></table></figure>
+
+<h2 id="抓取开机日志排查问题"><a href="#抓取开机日志排查问题" class="headerlink" title="抓取开机日志排查问题"></a>抓取开机日志排查问题</h2><ol>
+<li>先用命令<code>adb reboot</code>重启设备模拟器</li>
+<li>然后立即输入命令<code>adb root</code></li>
+<li>然后<code>adb wait-for-device shell dmesg &gt;dmesg.txt</code></li>
+</ol>
+<h1 id="FDBUS部署与跨系统通信测试"><a href="#FDBUS部署与跨系统通信测试" class="headerlink" title="FDBUS部署与跨系统通信测试"></a>FDBUS部署与跨系统通信测试</h1><p>车载系统中，由于Hypervisor的采用，有的域内可能会有多个节点。如智能座舱域，一个SOC芯片上可能会同时运行QNX和Android，虽然位于同一个SOC上，但还是被认为是两个节点。这两个节点必须打通，才能相互通信！</p>
+<p><img src="/images/android_aosp_fdbus_make10.png" alt="image"></p>
+<p>在Android与QNX系统中各自部署name-server，Android与QNX的name-server只能管理系统自身内部服务，为了<br>打通两个系统，FDBUS提供了host-server。<br>就好像DNS解析，本地DNS服务器无法解析，就会请求远程服务器。如果说name-server是本地DNS服务器，那么<br>host-server就是远程DNS服务器。</p>
+<p><img src="/images/android_aosp_fdbus_make11.png" alt="image"></p>
+<h2 id="host-server部署"><a href="#host-server部署" class="headerlink" title="host-server部署"></a>host-server部署</h2><p>host-server可以搭建在域内，也可以搭建在域外，只要保证Android与QNX都能够访问即可。</p>
+<p>为了方便测试，我们模拟一个通信环境，大致描述一下环境：</p>
+<blockquote>
+<p>在ubuntu系统上跑一个android模拟器。</p>
+<p>android模拟器可以理解为车载的android系统，内部运行有name-server</p>
+<p>ubuntu系统可以理解为车载的QNX系统，内部运行了name-server、host-server和一个真正处理业务的service</p>
+</blockquote>
+<p>我们需要在Ubuntu上搭建name-server和host-server服务，然后启动一个测试的service server</p>
+<p>fdbus的完整编译参照文章 <a target="_blank" rel="noopener" href="https://blog.csdn.net/u012739527/article/details/124011570">https://blog.csdn.net/u012739527/article/details/124011570</a></p>
+<p>编译完成后，启动name-server、host-server、fdbxserver(fdbus提供的测试服务)</p>
+<p><img src="/images/android_aosp_fdbus_make12.png" alt="image"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jia@jia-virtual-machine:~/work/fdbus/fdbus/build$ ./host_server &amp;</span><br><span class="line">[5] 13494</span><br><span class="line">jia@jia-virtual-machine:~/work/fdbus/fdbus/build$ ./name_server &amp;</span><br><span class="line">[6] 13497</span><br><span class="line">jia@jia-virtual-machine:~/work/fdbus/fdbus/build$ ./fdbxserver</span><br></pre></td></tr></table></figure>
+
+<h2 id="客户端测试app"><a href="#客户端测试app" class="headerlink" title="客户端测试app"></a>客户端测试app</h2><p>需要先将上文中aosp集成fdbus后编译出的SDK更新添加到studio的platform中以便app compile使用。</p>
+<p>然后编写测试代码如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.myapplication</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.util.Log</span><br><span class="line"><span class="keyword">import</span> ipc.fdbus.FdbusClient</span><br><span class="line"><span class="keyword">import</span> ipc.fdbus.FdbusClientListener</span><br><span class="line"><span class="keyword">import</span> ipc.fdbus.FdbusMessage</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">QnxClient</span> : <span class="type">FdbusClientListener &#123;</span></span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> mClient: FdbusClient</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span> &#123;</span><br><span class="line">        mClient = FdbusClient()</span><br><span class="line">        mClient.setListener(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> client: FdbusClient</span><br><span class="line">        <span class="keyword">get</span>() = mClient</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onOnline</span><span class="params">(sid: <span class="type">Int</span>, i1: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        Log.i(TAG, <span class="string">&quot;onOnline: <span class="variable">$sid</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">override</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onOffline</span><span class="params">(sid: <span class="type">Int</span>, i1: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        Log.i(TAG, <span class="string">&quot;onOffline: <span class="variable">$sid</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">override</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onReply</span><span class="params">(fdbusMessage: <span class="type">FdbusMessage</span>)</span></span> &#123;</span><br><span class="line">        Log.i(TAG, <span class="string">&quot;onReply: &quot;</span> + fdbusMessage.toString())</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">override</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onGetEvent</span><span class="params">(fdbusMessage: <span class="type">FdbusMessage</span>)</span></span> &#123;</span><br><span class="line">        Log.i(TAG, <span class="string">&quot;onGetEvent: &quot;</span> + fdbusMessage.toString())</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">override</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onBroadcast</span><span class="params">(fdbusMessage: <span class="type">FdbusMessage</span>)</span></span> &#123;</span><br><span class="line">        Log.i(TAG, <span class="string">&quot;onGetEvent: &quot;</span> + fdbusMessage.toString())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">const</span> <span class="keyword">val</span> TAG = <span class="string">&quot;QnxClient&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用代码</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.myapplication</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.<span class="keyword">annotation</span>.SuppressLint</span><br><span class="line"><span class="keyword">import</span> android.os.Bundle</span><br><span class="line"><span class="keyword">import</span> android.util.Log</span><br><span class="line"><span class="keyword">import</span> android.view.View</span><br><span class="line"><span class="keyword">import</span> androidx.appcompat.app.AppCompatActivity</span><br><span class="line"><span class="keyword">import</span> ipc.fdbus.Fdbus</span><br><span class="line"><span class="keyword">import</span> ipc.fdbus.FdbusAppListener</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> TAG = <span class="string">&quot;MainActivity&quot;</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> qnxClient: QnxClient? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@SuppressLint(<span class="meta-string">&quot;WrongConstant&quot;</span>)</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        Fdbus()</span><br><span class="line">        qnxClient = QnxClient()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 跨系统通信</span></span><br><span class="line">        qnxClient!!.client.connect(<span class="string">&quot;svc://org.fdbus.xtest-server&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">sendQnx</span><span class="params">(view: <span class="type">View</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> fdbusMessage = qnxClient!!.client.invokeSync(<span class="number">1</span>, <span class="string">&quot;xxxxxx&quot;</span>.toByteArray())</span><br><span class="line">        Log.i(TAG, <span class="string">&quot;qnx响应: &quot;</span> + String(fdbusMessage.byteArray()))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">disconnectQnx</span><span class="params">(view: <span class="type">View</span>?)</span></span> &#123;</span><br><span class="line">        qnxClient!!.client.disconnect()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行app并点击测试</p>
+<p><img src="/images/android_aosp_fdbus_make13.png" alt="image"></p>
+<p>控制台输出</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qnx响应: xxxxxx</span><br></pre></td></tr></table></figure>
+
+<p>fdbxserver收到响应并回复</p>
+<p><img src="/images/android_aosp_fdbus_make14.png" alt="image"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AOSP/" rel="tag"># AOSP</a>
+              <a href="/tags/FDBUS/" rel="tag"># FDBUS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/07/02/car_soa_introduction/" rel="prev" title="汽车SOA架构设计浅析">
+                  <i class="fa fa-chevron-left"></i> 汽车SOA架构设计浅析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/09/04/android_aosp_media_service/" rel="next" title="Android车载多媒体架构">
+                  Android车载多媒体架构 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小贾</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

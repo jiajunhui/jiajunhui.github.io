@@ -27,12 +27,17 @@
 <meta property="og:site_name" content="奔跑的蜗牛">
 <meta property="og:description" content="Surface和SurfaceView是android图形系统java层中较为重要的角色。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/android_surface_surfaceview01.png">
+<meta property="og:image" content="http://example.com/images/android_surface_surfaceview02.png">
+<meta property="og:image" content="http://example.com/images/android_surface_surfaceview03.png">
+<meta property="og:image" content="http://example.com/images/android_surface_surfaceview04.png">
 <meta property="article:published_time" content="2018-03-19T12:37:00.000Z">
-<meta property="article:modified_time" content="2023-01-04T07:28:33.407Z">
+<meta property="article:modified_time" content="2023-02-18T08:52:45.509Z">
 <meta property="article:author" content="小贾">
 <meta property="article:tag" content="系统机制">
 <meta property="article:tag" content="图形系统">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/android_surface_surfaceview01.png">
 
 
 <link rel="canonical" href="http://example.com/2018/03/19/android_surface_surfaceview/">
@@ -148,7 +153,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Surface"><span class="nav-number">1.</span> <span class="nav-text">Surface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceView"><span class="nav-number">2.</span> <span class="nav-text">SurfaceView</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceHolder"><span class="nav-number">3.</span> <span class="nav-text">SurfaceHolder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceHolder-Callback"><span class="nav-number">4.</span> <span class="nav-text">SurfaceHolder.Callback</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Surface"><span class="nav-number">1.</span> <span class="nav-text">Surface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceView"><span class="nav-number">2.</span> <span class="nav-text">SurfaceView</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SurfaceView%E5%8F%8C%E7%BC%93%E5%86%B2%E6%9C%BA%E5%88%B6"><span class="nav-number">2.1.</span> <span class="nav-text">SurfaceView双缓冲机制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceHolder"><span class="nav-number">3.</span> <span class="nav-text">SurfaceHolder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceHolder-Callback"><span class="nav-number">4.</span> <span class="nav-text">SurfaceHolder.Callback</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceView%E4%B8%8E%E6%99%AE%E9%80%9AView%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">5.</span> <span class="nav-text">SurfaceView与普通View的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SurfaceView%E5%8E%9F%E7%90%86"><span class="nav-number">5.1.</span> <span class="nav-text">SurfaceView原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SurfaceView%E7%9A%84%E7%BB%98%E5%9B%BE%E8%A1%A8%E9%9D%A2%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">6.</span> <span class="nav-text">SurfaceView的绘图表面的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SurfaceView-onAttachedToWindow"><span class="nav-number">6.1.</span> <span class="nav-text">SurfaceView.onAttachedToWindow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SurfaceView-onWindowVisibilityChanged"><span class="nav-number">6.2.</span> <span class="nav-text">SurfaceView.onWindowVisibilityChanged</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SurfaceView-updateRequestedVisibility"><span class="nav-number">6.3.</span> <span class="nav-text">SurfaceView.updateRequestedVisibility</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SurfaceView-updateSurface"><span class="nav-number">6.4.</span> <span class="nav-text">SurfaceView.updateSurface</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%9C%A8%E4%B8%80%E4%B8%AA%E7%BB%98%E5%9B%BE%E8%A1%A8%E9%9D%A2%E4%B8%8A%E8%BF%9B%E8%A1%8CUI%E7%BB%98%E5%88%B6%EF%BC%9F"><span class="nav-number">6.5.</span> <span class="nav-text">如何在一个绘图表面上进行UI绘制？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SurfaceView%E5%A6%82%E4%BD%95%E7%BB%98%E5%88%B6%EF%BC%9F"><span class="nav-number">6.6.</span> <span class="nav-text">SurfaceView如何绘制？</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -164,20 +169,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-count">88</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-count">56</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -286,15 +291,37 @@
 <p>很明显，每个SurfaceView创建的时候都会创建一个MyWindow，new MyWindow(this)中的this正是SurfaceView自身，因此将SurfaceView和window绑定在一起，由第一部分我们知道，一个window对应一个Surface，因此SurfaceView也就内嵌了一个自己的Surface，可以认为SurfaceView是用来控制Surface中View的位置和尺寸的。 </p>
 <p>​      SurfaceView就是展示Surface中数据的地方，同时可以认为SurfaceView是用来控制Surface中View的位置和尺寸的。</p>
 <p>​     大家都知道，传统View及其派生类的更新只能在UI线程，然而UI线程还同时处理其他交互逻辑，这就无法保证View更新的速度和帧率了，而SurfaceView可以用独立的线程进行绘制，因此可以提供更高的帧率，例如游戏，摄像头取景等场景就比较适合SurfaceView来实现。</p>
+<h2 id="SurfaceView双缓冲机制"><a href="#SurfaceView双缓冲机制" class="headerlink" title="SurfaceView双缓冲机制"></a>SurfaceView双缓冲机制</h2><p>SurfaceView跟大部分视频应用一样，把视频流解析成一帧帧的图像然后显示。如果把视频解析过程放到一个线程中完成，可能在上一帧图像已经显示过后，下一帧图像还没有来得及解析，这样会导致画面的不流畅或者声音和视频不同步的问题。所以SurfaceView和大部分视频应用一样，通过双缓冲的机制来显示帧图像。那么什么是双缓冲呢？双缓冲可以理解为有两个线程轮番去解析视频流的帧图像，当一个线程解析完帧图像后，把图像渲染到界面中，同时另一线程开始解析下一帧图像，使得两个线程轮番配合去解析视频流，以达到流畅播放的效果。</p>
+<p><img src="/images/android_surface_surfaceview01.png" alt="img"></p>
 <h1 id="SurfaceHolder"><a href="#SurfaceHolder" class="headerlink" title="SurfaceHolder"></a>SurfaceHolder</h1><p>SurfaceHolder是一个接口，其作用就像一个关于Surface的监听器，提供访问和控制SurfaceView内嵌的Surface 相关的方法。它通过三个回调方法，让我们可以感知到Surface的创建、销毁或者改变。</p>
 <p>​     在SurfaceView中有一个方法getHolder，可以很方便地获得SurfaceView内嵌的Surface所对应的监听器接口SurfaceHolder（有点拗口吧）。</p>
 <p>​     除下面将要提到的SurfaceHolder.Callback外，SurfaceHolder还提供了很多重要的方法，其中最重要的就是：</p>
 <p>​    1、abstract void addCallback(SurfaceHolder.Callbackcallback)：为SurfaceHolder添加一个SurfaceHolder.Callback回调接口。<br>​    2、abstract CanvaslockCanvas()：获取一个Canvas对象，并锁定之。所得到的Canvas对象，其实就是Surface中一个成员。<br>​    3、abstract CanvaslockCanvas(Rect dirty)：同上。但只锁定dirty所指定的矩形区域，因此效率更高。<br>​    4、abstract void unlockCanvasAndPost(Canvas canvas)：当修改Surface中的数据完成后，释放同步锁，并提交改变，然后将新的数据进行展示，同时Surface中相关数据会被丢失。</p>
 <p>​     2、3、4中的同步锁机制的目的，就是为了在绘制的过程中，Surface中的数据不会被改变。lockCanvas是为了防止同一时刻多个线程对同一canvas写入。</p>
 <p>总结：从设计模式的高度来看，Surface、SurfaceView和SurfaceHolder实质上就是广为人知的MVC，即Model-View-Controller。Model就是模型的意思，或者说是数据模型，或者更简单地说就是数据，也就是这里的Surface；View即视图，代表用户交互界面，也就是这里的SurfaceView；SurfaceHolder很明显可以理解为MVC中的Controller（控制器）。</p>
-<h1 id="SurfaceHolder-Callback"><a href="#SurfaceHolder-Callback" class="headerlink" title="SurfaceHolder.Callback"></a>SurfaceHolder.Callback</h1><p>SurfaceHolder.Callback主要是当底层的Surface被创建、销毁或者改变时提供回调通知，由于绘制必须在Surface被创建后才能进行，因此SurfaceHolder.Callback中的surfaceCreated 和surfaceDestroyed 就成了绘图处理代码的边界。</p>
-<p>​     SurfaceHolder.Callback中定义了三个接口方法：</p>
-<p>​     1、abstract void surfaceChanged(SurfaceHolder holder, int format, int width, int height)：当surface发生任何结构性的变化时（格式或者大小），该方法就会被立即调用。<br>​     2、abstract void surfaceCreated(SurfaceHolder holder)：当surface对象创建后，该方法就会被立即调用。<br>​     3、abstract void surfaceDestroyed(SurfaceHolder holder)：当surface对象在将要销毁前，该方法会被立即调用。</p>
+<h1 id="SurfaceHolder-Callback"><a href="#SurfaceHolder-Callback" class="headerlink" title="SurfaceHolder.Callback"></a>SurfaceHolder.Callback</h1><p>SurfaceView内部实现了双缓冲的机制，但是实现这个功能是非常消耗系统内存的。因为移动设备的局限性，Android在设计的时候规定，SurfaceView如果为用户可见的时候，创建SurfaceView的SurfaceHolder用于显示视频流解析的帧图片，如果发现SurfaceView变为用户不可见的时候，则立即销毁SurfaceView的SurfaceHolder，以达到节约系统资源的目的。</p>
+<p>如果开发人员不对SurfaceHolder进行维护，会出现最小化程序后，再打开应用的时候，视频的声音在继续播放，但是不显示画面了的情况，这就是因为当SurfaceView不被用户可见的时候，之前的SurfaceHolder已经被销毁了，再次进入的时候，界面上的SurfaceHolder已经是新的SurfaceHolder了。所以SurfaceHolder需要我们开发人员去编码维护，维护SurfaceHolder需要用到它的一个回调，SurfaceHolder.Callback()，它需要实现如下三个方法：</p>
+<p>SurfaceHolder.Callback主要是当底层的Surface被创建、销毁或者改变时提供回调通知，由于绘制必须在Surface被创建后才能进行，因此SurfaceHolder.Callback中的surfaceCreated 和surfaceDestroyed 就成了绘图处理代码的边界。</p>
+<p>​     SurfaceHolder.Callback中定义了三个接口方法：<br>​     1、abstract void surfaceChanged(SurfaceHolder holder, int format, int width, int height)：当surface发生任何结构性的变化时（格式或者大小），该方法就会被立即调用。<br>​     2、abstract void surfaceCreated(SurfaceHolder holder)：当surface对象创建后，该方法就会被立即调用。<br>​     3、abstract void surfaceDestroyed(SurfaceHolder holder)：当surface对象在将要销毁前，该方法会被立即调用。</p>
+<h1 id="SurfaceView与普通View的区别"><a href="#SurfaceView与普通View的区别" class="headerlink" title="SurfaceView与普通View的区别"></a>SurfaceView与普通View的区别</h1><p>SurfaceView，它拥有独立的绘图表面，即它不与其宿主窗口共享同一个绘图表面。由于拥有独立的绘图表面，因此SurfaceView的UI就可以在一个独立的线程中进行绘制。又由于不会占用主线程资源，SurfaceView一方面可以实现复杂而高效的UI，另一方面又不会导致用户输入得不到及时响应。</p>
+<p>普通的Android控件，例如TextView、Button等，都是将自己的UI绘制在宿主窗口的绘图表面之上，这意味着它们的UI是在应用程序的主线程中进行绘制的。由于应用程序的主线程除了要绘制UI之外，还需要及时地响应用户输入，否则的话，系统就会认为应用程序没有响应了，因此就会弹出一个ANR对话框出来。对于一些游戏画面，或者摄像头预览、视频播放来说，它们的UI都比较复杂，而且要求能够进行高效的绘制，因此，它们的UI就不适合在应用程序的主线程中进行绘制。这时候就必须要给那些需要复杂而高效UI的视图生成一个独立的绘图表面，以及使用一个独立的线程来绘制这些视图的UI。</p>
+<p>一般来说，每一个窗口在SurfaceFlinger服务中都对应有一个Layer，用来描述它的绘图表面。对于那些具有SurfaceView的窗口来说，每一个SurfaceView在SurfaceFlinger服务中还对应有一个独立的Layer或者LayerBuffer，用来单独描述它的绘图表面，以区别于它的宿主窗口的绘图表面。SurfaceFlinger服务负责绘制Android应用程序的UI。SurfaceFlinger服务运行在Android系统的System进程中，它负责管理Android系统的帧缓冲区（Frame Buffer）。</p>
+<h2 id="SurfaceView原理"><a href="#SurfaceView原理" class="headerlink" title="SurfaceView原理"></a>SurfaceView原理</h2><p>官方文档：</p>
+<p>SurfaceView：Provides a dedicated drawing surface embedded inside of a view hierarchy. The surface is Z ordered so that it is behind the window holding its SurfaceView; the SurfaceView punches a hole in its window to allow its surface to be displayed.</p>
+<p>翻译解释：</p>
+<p>SurfaceView提供一个嵌入视图层级的专用的绘图表面。绘图表面是在Z轴上有序的，SurfaceView在宿主窗体的后面。SurfaceView在宿主窗体上“挖”了一个洞，以此来显示自己的表面。实际上，SurfaceView在其宿主Activity窗口上所挖的“洞”只不过是在其宿主Activity窗口上设置了一块透明区域，以显示自己内容</p>
+<h1 id="SurfaceView的绘图表面的创建"><a href="#SurfaceView的绘图表面的创建" class="headerlink" title="SurfaceView的绘图表面的创建"></a>SurfaceView的绘图表面的创建</h1><p>我们知道，Activity、Window、View三者紧密联系在一起。我们在Activity中设置setContentView()，最终会调用PhoneWindow的setContentView()。经过WindowManagerImpl#addView，WindowManagerGlobal#addView，ViewRootImpl#setView方法，最顶层视图DecorView被添加到Window上。最后通过WMS调用ViewRootImpl#performTraverals方法开始View的测量、布局、绘制流程。</p>
+<p>ViewRootImpl类的成员函数performTraversals在执行的过程中，如果发现当前窗口的绘图表面还没有创建，或者发现当前窗口的绘图表面已经失效了，那么就会请求WindowManagerService服务创建一个新的绘图表面，同时，它还会通过一系列的回调函数来让嵌入在窗口里面的SurfaceView有机会创建自己的绘图表面。</p>
+<p>虽然SurfaceView不与它的宿主窗口共享同一个绘图表面，但是它仍然是属于宿主窗口的视图结构的一个结点的，也就是说，SurfaceView仍然是会参与到宿主窗口的某些执行流程中去。</p>
+<h2 id="SurfaceView-onAttachedToWindow"><a href="#SurfaceView-onAttachedToWindow" class="headerlink" title="SurfaceView.onAttachedToWindow"></a><strong>SurfaceView.onAttachedToWindow</strong></h2><p><img src="/images/android_surface_surfaceview02.png" alt="img"></p>
+<p>说明：SurfaceView在Z轴上位置是小于其宿主窗口的Z轴位置的。为了保证SurfaceView的UI是可见的，SurfaceView就需要在其宿主窗口的上面打一个孔出来，实际上就是在其宿主窗口的绘图表面上设置一块透明区域，以便可以将自己显示出来。SurfaceView类的成员函数onAttachedToWindow调用mParent.requestTransparentRegion(SurfaceView.this)去通知父View，当前正在处理的SurfaceView需要在宿主窗口的绘图表面上打一个孔，即需要在宿主窗口的绘图表面上设置一块透明区域。</p>
+<h2 id="SurfaceView-onWindowVisibilityChanged"><a href="#SurfaceView-onWindowVisibilityChanged" class="headerlink" title="SurfaceView.onWindowVisibilityChanged"></a>SurfaceView.onWindowVisibilityChanged</h2><p><img src="/images/android_surface_surfaceview03.png" alt="img"></p>
+<p>说明：类SurfaceView调用updateSurface来更新当前正在处理的SurfaceView。在更新的过程中，如果发现当前正在处理的SurfaceView还没有创建绘图表面，那么就会请求WindowManagerService服务为它创建一个。</p>
+<h2 id="SurfaceView-updateRequestedVisibility"><a href="#SurfaceView-updateRequestedVisibility" class="headerlink" title="SurfaceView.updateRequestedVisibility"></a>SurfaceView.updateRequestedVisibility</h2><p><img src="/images/android_surface_surfaceview04.png" alt="img"></p>
+<p>说明：mWindowVisibility表示SurfaceView的宿主窗口的可见性，mViewVisibility表示SurfaceView自身的可见性。只有当mWindowVisibility和mViewVisibility的值均等于true，且宿主窗口没有停止，mRequestedVisible的值才为true，表示SurfaceView是可见的。</p>
+<h2 id="SurfaceView-updateSurface"><a href="#SurfaceView-updateSurface" class="headerlink" title="SurfaceView.updateSurface"></a>SurfaceView.updateSurface</h2><p>mSurface：这个Surface对象描述的是SurfaceView专有的绘图表面，在SurfaceView对象创建时就会被实例化。updateSurface方法根据实际条件判断创建或更新mSurface。</p>
+<h2 id="如何在一个绘图表面上进行UI绘制？"><a href="#如何在一个绘图表面上进行UI绘制？" class="headerlink" title="如何在一个绘图表面上进行UI绘制？"></a>如何在一个绘图表面上进行UI绘制？</h2><p>1.在绘图表面的基础上建立一块画布，即获得一个Canvas对象<br>2.利用Canvas类提供的绘图方法在前面获得的画布上绘制任意的UI<br>3.最后通过SurfaceFlinger服务将它合成到屏幕上去</p>
+<h2 id="SurfaceView如何绘制？"><a href="#SurfaceView如何绘制？" class="headerlink" title="SurfaceView如何绘制？"></a>SurfaceView如何绘制？</h2><p>1.通过SurfaceView的getHolder方法获得SurfaceHolder<br> 2.通过SurfaceHolder的lockCanvas方法获得Canvas<br> 3.上面会走到Surface的lockCanvas方法获得Canvas<br> 4.在Canvas上绘制UI<br> 5.通过SurfaceHolder的unlockCanvasAndPost将绘制好的canvas投递到surface上<br> 6.上面会走到Surface的unlockCanvasAndPost方法</p>
 
     </div>
 
